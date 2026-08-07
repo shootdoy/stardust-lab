@@ -7,7 +7,7 @@
 <meta name="description" content="포켓몬 태그스타 스타더스트 1탄·2탄 ★6·★5 보스 공략. 보유 태그로 3턴 로테이션과 서포트 티켓을 추천합니다.">
 <meta name="theme-color" content="#120B2E">
 <meta name="color-scheme" content="dark">
-<meta name="version" content="1.6.1">
+<meta name="version" content="1.9.0">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -501,6 +501,14 @@ summary:focus-visible{outline:2.5px solid var(--cyan);outline-offset:-3px}
   transition:transform .13s ease,opacity .13s ease,filter .13s ease}
 .ctag:hover{transform:translateY(-1px)}
 .ctag:focus-visible{outline:2.5px solid var(--cyan);outline-offset:2px}
+.b23n{margin:0 0 13px;padding:10px 12px;border-radius:12px;font-size:11.5px;line-height:1.6;
+  color:var(--ink-dim);background:rgba(255,200,49,.08);border:1px solid rgba(255,200,49,.3)}
+.b23n b{color:var(--ink)}
+.ctag .b23{position:absolute;top:6px;right:6px;padding:2px 6px;border-radius:6px;
+  font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.04em;
+  background:linear-gradient(180deg,#FFD34A,#E09A16);color:#241300;
+  box-shadow:0 1px 4px rgba(0,0,0,.55)}
+.ctag[aria-pressed="false"] .b23{opacity:.75}
 .ctag .cn{font-size:13.5px;font-weight:700;color:#fff;line-height:1.15;
   text-shadow:0 1px 4px rgba(0,0,0,.85);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ctag .cm{display:flex;align-items:center;gap:4px}
@@ -656,6 +664,7 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
 <div id="viewCollection" hidden>
   <section>
     <div class="sec-head"><h2>컬렉션</h2><span class="hint" id="ownHint"></span></div>
+    <p class="b23n" id="b23ct"></p>
     <div class="setsw" role="group" aria-label="컬렉션 탄 선택">
       <button id="rs1" aria-pressed="true">1탄</button>
       <button id="rs2" aria-pressed="false">2탄</button>
@@ -686,7 +695,7 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
   스탯·기술은 공식·팬페이지 표기값 (1탄 25 · 2탄 25 · 공통 6)<br>
   받는 피해는 보스 표기 기술 기준
   <span class="ver" id="ver" role="button" tabindex="0" title="눌러서 저장값 초기화">
-    v1.6.1 · 2026-08-07</span>
+    v1.9.0 · 2026-08-07</span>
 </footer>
 </div>
 
@@ -957,7 +966,7 @@ const TAGIMG={
 const tagArt=b=>TAGIMG[b.s+'-'+b.n]||null;
 
 const RANK_N=10;          // 순위에 보여줄 개수
-const VERSION='1.6.1';
+const VERSION='1.9.0';
 const BUILT='2026-08-07';
 
 /* ══ 자산을 CSS 로 한 번만 심는다 (DOM 에 base64 중복 방지) ══ */
@@ -972,6 +981,10 @@ const AK={}, TK={}, GK={}, SK={};
   document.head.appendChild(st);
 })();
 const artCls=c=>AK[c.s+'-'+c.n]||'';
+
+/* ══ BEST-25 — 50보스 x 2모드 완전탐색으로 뽑은 핵심 태그.
+   2탄 ★6 전부 최적, 전체 화력의 100% 를 커버한다. ══ */
+const BEST25=new Set(["1-5-거대코뿌리","2-6-레시라무","2-5-알로라 나인테일","2-6-짜랑고우거","2-6-큐레무","1-6-메타그로스","1-6-마기라스","2-6-제크로무","2-5-초염몽","1-6-자시안","1-5-플라이곤","2-6-그란돈","2-5-갈가부기","2-6-가이오가","2-5-엠페르트","공통-S-따라큐","1-5-윈디","2-6-피카츄","1-6-뮤츠","2-5-님피아","2-6-코라이돈","2-5-마휘핑","2-5-리피아","1-6-이상해꽃","1-5-글레이시아"]);
 
 /* ══ 상태 ══ */
 let bossId='2-6-가이오가', mode='power', setView='2', bossRank='6', rosterSet='1';
@@ -1158,6 +1171,7 @@ const chip=(c,o={})=>{
     : `linear-gradient(120deg,${c1}AA,${c2}77)`;
   return `<button class="ctag ${artCls(c)}" style="--c:${RARITY[c.r].color};background:${bg}"
     ${o.pressed==null?'':`aria-pressed="${o.pressed}"`} data-id="${c.id}">
+    ${BEST25.has(c.id)?'<span class="b23">BEST</span>':''}
     <span class="cn">${c.n}</span>
     <span class="cm"><span class="cr">★${c.r}</span>${c.t.map(x=>
       `<i class="ci ${TK[x]}" title="${x}"></i>`).join('')}
@@ -1650,6 +1664,10 @@ function renderChance(){
 function renderAll(){
   renderBosses();renderReadout();renderRotation();renderSupport();renderRank();renderRoster();renderBackend();renderChance();renderGuide();renderDetail();renderDock();
   document.getElementById('vCct').textContent=owned.size+'/'+POOL.length;
+  const bh=document.getElementById('b23ct');
+  if(bh){ const have=[...BEST25].filter(id=>owned.has(id)).length;
+    bh.innerHTML=`<b>BEST-25</b> 핵심 태그 <b style="color:${have===BEST25.size?'var(--ok)':'var(--star)'}">${have}/${BEST25.size}</b>`
+      +' · 50보스 전부 최적에 가깝고, 2탄 ★6은 두 모드 모두 최적입니다'; }
 }
 const pickBoss=()=>{                       // 탄·등급을 바꾸면 그 그룹의 첫 보스로
   const f=BOSSES.find(b=>b.s===setView&&b.r===bossRank);
