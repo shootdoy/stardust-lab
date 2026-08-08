@@ -7,7 +7,7 @@
 <meta name="description" content="포켓몬 태그스타 스타더스트 1탄·2탄 ★6·★5 보스 공략. 보유 태그로 3턴 로테이션과 서포트 티켓을 추천합니다.">
 <meta name="theme-color" content="#120B2E">
 <meta name="color-scheme" content="dark">
-<meta name="version" content="1.21.1">
+<meta name="version" content="1.25.0">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -32,6 +32,7 @@
   --star:#FFC831; --cyan:#38E1FF; --magenta:#FF3D8B;
   --ink:#F2ECFF; --ink-dim:#A392D6; --ok:#7CFFA8; --bad:#FF5A5A;
   --r6:#FF3D8B; --r5:#C77DFF; --r4:#FFA23A; --r3:#38E1FF; --r2:#FF8FC7; --rR:#8BE04A;
+  --set1:#FF5C86; --set2:#5BB8FF;      /* 탄 테마 — 실물 태그 라벨 숫자 색 (1탄 붉은색 · 2탄 푸른색) */
   --display:'Black Han Sans','Apple SD Gothic Neo','Noto Sans KR',sans-serif;
   --body:'Gothic A1','Apple SD Gothic Neo','Noto Sans KR',sans-serif;
   --mono:'IBM Plex Mono',ui-monospace,'SFMono-Regular',Menlo,monospace;
@@ -159,6 +160,11 @@ section:first-child{margin-top:0}
 .setsw button{flex:1;padding:9px 8px;border-radius:10px;border:1px solid var(--rim);background:transparent;
   color:var(--ink-dim);font-family:var(--body);font-weight:700;font-size:12.5px;cursor:pointer;transition:.14s}
 .setsw button[aria-pressed="true"]{background:var(--cyan);color:#0C0722;border-color:var(--cyan)}
+/* 탄 선택 버튼 — 1탄 붉은색 · 2탄 푸른색 (실물 라벨과 맞춤) */
+.setsw button.s1{color:var(--set1)}
+.setsw button.s2{color:var(--set2)}
+.setsw button.s1[aria-pressed="true"]{background:var(--set1);border-color:var(--set1);color:#0C0722}
+.setsw button.s2[aria-pressed="true"]{background:var(--set2);border-color:var(--set2);color:#0C0722}
 .setsw button:focus-visible{outline:2.5px solid var(--star);outline-offset:2px}
 
 /* 상단 뷰 전환 */
@@ -518,7 +524,7 @@ summary:focus-visible{outline:2.5px solid var(--cyan);outline-offset:-3px}
 .dx[aria-pressed="true"]{background:rgba(255,255,255,.10);border-color:var(--c);color:var(--ink)}
 .dx:focus-visible{outline:2.5px solid var(--cyan);outline-offset:2px}
 .dx .no{position:absolute;left:6px;top:6px;min-width:19px;padding:1px 3px;border-radius:5px;
-  background:var(--c);color:#0C0722;font-size:9.5px;font-weight:800;text-align:center;letter-spacing:-.2px}
+  background:var(--sc);color:#0C0722;font-size:9.5px;font-weight:800;text-align:center;letter-spacing:-.2px}
 .dx .dn{font-size:11.5px;font-weight:700;line-height:1.25;word-break:keep-all}
 .dx .dt{display:flex;gap:3px;align-items:center}
 .dx .ci{width:14px;height:14px;display:block;flex:none;background:var(--ic) center/contain no-repeat}
@@ -527,6 +533,7 @@ summary:focus-visible{outline:2.5px solid var(--cyan);outline-offset:-3px}
 .dx[aria-pressed="false"] .dt{filter:grayscale(.85) brightness(.7);opacity:.65}
 .dx .rg{position:absolute;left:6px;top:6px;padding:1px 4px;border-radius:5px;
   background:var(--rim);color:var(--dim);font-size:9px;font-weight:800}
+.dx .no.un{background:var(--rim);color:var(--ink-dim)}
 .ctag{position:relative;display:flex;flex-direction:column;justify-content:flex-end;gap:3px;
   min-height:62px;padding:7px 9px;border:0;border-radius:12px;cursor:pointer;overflow:hidden;
   background-size:cover;background-position:center;text-align:left;
@@ -610,8 +617,8 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
   <section id="sBoss">
     <div class="sec-head"><h2>보스 선택</h2><span class="hint" id="bossHint"></span></div>
     <div class="setsw" role="group" aria-label="탄 선택">
-      <button id="sw1" aria-pressed="false">1탄</button>
-      <button id="sw2" aria-pressed="true">2탄</button>
+      <button id="sw1" class="s1" aria-pressed="false">1탄</button>
+      <button id="sw2" class="s2" aria-pressed="true">2탄</button>
     </div>
     <div class="setsw" role="group" aria-label="등급 전환">
       <button id="sr6" aria-pressed="true">★6</button>
@@ -720,8 +727,8 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
     </div>
     <p class="b23n" id="b23ct"></p>
     <div class="setsw" role="group" aria-label="컬렉션 탄 선택">
-      <button id="rs1" aria-pressed="true">1탄</button>
-      <button id="rs2" aria-pressed="false">2탄</button>
+      <button id="rs1" class="s1" aria-pressed="true">1탄</button>
+      <button id="rs2" class="s2" aria-pressed="false">2탄</button>
     </div>
     <div id="backend" class="backend"></div>
     <div id="colBattle">
@@ -733,7 +740,14 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
       </div>
       <div id="roster"></div>
     </div>
-    <div id="colDex" hidden><div id="dexHost"></div></div>
+    <div id="colDex" hidden>
+      <p class="hint" id="dexHint" style="padding:0 0 10px"></p>
+      <div class="bulk" style="padding:0 0 12px">
+        <button class="mini" id="dexFromOwn">전투 보유 가져오기</button>
+        <button class="mini" id="dexClear">전부 끄기</button>
+      </div>
+      <div id="dexHost"></div>
+    </div>
   </section>
 </div>
 
@@ -752,7 +766,7 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
   스탯·기술은 공식·팬페이지 표기값 (1탄 25 · 2탄 25 · 공통 6)<br>
   받는 피해는 보스 표기 기술 기준
   <span class="ver" id="ver" role="button" tabindex="0" title="눌러서 저장값 초기화">
-    v1.21.1 · 2026-08-08</span>
+    v1.25.0 · 2026-08-08</span>
 </footer>
 </div>
 
@@ -1023,7 +1037,7 @@ const TAGIMG={
 const tagArt=b=>TAGIMG[b.s+'-'+b.n]||null;
 
 const RANK_N=10;          // 순위에 보여줄 개수
-const VERSION='1.21.1';
+const VERSION='1.25.0';
 const BUILT='2026-08-08';
 
 /* ══ 자산을 CSS 로 한 번만 심는다 (DOM 에 base64 중복 방지) ══ */
@@ -1070,18 +1084,32 @@ const DEXLOW={
  '2-2':'카르본,불꽃/드니차,드래곤·얼음/빠모,전기/모부기,풀/불꽃숭이,불꽃/팽도리,물/멍파치,전기/구구,노말·비행/알로라 모래두지,얼음·강철/동미러,강철·에스퍼/톱치,땅/갈모매,물·비행/케이시,에스퍼/랄토스,에스퍼·페어리',
 };
 const DEXRANK=['6','5','4','3','2'];
-// 등급별 시작 번호 (누적)
-const DEXBASE=(()=>{ const o={}; for(const s of ['1','2']){ let n=1;
-  DEXRANK.forEach(r=>{ o[s+'-'+r]=n; n += (r==='6'||r==='5')
-    ? POOL.filter(p=>p.s===s&&p.r===r).length
-    : DEXLOW[s+'-'+r].split('/').length; }); } return o; })();
-// 한 등급의 도감 항목 배열 → [{no,n,t,card}]
-const dexList=(s,r)=>{ const b=DEXBASE[s+'-'+r];
-  if(r==='6'||r==='5') return POOL.filter(p=>p.s===s&&p.r===r)
-    .map((p,i)=>({no:b+i,n:p.n,t:p.t,card:p}));
-  return DEXLOW[s+'-'+r].split('/').map((x,i)=>{ const [n,t]=x.split(',');
-    return {no:b+i,n,t:t.split('·'),card:null}; }); };
-const dexKey=(s,r,no)=>s+'-'+r+'-'+no;
+const SETC={'1':'#FF5C86','2':'#5BB8FF'};   // 탄 테마 — 실물 라벨 숫자 색
+/* 번호 순서 — 실물 태그 케이스 라벨 실측. 등급순이 아니라 진화 계열 순이다.
+   1탄·2탄 모두 70번까지 채워져 있다. 빈칸이 생기면 번호 미확인으로 렌더된다. */
+const DEXORD={
+ '1':["뮤츠|6","뮤|6","자시안|6","자마젠타|6","마기라스|6","메타그로스|6","미라이돈|6","이상해꽃|6","리자몽|6","거북왕|6","샤미드|5","부스터|5","블래키|5","글레이시아|5","피죤투|5","팬텀|5","윈디|5","거대코뿌리|5","피카츄|5","플라이곤|5","고릴타|5","에이스번|5","인텔리레온|5","가로막구리|5","케르디오|5","나오하|2","나로테|3","뜨아거|2","악뜨거|3","꾸왁스|2","아꾸왁|3","흥나숭|2","채키몽|3","고릴타|4","염버니|2","래비풋|3","에이스번|4","울머기|2","누겔레온|3","인텔리레온|4","데덴네|2","피카츄|3","라이츄|4","이브이|3","쥬피썬더|4","에브이|4","리피아|4","님피아|4","포푸니|3","포푸니라|4","골비람|2","골루그|3","야돈|2","야도란|4","머드나기|3","만마드|4","가라르 지그제구리|2","가라르 직구리|3","가로막구리|4","턱지충이|2","전지충이|3","투구뿌논|4","두두|2","두트리오|4","꼬모카|2","백솜모카|4","폭거북스|4","옥우지|3","누니머기|2","모스노우|4"],
+ '2':["가이오가|6","그란돈|6","코라이돈|6","피카츄|6","잠만보|6","짜랑고우거|6","가디안|6","레시라무|6","제크로무|6","큐레무|6","쥬피썬더|5","에브이|5","리피아|5","님피아|5","루카리오|5","토대부기|5","초염몽|5","엠페르트|5","알로라 나인테일|5","마기라스|5","메타그로스|5","애프룡|5","단지래플|5","마휘핑|5","갈가부기|5","마스카나|4","라우드본|4","웨이니발|4","카르본|2","드니차|2","빠모|2","모부기|2","수풀부기|3","토대부기|4","불꽃숭이|2","파이숭이|3","초염몽|4","팽도리|2","팽태자|3","엠페르트|4","샤미드|4","부스터|4","블래키|4","글레이시아|4","멍파치|2","펄스멍|4","구구|2","피죤|3","피죤투|4","알로라 모래두지|2","알로라 고지|4","동미러|2","동탁군|3","톱치|2","비브라바|3","플라이곤|4","갈모매|2","패리퍼|3","루주라|3","케이시|2","윤겔라|3","후딘|4","흔들풍손|3","둥실라이드|4","시마사리|3","토게데마루|3","랄토스|2","킬리아|3","가디안|4","롱스톤|3"]
+};
+// 등급별 도감 항목 → [{no,n,t,card}] · no 가 null 이면 번호 미확인
+const dexTypes=(s,r,n)=>{ const row=(DEXLOW[s+'-'+r]||'').split('/')
+  .map(x=>x.split(',')).find(x=>x[0]===n); return row?row[1].split('·'):[]; };
+const dexList=(s,r)=>{
+  const out=[], seen=new Set();
+  (DEXORD[s]||[]).forEach((slot,i)=>{ if(!slot) return;
+    const [n,rr]=slot.split('|'); if(rr!==r) return;
+    const card=(rr==='6'||rr==='5') ? POOL.find(p=>p.s===s&&p.r===rr&&p.n===n) : null;
+    out.push({no:i+1,n,t:card?card.t:dexTypes(s,r,n),card}); seen.add(n); });
+  if(r==='6'||r==='5') POOL.filter(p=>p.s===s&&p.r===r&&!seen.has(p.n))
+    .forEach(p=>out.push({no:null,n:p.n,t:p.t,card:p}));
+  else {
+    (DEXLOW[s+'-'+r]||'').split('/').filter(Boolean).forEach(x=>{
+      const [n,t]=x.split(','); if(seen.has(n)) return;
+      out.push({no:null,n,t:t.split('·'),card:null}); });
+  }
+  return out;
+};
+const dexKey=(s,r,no,n)=> no ? s+'-'+r+'-'+no : s+'-'+r+'-@'+n;
 
 /* ══ 상태 ══ */
 let bossId='2-6-가이오가', mode='power', setView='2', bossRank='6', rosterSet='1';
@@ -1656,12 +1684,11 @@ function renderRoster(){
   document.getElementById('ownHint').textContent=`전체 ${total} / ${POOL.length}개 켜짐`;
 }
 
-/* 수집 탭 — ★6·★5 는 전투 보유(owned)를 그대로 쓰고, ★4 이하만 dex 로 따로 센다.
-   ★4 이하는 스탯이 없어 추천 계산에 절대 들어가지 않는다. */
-const dexOn=(r,it)=> (r==='6'||r==='5') ? owned.has(it.card.id) : dex.has(dexKey(rosterSet,r,it.no));
+/* 수집 탭 — 전투 보유(owned)와 완전히 분리된 dex 집합만 쓴다.
+   여기서 무엇을 켜고 꺼도 추천 계산과 전투 탭에는 아무 영향이 없다. */
+const dexOn=(r,it)=>dex.has(dexKey(rosterSet,r,it.no,it.n));
 function dexToggle(r,it){
-  if(r==='6'||r==='5'){ const id=it.card.id; owned.has(id)?owned.delete(id):owned.add(id); }
-  else { const k=dexKey(rosterSet,r,it.no); dex.has(k)?dex.delete(k):dex.add(k); }
+  const k=dexKey(rosterSet,r,it.no,it.n); dex.has(k)?dex.delete(k):dex.add(k);
 }
 function renderDex(){
   const host=document.getElementById('dexHost'); if(!host)return;
@@ -1678,44 +1705,52 @@ function renderDex(){
       <div class="dexg"></div></details>`);
     const g=d.querySelector('.dexg');
     list.forEach(it=>{
-      const n=el(`<button class="dx" style="--c:${RARITY[r].color}" aria-pressed="${dexOn(r,it)}">
-        <span class="no">${it.no}</span><span class="dn">${it.n}</span>
+      const n=el(`<button class="dx" style="--c:${RARITY[r].color};--sc:${SETC[rosterSet]}" aria-pressed="${dexOn(r,it)}">
+        <span class="no${it.no?'':' un'}">${it.no??'–'}</span><span class="dn">${it.n}</span>
         <span class="dt">${it.t.map(x=>`<i class="ci ${TK[x]}" title="${x}"></i>`).join('')}
           ${it.card&&it.card.g?`<span class="sep"></span><i class="gi ${GK[it.card.g]}" title="${it.card.g}"></i>`:''}
         </span></button>`);
-      n.addEventListener('click',()=>{dexToggle(r,it);save();renderAll()});
+      n.addEventListener('click',()=>{dexToggle(r,it);save();renderDex()});
       g.appendChild(n);
     });
     d.querySelectorAll('[data-b]').forEach(btn=>btn.addEventListener('click',()=>{
       const want=btn.dataset.b==='on';
       list.forEach(it=>{ if(dexOn(r,it)!==want) dexToggle(r,it); });
-      save();renderAll()}));
+      save();renderDex()}));
     host.appendChild(d);
   });
-  // 레귤러 — 번호가 없고 1·2탄 공통
-  const reg=POOL.filter(p=>p.s==='공통'&&p.r==='R');
-  if(reg.length){
-    const on=reg.filter(p=>owned.has(p.id)).length;
+  // 레귤러·스페셜 — 번호가 없고 1·2탄 공통
+  [['R','탄 공통 · 번호 없음'],['S','배포 한정 · 번호 없음']].forEach(([rk,note])=>{
+    const list=POOL.filter(p=>p.s==='공통'&&p.r===rk); if(!list.length)return;
+    const key=c=>'공통-'+rk+'-@'+c.n;
+    const on=list.filter(c=>dex.has(key(c))).length;
+    const col=RARITY[rk].color;
     const d=el(`<details open>
-      <summary><span class="band" style="background:${RARITY.R.color}"></span>${RARITY.R.label}
-        <span class="badge b-set">탄 공통 · 번호 없음</span>
-        <span class="ct">${on} / ${reg.length}</span></summary>
+      <summary><span class="band" style="background:${col}"></span>${RARITY[rk].label}
+        <span class="badge b-set">${note}</span>
+        <span class="ct">${on} / ${list.length}</span></summary>
+      <div class="bulk"><button class="mini" data-b="on">전체 켜기</button>
+        <button class="mini" data-b="off">전체 끄기</button></div>
       <div class="dexg"></div></details>`);
     const g=d.querySelector('.dexg');
-    reg.forEach(c=>{
-      const n=el(`<button class="dx" style="--c:${RARITY.R.color}" aria-pressed="${owned.has(c.id)}">
-        <span class="rg">R</span><span class="dn">${c.n}</span>
+    list.forEach(c=>{
+      const n=el(`<button class="dx" style="--c:${col};--sc:${col}" aria-pressed="${dex.has(key(c))}">
+        <span class="rg">${rk}</span><span class="dn">${c.n}</span>
         <span class="dt">${c.t.map(x=>`<i class="ci ${TK[x]}" title="${x}"></i>`).join('')}
           ${c.g?`<span class="sep"></span><i class="gi ${GK[c.g]}" title="${c.g}"></i>`:''}
         </span></button>`);
-      n.addEventListener('click',()=>{owned.has(c.id)?owned.delete(c.id):owned.add(c.id);save();renderAll()});
+      n.addEventListener('click',()=>{const k=key(c);
+        dex.has(k)?dex.delete(k):dex.add(k); save(); renderDex()});
       g.appendChild(n);
     });
+    d.querySelectorAll('[data-b]').forEach(btn=>btn.addEventListener('click',()=>{
+      list.forEach(c=>btn.dataset.b==='on'?dex.add(key(c)):dex.delete(key(c)));
+      save();renderDex()}));
     host.appendChild(d);
-    have+=on; all+=reg.length;
-  }
-  const h=document.getElementById('ownHint');
-  if(h && colTab==='dex') h.textContent=`${rosterSet}탄 ${have} / ${all}종 수집`;
+    have+=on; all+=list.length;
+  });
+  const h=document.getElementById('dexHint');
+  if(h) h.textContent=`${rosterSet}탄 ${have} / ${all}종 수집 · 전투 보유와 별개로 저장됩니다`;
 }
 function setColTab(v){
   colTab=v;
@@ -1899,6 +1934,15 @@ document.getElementById('sw1').addEventListener('click',()=>{setView='1'; pickBo
 document.getElementById('sw2').addEventListener('click',()=>{setView='2'; pickBoss()});
 document.getElementById('sr6').addEventListener('click',()=>{bossRank='6'; pickBoss()});
 document.getElementById('sr5').addEventListener('click',()=>{bossRank='5'; pickBoss()});
+document.getElementById('dexFromOwn').addEventListener('click',()=>{
+  // owned → dex 단방향 복사. dex 는 전투 계산에 영향을 주지 않는다.
+  ['1','2'].forEach(s=>DEXRANK.forEach(r=>dexList(s,r).forEach(it=>{
+    if(it.card && owned.has(it.card.id)) dex.add(dexKey(s,r,it.no,it.n)); })));
+  POOL.filter(p=>p.s==='공통'&&(p.r==='R'||p.r==='S')&&owned.has(p.id))
+    .forEach(c=>dex.add('공통-'+c.r+'-@'+c.n));
+  save(); renderDex();
+});
+document.getElementById('dexClear').addEventListener('click',()=>{dex=new Set();save();renderDex()});
 document.getElementById('ct1').addEventListener('click',()=>setColTab('battle'));
 document.getElementById('ct2').addEventListener('click',()=>setColTab('dex'));
 document.getElementById('rs1').addEventListener('click',()=>{rosterSet='1';renderRoster();renderDex()});
