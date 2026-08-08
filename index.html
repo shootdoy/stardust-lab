@@ -7,7 +7,7 @@
 <meta name="description" content="포켓몬 태그스타 스타더스트 1탄·2탄 ★6·★5 보스 공략. 보유 태그로 3턴 로테이션과 서포트 티켓을 추천합니다.">
 <meta name="theme-color" content="#120B2E">
 <meta name="color-scheme" content="dark">
-<meta name="version" content="1.9.0">
+<meta name="version" content="1.10.0">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -444,6 +444,7 @@ section:first-child{margin-top:0}
 .ranksort button:focus-visible{outline:2.5px solid var(--cyan);outline-offset:2px}
 .sortnote{flex:1 0 100%;font-size:11px;color:var(--ink-dim);line-height:1.55;margin-top:2px}
 .rline .rside{display:flex;flex-direction:column;align-items:flex-end;gap:1px;flex:none}
+.rline .rdn{font-family:var(--mono);font-size:9.5px;color:#8B7BC4;letter-spacing:-.01em}
 .rline .rd{font-family:var(--display);font-weight:400;font-size:19px;line-height:1;color:var(--star)}
 .rline .nums{display:flex;gap:7px;font-family:var(--mono);font-size:10px}
 .badge{font-family:var(--mono);font-size:8.5px;padding:1px 5px;border-radius:4px;flex:none}
@@ -695,7 +696,7 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
   스탯·기술은 공식·팬페이지 표기값 (1탄 25 · 2탄 25 · 공통 6)<br>
   받는 피해는 보스 표기 기술 기준
   <span class="ver" id="ver" role="button" tabindex="0" title="눌러서 저장값 초기화">
-    v1.9.0 · 2026-08-07</span>
+    v1.10.0 · 2026-08-07</span>
 </footer>
 </div>
 
@@ -966,7 +967,7 @@ const TAGIMG={
 const tagArt=b=>TAGIMG[b.s+'-'+b.n]||null;
 
 const RANK_N=10;          // 순위에 보여줄 개수
-const VERSION='1.9.0';
+const VERSION='1.10.0';
 const BUILT='2026-08-07';
 
 /* ══ 자산을 CSS 로 한 번만 심는다 (DOM 에 base64 중복 방지) ══ */
@@ -1480,9 +1481,11 @@ function renderRank(){
   document.querySelectorAll('.ranksort button').forEach(x=>
     x.setAttribute('aria-pressed', x.dataset.sort===rankSort));
   const note=document.getElementById('sortNote');
-  if(note) note.textContent = rankSort==='score'
+  if(note) note.innerHTML = (rankSort==='score'
     ? '화력에 받는 피해까지 반영한 순위. 약점을 찔리는 태그는 순위가 내려갑니다.'
-    : '예상 피해만으로 정렬. 내구는 보지 않으니 한 방 넣고 쓰러져도 상위에 옵니다.';
+    : '예상 피해만으로 정렬. 내구는 보지 않으니 한 방 넣고 쓰러져도 상위에 옵니다.')
+    + ' 이 순위는 <b style="color:var(--ink)">한 장씩 따로</b> 잰 값입니다.'
+    + ' 기믹은 배틀당 한 번뿐이라, 로테이션에서는 <b style="color:var(--ink)">일반</b> 화력으로 밀릴 수 있습니다.';
   if(!R.length){n.innerHTML=`<p class="empty">상단의 <b>컬렉션</b> 탭에서 태그를 켜면 순위가 나옵니다.</p>`;return}
   n.innerHTML=R.map((r,i)=>`<div class="rline">
     <span class="ix">${i+1}</span>
@@ -1496,6 +1499,10 @@ function renderRank(){
     </span>
     <span class="rside">
       <b class="rd">${Math.round(r.dmg)}</b>
+      ${(()=>{ if(!(r.move&&r.move.tagx)) return '';
+        const alt=r.c.mv.filter(m=>!m.tagx).map(m=>evalMove(r.c,boss,m)).sort((x,y)=>y.dmg-x.dmg)[0];
+        return `<span class="rdn">일반 ${alt?Math.round(alt.dmg):'—'}</span>`;
+      })()}
       <span class="nums">
         <span style="color:${r.mult>=2?'var(--ok)':r.mult===1?'var(--star)':'var(--bad)'}">공×${r.mult}</span>
         <span style="color:${r.d<1?'var(--ok)':r.d>1?'var(--bad)':'var(--ink-dim)'}">피×${r.d}</span>
