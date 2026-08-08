@@ -7,7 +7,7 @@
 <meta name="description" content="포켓몬 태그스타 스타더스트 1탄·2탄 ★6·★5 보스 공략. 보유 태그로 3턴 로테이션과 서포트 티켓을 추천합니다.">
 <meta name="theme-color" content="#120B2E">
 <meta name="color-scheme" content="dark">
-<meta name="version" content="1.10.0">
+<meta name="version" content="1.18.0">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -461,6 +461,21 @@ summary .band{width:5px;height:17px;border-radius:3px;flex:none}
 summary .ct{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--ink-dim)}
 #rankBox{background:linear-gradient(180deg,rgba(42,26,99,.9),rgba(30,19,73,.9));border-radius:18px;margin:0}
 #rankBox summary{font-family:var(--display);font-weight:400;font-size:17px;color:#fff}
+.dlv{margin:14px 0 2px;padding:11px 12px;border-radius:12px;
+  background:rgba(255,61,139,.07);border:1px solid rgba(255,61,139,.28)}
+.dlv-l{display:block;font-size:12.5px;font-weight:700}
+.dlv-l i{display:block;font-family:var(--mono);font-style:normal;font-size:10px;
+  color:var(--ink-dim);font-weight:500;margin-top:3px}
+.dlv-b{display:flex;gap:5px;margin:9px 0 7px}
+.dlv-b button{flex:1;padding:8px 4px;border-radius:9px;border:1px solid var(--rim);
+  background:transparent;color:var(--ink-dim);font-family:var(--body);font-weight:700;
+  font-size:12px;cursor:pointer}
+.dlv-b button[aria-pressed="true"]{background:var(--magenta);color:#fff;border-color:var(--magenta)}
+.dlv-b button:focus-visible{outline:2.5px solid var(--star);outline-offset:2px}
+.dlv-n{display:block;font-size:11px;color:var(--ink-dim);line-height:1.6}
+.dlv.mgt{margin-top:9px;background:rgba(126,231,255,.07);border-color:rgba(126,231,255,.28)}
+.dlv.mgt .dlv-b button[aria-pressed="true"]{background:var(--cyan);color:#0C0722;border-color:var(--cyan)}
+
 .roul{margin:2px 0 14px;text-align:center}
 .roul svg{display:block;margin:0 auto;max-width:320px}
 .chips circle{fill:#1E9EB4;stroke:#0B0718;stroke-width:3}
@@ -657,6 +672,23 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
         <span class="roul-c">룰렛에서 멈춘 숫자가 그대로 공격력에 더해집니다</span>
       </div>
       <div id="chanceRows"></div>
+      <div class="dlv">
+        <span class="dlv-l">다이맥스 레벨 <i>룰렛에서 뜬 값 · 에너지에 배율</i></span>
+        <div class="dlv-b" role="group" aria-label="다이맥스 레벨">
+          <button data-dlv="0">꽝</button>
+          <button data-dlv="5" aria-pressed="true">레벨 5</button>
+          <button data-dlv="10">레벨 10</button>
+        </div>
+        <span class="dlv-n" id="dlvNote"></span>
+      </div>
+      <div class="dlv mgt">
+        <span class="dlv-l">메가진화 등급 <i>성공 · 대성공</i></span>
+        <div class="dlv-b" role="group" aria-label="메가진화 등급">
+          <button data-mg="성공">성공</button>
+          <button data-mg="대성공" aria-pressed="true">대성공</button>
+        </div>
+        <span class="dlv-n" id="mgtNote"></span>
+      </div>
       <button class="mini" id="chanceReset" style="margin-top:14px"></button>
     </div>
   </section>
@@ -696,7 +728,7 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
   스탯·기술은 공식·팬페이지 표기값 (1탄 25 · 2탄 25 · 공통 6)<br>
   받는 피해는 보스 표기 기술 기준
   <span class="ver" id="ver" role="button" tabindex="0" title="눌러서 저장값 초기화">
-    v1.10.0 · 2026-08-07</span>
+    v1.18.0 · 2026-08-07</span>
 </footer>
 </div>
 
@@ -967,7 +999,7 @@ const TAGIMG={
 const tagArt=b=>TAGIMG[b.s+'-'+b.n]||null;
 
 const RANK_N=10;          // 순위에 보여줄 개수
-const VERSION='1.10.0';
+const VERSION='1.18.0';
 const BUILT='2026-08-07';
 
 /* ══ 자산을 CSS 로 한 번만 심는다 (DOM 에 base64 중복 방지) ══ */
@@ -984,8 +1016,21 @@ const AK={}, TK={}, GK={}, SK={};
 const artCls=c=>AK[c.s+'-'+c.n]||'';
 
 /* ══ BEST-25 — 50보스 x 2모드 완전탐색으로 뽑은 핵심 태그.
-   2탄 ★6 전부 최적, 전체 화력의 100% 를 커버한다. ══ */
-const BEST25=new Set(["1-5-거대코뿌리","2-6-레시라무","2-5-알로라 나인테일","2-6-짜랑고우거","2-6-큐레무","1-6-메타그로스","1-6-마기라스","2-6-제크로무","2-5-초염몽","1-6-자시안","1-5-플라이곤","2-6-그란돈","2-5-갈가부기","2-6-가이오가","2-5-엠페르트","공통-S-따라큐","1-5-윈디","2-6-피카츄","1-6-뮤츠","2-5-님피아","2-6-코라이돈","2-5-마휘핑","2-5-리피아","1-6-이상해꽃","1-5-글레이시아"]);
+   2탄 ★6 전부 최적, 전체 화력의 100% 를 커버한다. 메가·다이맥스 보정 반영본. ══ */
+const BEST25=new Set(["1-5-거대코뿌리","2-6-짜랑고우거","2-5-알로라 나인테일","1-6-마기라스","2-6-큐레무","2-5-초염몽","2-6-그란돈","1-6-메타그로스","1-6-이상해꽃","1-6-자시안","1-5-글레이시아","2-6-제크로무","공통-S-따라큐","1-5-플라이곤","2-5-엠페르트","2-6-가이오가","2-6-피카츄","2-6-코라이돈","2-6-레시라무","2-5-갈가부기","2-5-님피아","1-5-윈디","1-5-팬텀","2-6-잠만보","2-5-마휘핑"]);
+
+/* ══ 메가진화 — 에너지(=스탯)가 오르고, 폼에 따라 타입이 바뀌기도 한다.
+   실측된 것만 채운다. 비어 있으면 보정 없이 원본 스탯으로 계산한다. ══ */
+const MEGA={
+  // e = 대성공 에너지, e2 = 성공 에너지(미측정이면 생략), t = 바뀌는 타입
+  '1-6-리자몽':{e:144,t:['불꽃','드래곤'],n:'메가리자몽X'}   // 대성공 124 → 144, 비행 → 드래곤
+};
+let megaTier='대성공';                     // 성공 / 대성공
+const megaOf=c=>{
+  const M=MEGA[c.id]; if(!M) return null;
+  const e = megaTier==='대성공' ? M.e : M.e2;
+  return {...M, e: e ?? null};             // 해당 등급 수치가 없으면 스탯 보정 없음
+};
 
 /* ══ 상태 ══ */
 let bossId='2-6-가이오가', mode='power', setView='2', bossRank='6', rosterSet='1';
@@ -994,6 +1039,11 @@ let owned=DEFAULT_OWNED();
 let guideHidden=false;
 let detail=0;
 let rankSort='score';
+// 다이맥스는 에너지(=스탯)에 배율을 곱한다. 덧셈이 아니다.
+// 실측 — 마기라스 L5 144→159 · 메타그로스 L10 144→166
+//        짜랑고우거 L10 158→182 · 플라이곤 L10 114→132  (4건 모두 일치)
+const DMAX_MUL={0:1, 5:1.1042, 10:1.1536};
+let dmaxLv=5;        // 룰렛에서 뜬 다이맥스 레벨 (꽝 0 · 5 · 10)
 
 const KEY='tagstar:owned';
 let backend='memory';
@@ -1006,6 +1056,8 @@ async function load(){
     if(saved&&saved.detail!=null) detail=saved.detail;
     if(saved&&saved.rankSort) rankSort=saved.rankSort;
     if(saved&&saved.bossRank) bossRank=saved.bossRank;
+    if(saved&&saved.dmaxLv!=null) dmaxLv=saved.dmaxLv;
+    if(saved&&saved.megaTier) megaTier=saved.megaTier;
     backend='claude';
     if(Array.isArray(arr)) owned=new Set(arr.filter(id=>POOL.some(p=>p.id===id)));
     return;
@@ -1025,7 +1077,7 @@ async function load(){
 }
 let sT;
 function save(){clearTimeout(sT);sT=setTimeout(async()=>{
-  const p=JSON.stringify({owned:[...owned],chance,guideHidden,detail,rankSort,bossRank});
+  const p=JSON.stringify({owned:[...owned],chance,guideHidden,detail,rankSort,bossRank,dmaxLv,megaTier});
   if(backend==='claude'){try{await window.storage.set(KEY,p);return}catch(e){}}
   if(backend==='claude'||backend==='local'){try{localStorage.setItem(KEY,p);backend='local';return}catch(e){}}
   backend='memory'; renderBackend();
@@ -1060,19 +1112,14 @@ const bonusOf=m=>chance[m.tagx]??chance['일반'];
 
 function offense(card,boss,banGim){
   if(card.measured){
+    const canMega=card.g==='메가진화';
     let best=null;
     card.mv.forEach(m=>{
       if(m.tagx && banGim && banGim.has(m.tagx)) return;   // 기믹은 배틀당 1회
-      const mult=eff(m.t,boss.t);
-      const bonus=bonusOf(m);
-      const raw=(m.k==='물리'? card.a : card.sa);
-      const atk=raw+bonus;                                  // 찬스 보너스 가산
-      const def=(m.k==='물리'? boss.d : boss.sd);
-      const ratio=atk/def;
-      const pw=POWER[m.n]??100;
-      const v=mult*Math.min(2.2,Math.max(.5,ratio))*(pw/100);
-      const dmg=pw*(atk/def)*mult;                          // 예상 피해 지수
-      if(!best||v>best.v) best={v,mult,ratio,move:m,pw,bonus,raw,atk,def,dmg};
+      const r=evalMove(card,boss,m,canMega&&!m.tagx);      // 다이맥스·메가 보정을 한 곳에서
+      const v=r.s/(DW[r.d]??1);                            // 내구 가중 이전의 공격 점수
+      if(!best||v>best.v) best={v,mult:r.mult,ratio:r.ratio,move:m,
+        pw:r.pw,bonus:r.bonus,raw:r.raw,atk:r.atk,def:r.def,dmg:r.dmg,mega:r.mega,megaT:r.megaT};
     });
     return best;
   }
@@ -1082,24 +1129,32 @@ function offense(card,boss,banGim){
 const incoming=(card,boss)=>Math.max(...boss.mv.map(m=>eff(m.t,card.t)));
 const DW={0:1.5,.25:1.35,.5:1.2,1:1,2:.85,4:.7};
 function evalCard(card,boss,banGim){
-  const o=offense(card,boss,banGim), d=incoming(card,boss);
+  const o=offense(card,boss,banGim);
   if(!o) return null;
+  const types=(o.megaT)||card.t;                 // 메가 폼이면 바뀐 타입으로 피해 계산
+  const d=Math.max(...boss.mv.map(m=>eff(m.t,types)));
   return {c:card,mult:o.mult,move:o.move,ratio:o.ratio,pw:o.pw,bonus:o.bonus,raw:o.raw,atk:o.atk,def:o.def,dmg:o.dmg,d,s:o.v*(DW[d]??1)};
 }
 const ranked=(boss,banGim,skip)=>POOL.filter(p=>owned.has(p.id)&&p.id!==boss.id&&!(skip&&skip.has(p.id)))
   .map(c=>evalCard(c,boss,banGim)).filter(Boolean).sort((a,b)=>b.s-a.s||b.mult-a.mult);
 
 // 한 장을 특정 기술로 썼을 때의 평가
-function evalMove(card,boss,m){
+function evalMove(card,boss,m,megaOn){
+  const M=megaOn?megaOf(card):null;
   const mult=eff(m.t,boss.t);
   const bonus=bonusOf(m);
-  const raw=(m.k==='물리'? card.a : card.sa);
+  // 다이맥스는 태그의 에너지(=스탯)를 올린다. 레벨당 +3 (마기라스 144→159 실측)
+  const base=(m.k==='물리'? card.a : card.sa);
+  const dmax=(m.tagx==='다이맥스') ? (DMAX_MUL[dmaxLv]??1) : 1;
+  const mgx=(M&&M.e&&card.e) ? M.e/card.e : 1;      // 메가진화 스탯 상승
+  const raw=Math.round(base*dmax*mgx);
   const atk=raw+bonus;
   const def=(m.k==='물리'? boss.d : boss.sd);
   const pw=POWER[m.n]??100;
-  const d=incoming(card,boss);
+  const dTypes=(M&&M.t)?M.t:card.t;                 // 메가 폼은 타입이 바뀔 수 있다
+  const d=boss.mv.reduce((w,bm)=>Math.max(w,eff(bm.t,dTypes)),0);
   const v=mult*Math.min(2.2,Math.max(.5,atk/def))*(pw/100);
-  return {c:card,mult,move:m,ratio:atk/def,pw,bonus,raw,atk,def,
+  return {c:card,mult,move:m,ratio:atk/def,pw,bonus,raw,atk,def,mega:!!M,megaT:M?M.t:null,
           dmg:pw*(atk/def)*mult,d,s:v*(DW[d]??1)};
 }
 
@@ -1116,15 +1171,17 @@ function buildSeq(boss,mode){
   const cards=all;
   const distinct = mode==='flex' && cards.length>=3;   // 3장 미만이면 재사용 허용
   const opts=[];
+  const V=r=> mode==='flex' ? r.dmg*(DW[r.d]??1) : r.dmg;
   cards.forEach(c=>c.mv.forEach(m=>{
-    const base=evalMove(c,boss,m);
-    opts.push({c,m,mega:!m.tagx&&c.g==='메가진화',base,
-      val: mode==='flex' ? base.dmg*(DW[base.d]??1) : base.dmg});
+    const canMega = !m.tagx && c.g==='메가진화';
+    const base=evalMove(c,boss,m,false);
+    const mega=canMega ? evalMove(c,boss,m,true) : null;   // 메가 슬롯을 쓸 때의 값
+    opts.push({c,m,mega:canMega,base,megaBase:mega,val:V(base),megaVal:mega?V(mega):0});
   }));
   // 태그가 모자라면 기기가 랜덤으로 채워준다. 값이 0이라 다른 수가 있으면 안 쓰인다.
   opts.push({c:RANDOM.c,m:null,mega:false,base:RANDOM,val:0,rand:true});
 
-  const maxOne=Math.max(...opts.map(o=>o.val));
+  const maxOne=Math.max(...opts.map(o=>Math.max(o.val,o.megaVal||0)));
   // 합계가 같으면 큰 피해를 앞턴에. 보스가 먼저 쓰러질 수 있어 앞이 유리하다.
   let bestSeq=null, bestVal=-1, bestTie=-1;
   const acc=[];
@@ -1143,11 +1200,13 @@ function buildSeq(boss,mode){
       }
       if(o.m && o.m.tagx && used.has(o.m.tagx)) continue;  // 기믹 1회
       const mega = o.mega && !used.has('메가진화');
-      acc.push(mega?{...o.base,mega:true}:o.base);
+      const r = mega ? {...o.megaBase,mega:true} : o.base;
+      const v = mega ? o.megaVal : o.val;
+      acc.push(r);
       let nu=used;
       const gk = (o.m && o.m.tagx) || (mega ? '메가진화' : null);
       if(gk){ nu=new Set(used); nu.add(gk) }
-      step(turn+1,o.c.id,nu,val+o.val,tie+o.val*(3-turn));
+      step(turn+1,o.c.id,nu,val+v,tie+v*(3-turn));
       acc.pop();
     }
   };
@@ -1608,6 +1667,10 @@ document.addEventListener('visibilitychange',()=>{ if(!document.hidden) checkUpd
 
 document.querySelectorAll('.dock button').forEach(b=>
   b.addEventListener('click',()=>goSection(b.dataset.go)));
+document.querySelectorAll('[data-dlv]').forEach(b=>
+  b.addEventListener('click',()=>{dmaxLv=Number(b.dataset.dlv); save(); renderAll()}));
+document.querySelectorAll('[data-mg]').forEach(b=>
+  b.addEventListener('click',()=>{megaTier=b.dataset.mg; save(); renderAll()}));
 document.getElementById('qrClose').addEventListener('click',closeQR);
 document.getElementById('qrModal').addEventListener('click',closeQR);
 document.addEventListener('keydown',e=>{if(e.key==='Escape') closeQR()});
@@ -1644,6 +1707,30 @@ function renderGuide(){
   const g=document.getElementById('guide'); if(g) g.hidden=guideHidden;
 }
 
+function renderDmax(){
+  document.querySelectorAll('[data-dlv]').forEach(b=>
+    b.setAttribute('aria-pressed', Number(b.dataset.dlv)===dmaxLv));
+  const n=document.getElementById('dlvNote');
+  if(!n) return;
+  const ex=POOL.find(p=>p.n==='마기라스'&&p.s==='1');
+  const k=DMAX_MUL[dmaxLv]??1;
+  n.innerHTML = dmaxLv===0
+    ? '다이맥스가 실패한 상태로 계산합니다. <b style="color:var(--ink)">다이맥스밴드</b>가 있으면 100% 성공하니 레벨을 골라 두세요.'
+    : `에너지가 <b style="color:var(--ink)">×${k}</b> 오른 것으로 계산합니다.`
+      + (ex?` 예: 마기라스 ${ex.e} → ${Math.round(ex.e*k)}`:'');
+}
+
+function renderMega(){
+  document.querySelectorAll('[data-mg]').forEach(b=>
+    b.setAttribute('aria-pressed', b.dataset.mg===megaTier));
+  const n=document.getElementById('mgtNote'); if(!n) return;
+  const known=Object.keys(MEGA).filter(k=>megaTier==='대성공'?MEGA[k].e:MEGA[k].e2).length;
+  const total=POOL.filter(p=>p.g==='메가진화').length;
+  n.innerHTML = `메가 태그 <b style="color:var(--ink)">${total}종</b> 중 `
+    + `<b style="color:${known?'var(--ok)':'var(--bad)'}">${known}종</b>의 ${megaTier} 수치가 들어 있습니다.`
+    + (known<total?' 나머지는 보정 없이 원본 스탯으로 계산합니다.':'');
+}
+
 function renderChance(){
   const rb=document.getElementById('chanceReset');
   if(rb) rb.textContent='기본값 ('+Object.values(CHANCE_DEFAULTS).join(' / ')+')';
@@ -1669,7 +1756,7 @@ function renderChance(){
 }
 
 function renderAll(){
-  renderBosses();renderReadout();renderRotation();renderSupport();renderRank();renderRoster();renderBackend();renderChance();renderGuide();renderDetail();renderDock();
+  renderBosses();renderReadout();renderRotation();renderSupport();renderRank();renderRoster();renderBackend();renderChance();renderDmax();renderMega();renderGuide();renderDetail();renderDock();
   document.getElementById('vCct').textContent=owned.size+'/'+POOL.length;
   const bh=document.getElementById('b23ct');
   if(bh){ const have=[...BEST25].filter(id=>owned.has(id)).length;
