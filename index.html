@@ -7,7 +7,7 @@
 <meta name="description" content="포켓몬 태그스타 스타더스트 1탄·2탄 ★6·★5 보스 공략. 보유 태그로 3턴 로테이션과 서포트 티켓을 추천합니다.">
 <meta name="theme-color" content="#120B2E">
 <meta name="color-scheme" content="dark">
-<meta name="version" content="1.25.0">
+<meta name="version" content="1.27.0">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -518,22 +518,24 @@ summary:focus-visible{outline:2.5px solid var(--cyan);outline-offset:-3px}
 .pool{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:8px;padding:0 13px 15px}
 /* 수집 탭 — 아트 없이 번호·이름·타입만 */
 .dexg{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:6px;padding:0 13px 15px}
-.dx{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:3px;
-  padding:7px 8px 7px 30px;border-radius:10px;border:1px solid var(--rim);background:rgba(255,255,255,.03);
+.dx{display:flex;flex-direction:column;align-items:stretch;gap:4px;
+  padding:7px 8px;border-radius:10px;border:1px solid var(--rim);background:rgba(255,255,255,.03);
   color:var(--dim);text-align:left;cursor:pointer;transition:.12s}
+.dx .hd{display:flex;align-items:center;gap:4px}
 .dx[aria-pressed="true"]{background:rgba(255,255,255,.10);border-color:var(--c);color:var(--ink)}
 .dx:focus-visible{outline:2.5px solid var(--cyan);outline-offset:2px}
-.dx .no{position:absolute;left:6px;top:6px;min-width:19px;padding:1px 3px;border-radius:5px;
+.dx .no{min-width:19px;padding:1px 4px;border-radius:5px;
   background:var(--sc);color:#0C0722;font-size:9.5px;font-weight:800;text-align:center;letter-spacing:-.2px}
+.dx .rk{margin-left:auto;padding:1px 5px;border-radius:5px;background:var(--c);color:#0C0722;
+  font-size:9px;font-weight:800;letter-spacing:-.3px;white-space:nowrap}
 .dx .dn{font-size:11.5px;font-weight:700;line-height:1.25;word-break:keep-all}
 .dx .dt{display:flex;gap:3px;align-items:center}
 .dx .ci{width:14px;height:14px;display:block;flex:none;background:var(--ic) center/contain no-repeat}
 .dx .gi{width:14px;height:14px}
 .dx .sep{width:1px;height:11px;background:var(--rim);margin:0 1px}
 .dx[aria-pressed="false"] .dt{filter:grayscale(.85) brightness(.7);opacity:.65}
-.dx .rg{position:absolute;left:6px;top:6px;padding:1px 4px;border-radius:5px;
-  background:var(--rim);color:var(--dim);font-size:9px;font-weight:800}
-.dx .no.un{background:var(--rim);color:var(--ink-dim)}
+
+.dx .no.un{background:var(--rim);color:var(--dim)}
 .ctag{position:relative;display:flex;flex-direction:column;justify-content:flex-end;gap:3px;
   min-height:62px;padding:7px 9px;border:0;border-radius:12px;cursor:pointer;overflow:hidden;
   background-size:cover;background-position:center;text-align:left;
@@ -744,6 +746,7 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
       <p class="hint" id="dexHint" style="padding:0 0 10px"></p>
       <div class="bulk" style="padding:0 0 12px">
         <button class="mini" id="dexFromOwn">전투 보유 가져오기</button>
+        <button class="mini" id="dexAll">전부 켜기</button>
         <button class="mini" id="dexClear">전부 끄기</button>
       </div>
       <div id="dexHost"></div>
@@ -766,7 +769,7 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
   스탯·기술은 공식·팬페이지 표기값 (1탄 25 · 2탄 25 · 공통 6)<br>
   받는 피해는 보스 표기 기술 기준
   <span class="ver" id="ver" role="button" tabindex="0" title="눌러서 저장값 초기화">
-    v1.25.0 · 2026-08-08</span>
+    v1.27.0 · 2026-08-09</span>
 </footer>
 </div>
 
@@ -1037,8 +1040,8 @@ const TAGIMG={
 const tagArt=b=>TAGIMG[b.s+'-'+b.n]||null;
 
 const RANK_N=10;          // 순위에 보여줄 개수
-const VERSION='1.25.0';
-const BUILT='2026-08-08';
+const VERSION='1.27.0';
+const BUILT='2026-08-09';
 
 /* ══ 자산을 CSS 로 한 번만 심는다 (DOM 에 base64 중복 방지) ══ */
 const AK={}, TK={}, GK={}, SK={};
@@ -1192,6 +1195,8 @@ const POWER={
  초월나선연격:190,레이징지오프리즈:190,무한암야로의유인:180
 };
 // 공격 찬스 보너스는 공격력에 가산 (조절 가능)
+// 셋 다 매판 달라지는 값의 기대값이다. Z기술은 룰렛이 아니라
+// 플레이어의 기술 입력을 기계가 판정해 매번 다르게 준다. 70은 그 평균.
 const CHANCE_DEFAULTS={'일반':10,'다이맥스':30,'Z기술':70};
 let chance={...CHANCE_DEFAULTS};
 const bonusOf=m=>chance[m.tagx]??chance['일반'];
@@ -1693,64 +1698,37 @@ function dexToggle(r,it){
 function renderDex(){
   const host=document.getElementById('dexHost'); if(!host)return;
   host.innerHTML='';
-  let have=0, all=0;
-  DEXRANK.forEach(r=>{
-    const list=dexList(rosterSet,r); if(!list.length)return;
-    const on=list.filter(it=>dexOn(r,it)).length; have+=on; all+=list.length;
-    const d=el(`<details open>
-      <summary><span class="band" style="background:${RARITY[r].color}"></span>${RARITY[r].label}
-        <span class="ct">${on} / ${list.length}</span></summary>
-      <div class="bulk"><button class="mini" data-b="on">전체 켜기</button>
-        <button class="mini" data-b="off">전체 끄기</button></div>
-      <div class="dexg"></div></details>`);
-    const g=d.querySelector('.dexg');
-    list.forEach(it=>{
-      const n=el(`<button class="dx" style="--c:${RARITY[r].color};--sc:${SETC[rosterSet]}" aria-pressed="${dexOn(r,it)}">
-        <span class="no${it.no?'':' un'}">${it.no??'–'}</span><span class="dn">${it.n}</span>
-        <span class="dt">${it.t.map(x=>`<i class="ci ${TK[x]}" title="${x}"></i>`).join('')}
-          ${it.card&&it.card.g?`<span class="sep"></span><i class="gi ${GK[it.card.g]}" title="${it.card.g}"></i>`:''}
-        </span></button>`);
-      n.addEventListener('click',()=>{dexToggle(r,it);save();renderDex()});
-      g.appendChild(n);
-    });
-    d.querySelectorAll('[data-b]').forEach(btn=>btn.addEventListener('click',()=>{
-      const want=btn.dataset.b==='on';
-      list.forEach(it=>{ if(dexOn(r,it)!==want) dexToggle(r,it); });
-      save();renderDex()}));
-    host.appendChild(d);
+  // 번호 오름차순 단일 목록. 번호가 없는 레귤러·스페셜은 뒤에 붙인다.
+  const rows=[];
+  DEXRANK.forEach(r=>dexList(rosterSet,r).forEach(it=>rows.push({r,it})));
+  rows.sort((a,b)=>(a.it.no??999)-(b.it.no??999));
+  ['R','S'].forEach(rk=>POOL.filter(p=>p.s==='공통'&&p.r===rk)
+    .forEach(c=>rows.push({r:rk,it:{no:null,n:c.n,t:c.t,card:c},common:true})));
+
+  const keyOf=x=>x.common ? '공통-'+x.r+'-@'+x.it.n : dexKey(rosterSet,x.r,x.it.no,x.it.n);
+  const isOn =x=>dex.has(keyOf(x));
+  const RKLAB={'6':'★6','5':'★5','4':'★4','3':'★3','2':'★2','R':'레귤러','S':'스페셜'};
+
+  const g=el('<div class="dexg"></div>');
+  rows.forEach(x=>{
+    const col=RARITY[x.r].color, it=x.it;
+    const n=el(`<button class="dx" style="--c:${col};--sc:${it.no?SETC[rosterSet]:col}" aria-pressed="${isOn(x)}">
+      <span class="hd"><span class="no${it.no?'':' un'}">${it.no??'–'}</span>
+        <span class="rk">${RKLAB[x.r]}</span></span>
+      <span class="dn">${it.n}</span>
+      <span class="dt">${it.t.map(t=>`<i class="ci ${TK[t]}" title="${t}"></i>`).join('')}
+        ${it.card&&it.card.g?`<span class="sep"></span><i class="gi ${GK[it.card.g]}" title="${it.card.g}"></i>`:''}
+      </span></button>`);
+    n.addEventListener('click',()=>{const k=keyOf(x);
+      dex.has(k)?dex.delete(k):dex.add(k); save(); renderDex()});
+    g.appendChild(n);
   });
-  // 레귤러·스페셜 — 번호가 없고 1·2탄 공통
-  [['R','탄 공통 · 번호 없음'],['S','배포 한정 · 번호 없음']].forEach(([rk,note])=>{
-    const list=POOL.filter(p=>p.s==='공통'&&p.r===rk); if(!list.length)return;
-    const key=c=>'공통-'+rk+'-@'+c.n;
-    const on=list.filter(c=>dex.has(key(c))).length;
-    const col=RARITY[rk].color;
-    const d=el(`<details open>
-      <summary><span class="band" style="background:${col}"></span>${RARITY[rk].label}
-        <span class="badge b-set">${note}</span>
-        <span class="ct">${on} / ${list.length}</span></summary>
-      <div class="bulk"><button class="mini" data-b="on">전체 켜기</button>
-        <button class="mini" data-b="off">전체 끄기</button></div>
-      <div class="dexg"></div></details>`);
-    const g=d.querySelector('.dexg');
-    list.forEach(c=>{
-      const n=el(`<button class="dx" style="--c:${col};--sc:${col}" aria-pressed="${dex.has(key(c))}">
-        <span class="rg">${rk}</span><span class="dn">${c.n}</span>
-        <span class="dt">${c.t.map(x=>`<i class="ci ${TK[x]}" title="${x}"></i>`).join('')}
-          ${c.g?`<span class="sep"></span><i class="gi ${GK[c.g]}" title="${c.g}"></i>`:''}
-        </span></button>`);
-      n.addEventListener('click',()=>{const k=key(c);
-        dex.has(k)?dex.delete(k):dex.add(k); save(); renderDex()});
-      g.appendChild(n);
-    });
-    d.querySelectorAll('[data-b]').forEach(btn=>btn.addEventListener('click',()=>{
-      list.forEach(c=>btn.dataset.b==='on'?dex.add(key(c)):dex.delete(key(c)));
-      save();renderDex()}));
-    host.appendChild(d);
-    have+=on; all+=list.length;
-  });
+  host.appendChild(g);
+
+  const have=rows.filter(isOn).length;
   const h=document.getElementById('dexHint');
-  if(h) h.textContent=`${rosterSet}탄 ${have} / ${all}종 수집 · 전투 보유와 별개로 저장됩니다`;
+  if(h) h.textContent=`${rosterSet}탄 ${have} / ${rows.length}종 수집 · 전투 보유와 별개로 저장됩니다`;
+  host.dataset.keys=JSON.stringify(rows.map(keyOf));
 }
 function setColTab(v){
   colTab=v;
@@ -1899,7 +1877,7 @@ function renderChance(){
   const host=document.getElementById('chanceRows'); if(!host)return;
   const meta={'일반':'기믹 없음 · 룰렛 기대값',
     '다이맥스':'다이맥스 기술 · 다이썬더, 다이스틸 등',
-    'Z기술':'Z기술 · 연타로 Z에너지 축적'};
+    'Z기술':'Z기술 · 기술 입력 판정 · 평균값'};
   host.innerHTML='';
   Object.keys(CHANCE_DEFAULTS).forEach(k=>{
     const ic = GIMICON[k] ? `<i class="cgi ${GK[k]}"></i>` : `<span class="cgi cgi-n"></span>`;
@@ -1940,6 +1918,11 @@ document.getElementById('dexFromOwn').addEventListener('click',()=>{
     if(it.card && owned.has(it.card.id)) dex.add(dexKey(s,r,it.no,it.n)); })));
   POOL.filter(p=>p.s==='공통'&&(p.r==='R'||p.r==='S')&&owned.has(p.id))
     .forEach(c=>dex.add('공통-'+c.r+'-@'+c.n));
+  save(); renderDex();
+});
+document.getElementById('dexAll').addEventListener('click',()=>{
+  const host=document.getElementById('dexHost');
+  JSON.parse(host.dataset.keys||'[]').forEach(k=>dex.add(k));
   save(); renderDex();
 });
 document.getElementById('dexClear').addEventListener('click',()=>{dex=new Set();save();renderDex()});
