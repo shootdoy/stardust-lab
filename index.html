@@ -7,7 +7,7 @@
 <meta name="description" content="포켓몬 태그스타 스타더스트 1탄·2탄 ★6·★5 보스 공략. 보유 태그로 3턴 로테이션과 서포트 티켓을 추천합니다.">
 <meta name="theme-color" content="#120B2E">
 <meta name="color-scheme" content="dark">
-<meta name="version" content="1.27.0">
+<meta name="version" content="1.30.0">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -175,7 +175,9 @@ section:first-child{margin-top:0}
   align-items:center;justify-content:center;gap:2px;line-height:1.1}
 .viewsw button[aria-pressed="true"]{background:var(--star);color:#1A0F3D;border-color:var(--star)}
 .viewsw button:focus-visible{outline:2.5px solid var(--cyan);outline-offset:2px}
-.viewsw .ct{font-family:var(--mono);font-size:9.5px;font-weight:600;opacity:.72;letter-spacing:-.02em}
+.viewsw .ct{display:flex;flex-direction:column;align-items:center;gap:1px;white-space:nowrap;
+  font-family:var(--mono);font-size:9.5px;font-weight:600;opacity:.72;letter-spacing:-.03em;line-height:1.25}
+.viewsw .ct span{white-space:nowrap}
 [hidden]{display:none!important}
 
 .t{display:inline-flex;align-items:center;gap:3px;font-family:var(--mono);font-size:10px;font-weight:600;
@@ -518,11 +520,25 @@ summary:focus-visible{outline:2.5px solid var(--cyan);outline-offset:-3px}
 .pool{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:8px;padding:0 13px 15px}
 /* 수집 탭 — 아트 없이 번호·이름·타입만 */
 .dexg{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:6px;padding:0 13px 15px}
-.dx{display:flex;flex-direction:column;align-items:stretch;gap:4px;
-  padding:7px 8px;border-radius:10px;border:1px solid var(--rim);background:rgba(255,255,255,.03);
+.dx{position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:stretch;gap:4px;
+  padding:7px 8px;border-radius:10px;border:1px solid var(--rim);background:transparent;
   color:var(--dim);text-align:left;cursor:pointer;transition:.12s}
+/* 등급색 채움 — color-mix 없이 겹쳐서 낸다 */
+.dx::before{content:'';position:absolute;inset:0;background:var(--c);opacity:0;
+  transition:.12s;pointer-events:none}
+.dx > *{position:relative;z-index:1}
 .dx .hd{display:flex;align-items:center;gap:4px}
-.dx[aria-pressed="true"]{background:rgba(255,255,255,.10);border-color:var(--c);color:var(--ink)}
+/* 수집함 — 등급색으로 채우고 테두리를 살린다 */
+.dx[aria-pressed="true"]{border-color:var(--c);color:var(--ink)}
+.dx[aria-pressed="true"]::before{opacity:.28}
+.dx[aria-pressed="true"]{box-shadow:inset 3px 0 0 var(--c)}
+.dx[aria-pressed="true"] .hd{padding-left:2px}
+.dx[aria-pressed="true"] .dn::after{content:'✓';margin-left:4px;color:var(--c);font-weight:900}
+/* 미수집 — 점선 테두리에 색을 뺀다 */
+.dx[aria-pressed="false"]{border-style:dashed;border-color:rgba(255,255,255,.13)}
+.dx[aria-pressed="false"] .no,
+.dx[aria-pressed="false"] .rk{filter:grayscale(1);opacity:.45}
+.dx[aria-pressed="false"] .dn{opacity:.5;font-weight:600}
 .dx:focus-visible{outline:2.5px solid var(--cyan);outline-offset:2px}
 .dx .no{min-width:19px;padding:1px 4px;border-radius:5px;
   background:var(--sc);color:#0C0722;font-size:9.5px;font-weight:800;text-align:center;letter-spacing:-.2px}
@@ -533,7 +549,7 @@ summary:focus-visible{outline:2.5px solid var(--cyan);outline-offset:-3px}
 .dx .ci{width:14px;height:14px;display:block;flex:none;background:var(--ic) center/contain no-repeat}
 .dx .gi{width:14px;height:14px}
 .dx .sep{width:1px;height:11px;background:var(--rim);margin:0 1px}
-.dx[aria-pressed="false"] .dt{filter:grayscale(.85) brightness(.7);opacity:.65}
+.dx[aria-pressed="false"] .dt{filter:grayscale(1) brightness(.8);opacity:.35}
 
 .dx .no.un{background:var(--rim);color:var(--dim)}
 .ctag{position:relative;display:flex;flex-direction:column;justify-content:flex-end;gap:3px;
@@ -551,6 +567,7 @@ summary:focus-visible{outline:2.5px solid var(--cyan);outline-offset:-3px}
   background:linear-gradient(180deg,#FFD34A,#E09A16);color:#241300;
   box-shadow:0 1px 4px rgba(0,0,0,.55)}
 .ctag[aria-pressed="false"] .b23{opacity:.75}
+.ctag .b23.rec{background:linear-gradient(180deg,#7DF3C0,#25B37C);color:#04231A}
 .ctag .cn{font-size:13.5px;font-weight:700;color:#fff;line-height:1.15;
   text-shadow:0 1px 4px rgba(0,0,0,.85);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ctag .cm{display:flex;align-items:center;gap:4px}
@@ -641,8 +658,8 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
     <div class="card" id="readout"></div>
     <div class="card">
       <div class="tabs" role="tablist">
-        <button class="tab" role="tab" id="tabA" aria-selected="true">최대 화력</button>
-        <button class="tab" role="tab" id="tabB" aria-selected="false">밸런스</button>
+        <button class="tab" role="tab" id="tabA" aria-selected="true">밸런스</button>
+        <button class="tab" role="tab" id="tabB" aria-selected="false">최대 화력</button>
       </div>
       <div class="seg" role="group" aria-label="표시 단계">
         <button data-lv="0" aria-pressed="true">태그</button>
@@ -734,6 +751,12 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
     </div>
     <div id="backend" class="backend"></div>
     <div id="colBattle">
+      <div class="bulk" style="padding:0 0 8px">
+        <button class="mini" id="dexBestGo">수집 기준 BEST-20</button>
+        <button class="mini" id="dexBestOn" hidden>이 20장만 켜기</button>
+        <button class="mini" id="dexBestClr" hidden>추천 지우기</button>
+      </div>
+      <p class="hint" id="dexBestMsg" style="padding:0 0 10px"></p>
       <div class="bulk" style="padding:0 0 12px">
         <button class="mini" id="preset16">1탄 ★6</button>
         <button class="mini" id="preset26">2탄 ★6</button>
@@ -743,7 +766,7 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
       <div id="roster"></div>
     </div>
     <div id="colDex" hidden>
-      <p class="hint" id="dexHint" style="padding:0 0 10px"></p>
+      <p class="hint" id="dexHint" style="padding:0 0 10px;text-align:center"></p>
       <div class="bulk" style="padding:0 0 12px">
         <button class="mini" id="dexFromOwn">전투 보유 가져오기</button>
         <button class="mini" id="dexAll">전부 켜기</button>
@@ -769,7 +792,7 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
   스탯·기술은 공식·팬페이지 표기값 (1탄 25 · 2탄 25 · 공통 6)<br>
   받는 피해는 보스 표기 기술 기준
   <span class="ver" id="ver" role="button" tabindex="0" title="눌러서 저장값 초기화">
-    v1.27.0 · 2026-08-09</span>
+    v1.30.0 · 2026-08-09</span>
 </footer>
 </div>
 
@@ -1040,7 +1063,7 @@ const TAGIMG={
 const tagArt=b=>TAGIMG[b.s+'-'+b.n]||null;
 
 const RANK_N=10;          // 순위에 보여줄 개수
-const VERSION='1.27.0';
+const VERSION='1.30.0';
 const BUILT='2026-08-09';
 
 /* ══ 자산을 CSS 로 한 번만 심는다 (DOM 에 base64 중복 방지) ══ */
@@ -1113,9 +1136,14 @@ const dexList=(s,r)=>{
   return out;
 };
 const dexKey=(s,r,no,n)=> no ? s+'-'+r+'-'+no : s+'-'+r+'-@'+n;
+// 수집 전체 칸 수 — 1탄 70 + 2탄 70 + 공통(레귤러·스페셜) 6
+const dexTotal=()=>['1','2'].reduce((t,st)=>t+DEXRANK.reduce((u,r)=>u+dexList(st,r).length,0),0)
+  + POOL.filter(p=>p.s==='공통'&&(p.r==='R'||p.r==='S')).length;
 
 /* ══ 상태 ══ */
-let bossId='2-6-가이오가', mode='power', setView='2', bossRank='6', rosterSet='1';
+// 기본 모드는 밸런스. 최대 화력은 약점을 찔리는 태그도 서슴없이 넣어
+// 한 대에 기절하는 일이 생긴다 (가이오가전 거대코뿌리 물 x4 실사례).
+let bossId='2-6-가이오가', mode='flex', setView='2', bossRank='6', rosterSet='1';
 const DEFAULT_OWNED=()=>new Set(POOL.filter(p=>p.s==='1'&&p.r==='6').map(p=>p.id));
 let owned=DEFAULT_OWNED();
 let guideHidden=false;
@@ -1128,6 +1156,8 @@ const DMAX_MUL={0:1, 5:1.1042, 10:1.1536};
 let dmaxLv=5;        // 룰렛에서 뜬 다이맥스 레벨 (꽝 0 · 5 · 10)
 let colTab='battle';           // 컬렉션 서브탭: battle | dex
 let dex=new Set();             // ★4 이하 수집 체크 (추천 계산과 무관)
+let dexBest=null;              // 수집 기준 BEST-20 결과 (Set|null)
+let dexCalcBusy=false;         // 계산 중에는 owned 를 임시로 쓴다. 클릭을 막을 것
 
 const KEY='tagstar:owned';
 let backend='memory';
@@ -1322,7 +1352,8 @@ const chip=(c,o={})=>{
     : `linear-gradient(120deg,${c1}AA,${c2}77)`;
   return `<button class="ctag ${artCls(c)}" style="--c:${RARITY[c.r].color};background:${bg}"
     ${o.pressed==null?'':`aria-pressed="${o.pressed}"`} data-id="${c.id}">
-    ${BEST20.has(c.id)?'<span class="b23">BEST</span>':''}
+    ${dexBest ? (dexBest.has(c.id)?'<span class="b23 rec">추천</span>':'')
+               : (BEST20.has(c.id)?'<span class="b23">BEST</span>':'')}
     <span class="cn">${c.n}</span>
     <span class="cm"><span class="cr">★${c.r}</span>${c.t.map(x=>
       `<i class="ci ${TK[x]}" title="${x}"></i>`).join('')}
@@ -1545,12 +1576,12 @@ function renderRotation(){
   const tp2=sum(P), tf=sum(F), wp=worst(P), wf=worst(F);
   const cap=(v,w)=>`<span class="tl2">최대 받는 ×${w}</span>`;
   rot.appendChild(el(`<div class="total">
-    <div class="tsum ${mode==='power'?'on':''}">
-      <span class="tl">최대 화력</span><b>${tp2}</b>${tp2>tf?'<span class="tw">화력 우세</span>':''}
-      ${cap(tp2,wp)}</div>
     <div class="tsum ${mode==='flex'?'on':''}">
       <span class="tl">밸런스</span><b>${tf}</b>${wf<wp?'<span class="tw ok">덜 맞음</span>':''}
       ${cap(tf,wf)}</div>
+    <div class="tsum ${mode==='power'?'on':''}">
+      <span class="tl">최대 화력</span><b>${tp2}</b>${tp2>tf?'<span class="tw">화력 우세</span>':''}
+      ${cap(tp2,wp)}</div>
   </div>`));
 
   const nr=seq.filter(r=>r.rand).length;
@@ -1660,6 +1691,61 @@ function renderRank(){
     </span></div>`).join('');
 }
 
+/* ══ 수집 기준 BEST-20 ══
+   수집(dex) 체크한 태그 중에서 다시 뽑는다. `buildSeq` 가 보유 장수의 세제곱이라
+   정확 탐욕은 후보 56장에서 Node 14초 · 폰은 그 몇 배다. 그래서 2단계로 나눈다.
+     1) 단독 기여도(보스별 한 장만 놓고 최고 피해)로 후보를 26장까지 좁힌다 — 20ms
+     2) 좁힌 후보로 정확 탐욕을 돌리되 한 단계마다 화면에 양보한다
+   후보가 20장 이하면 계산 없이 전부가 답이다.
+   지연 탐욕(lazy greedy)은 쓰지 말 것 — 탈진·기믹 제약 탓에 한계이득 감소가
+   성립하지 않아 결과가 7% 나빠진다. 실제로 재봤다. */
+const DEXBEST_N=20, DEXBEST_SHORT=26;
+const dexBossSet=()=>BOSSES.filter(b=>!(b.s==='1'&&b.r==='5'));   // BEST-20 과 같은 35보스 기준
+function dexBattleIds(){
+  const out=new Set();
+  ['1','2'].forEach(st=>DEXRANK.forEach(r=>dexList(st,r).forEach(it=>{
+    if(it.card && dex.has(dexKey(st,r,it.no,it.n))) out.add(it.card.id); })));
+  POOL.filter(p=>p.s==='공통'&&(p.r==='R'||p.r==='S'))
+    .forEach(c=>{ if(dex.has('공통-'+c.r+'-@'+c.n)) out.add(c.id); });
+  return [...out];
+}
+function dexSoloRank(ids){
+  const bs=dexBossSet(), sc={};
+  ids.forEach(id=>sc[id]=0);
+  bs.forEach(b=>ids.forEach(id=>{
+    const c=POOL.find(p=>p.id===id); let best=0;
+    c.mv.forEach(m=>{ const r=evalMove(c,b,m,false); if(r.dmg>best) best=r.dmg; });
+    sc[id]+=best; }));
+  return [...ids].sort((a,b)=>sc[b]-sc[a]);
+}
+function dexSeqTotal(set){
+  owned=new Set(set); let t=0;
+  for(const m of ['power','flex']) for(const b of dexBossSet())
+    t+=buildSeq(b,m).reduce((a,r)=>a+(r.dmg||0),0);
+  return t;
+}
+function calcDexBest(cb){        // cb={step,done} — 벗은 콜백 이름은 undef.js 가 오탐한다
+  const cand=dexBattleIds();
+  if(cand.length<=DEXBEST_N){ cb.done(cand,false); return; }
+  const snap=new Set(owned), short=dexSoloRank(cand).slice(0,DEXBEST_SHORT), cur=[];
+  dexCalcBusy=true;
+  const step=()=>{
+    let bi=null,bv=-1;
+    for(const id of short){ if(cur.includes(id)) continue;
+      const v=dexSeqTotal(cur.concat([id])); if(v>bv){bv=v;bi=id;} }
+    if(bi!=null) cur.push(bi);
+    cb.step(cur.length, Math.min(DEXBEST_N,short.length));
+    if(cur.length<DEXBEST_N && cur.length<short.length) setTimeout(step,0);
+    else { owned=snap; dexCalcBusy=false; cb.done(cur,true); }
+  };
+  setTimeout(step,0);
+}
+function renderDexBestMsg(txt){
+  const m=document.getElementById('dexBestMsg'); if(m) m.innerHTML=txt;
+  ['dexBestOn','dexBestClr'].forEach(id=>{
+    const b=document.getElementById(id); if(b) b.hidden=!dexBest; });
+}
+
 function renderRoster(){
   const host=document.getElementById('roster'); host.innerHTML='';
   const inSet=POOL.filter(p=>p.s===rosterSet||p.s==='공통');
@@ -1676,7 +1762,8 @@ function renderRoster(){
     const pool=d.querySelector('.pool');
     list.forEach(c=>{
       const n=el(chip(c,{pressed:owned.has(c.id)}));
-      n.addEventListener('click',()=>{owned.has(c.id)?owned.delete(c.id):owned.add(c.id);save();renderAll()});
+      n.addEventListener('click',()=>{ if(dexCalcBusy) return;
+        owned.has(c.id)?owned.delete(c.id):owned.add(c.id); save(); renderAll()});
       pool.appendChild(n);
     });
     d.querySelectorAll('[data-b]').forEach(btn=>btn.addEventListener('click',()=>{
@@ -1686,7 +1773,8 @@ function renderRoster(){
   document.getElementById('rs1').setAttribute('aria-pressed',rosterSet==='1');
   document.getElementById('rs2').setAttribute('aria-pressed',rosterSet==='2');
   const total=owned.size;
-  document.getElementById('ownHint').textContent=`전체 ${total} / ${POOL.length}개 켜짐`;
+  document.getElementById('ownHint').innerHTML=
+    `전투 <b>${total}</b> / ${POOL.length}개 켜짐 · 수집 <b>${dex.size}</b> / ${dexTotal()}종`;
 }
 
 /* 수집 탭 — 전투 보유(owned)와 완전히 분리된 dex 집합만 쓴다.
@@ -1897,7 +1985,8 @@ function renderChance(){
 
 function renderAll(){
   renderBosses();renderReadout();renderRotation();renderSupport();renderRank();renderRoster();renderDex();renderBackend();renderChance();renderDmax();renderMega();renderGuide();renderDetail();renderDock();
-  document.getElementById('vCct').textContent=owned.size+'/'+POOL.length;
+  document.getElementById('vCct').innerHTML=
+    `<span>전투 ${owned.size}/${POOL.length}</span><span>수집 ${dex.size}/${dexTotal()}</span>`;
   const bh=document.getElementById('b23ct');
   if(bh){ const have=[...BEST20].filter(id=>owned.has(id)).length;
     bh.innerHTML=`<b>BEST-20</b> 핵심 태그 <b style="color:${have===BEST20.size?'var(--ok)':'var(--star)'}">${have}/${BEST20.size}</b>`
@@ -1926,15 +2015,41 @@ document.getElementById('dexAll').addEventListener('click',()=>{
   save(); renderDex();
 });
 document.getElementById('dexClear').addEventListener('click',()=>{dex=new Set();save();renderDex()});
+document.getElementById('dexBestGo').addEventListener('click',()=>{
+  if(dexCalcBusy) return;
+  const n=dexBattleIds().length;
+  if(!n){ renderDexBestMsg('수집 탭에서 가진 태그를 먼저 켜 주세요. ★4 이하는 스탯이 없어 제외됩니다.'); return; }
+  renderDexBestMsg(`계산 중… 후보 ${n}장`);
+  calcDexBest({
+    step:(k,t)=>renderDexBestMsg(`계산 중… ${k} / ${t}`),
+    done:(list,computed)=>{
+      dexBest=new Set(list);
+      const nm=list.map(id=>POOL.find(p=>p.id===id).n).join(' · ');
+      const head=computed
+        ? `수집 ${dexBattleIds().length}장 중 <b>${list.length}장</b> 추천`
+        : `수집한 ${list.length}장이 20장 이하라 전부 추천입니다`;
+      renderDexBestMsg(`${head} · 1탄 ★5 보스를 뺀 35보스 기준<br>${nm}`);
+      renderAll();
+    }});
+});
+document.getElementById('dexBestOn').addEventListener('click',()=>{
+  if(!dexBest||dexCalcBusy) return;
+  owned=new Set(dexBest); save(); renderAll();
+});
+document.getElementById('dexBestClr').addEventListener('click',()=>{
+  if(dexCalcBusy) return;
+  dexBest=null; renderDexBestMsg(''); renderAll();
+});
 document.getElementById('ct1').addEventListener('click',()=>setColTab('battle'));
 document.getElementById('ct2').addEventListener('click',()=>setColTab('dex'));
 document.getElementById('rs1').addEventListener('click',()=>{rosterSet='1';renderRoster();renderDex()});
 document.getElementById('rs2').addEventListener('click',()=>{rosterSet='2';renderRoster();renderDex()});
-document.getElementById('tabA').addEventListener('click',()=>setMode('power'));
-document.getElementById('tabB').addEventListener('click',()=>setMode('flex'));
+// tabA=밸런스 · tabB=최대 화력. 기본값이 밸런스라 화면 순서도 그에 맞춘다.
+document.getElementById('tabA').addEventListener('click',()=>setMode('flex'));
+document.getElementById('tabB').addEventListener('click',()=>setMode('power'));
 function setMode(m){mode=m;
-  document.getElementById('tabA').setAttribute('aria-selected',m==='power');
-  document.getElementById('tabB').setAttribute('aria-selected',m==='flex');
+  document.getElementById('tabA').setAttribute('aria-selected',m==='flex');
+  document.getElementById('tabB').setAttribute('aria-selected',m==='power');
   renderRotation()}
 load().then(renderAll);
 </script>
