@@ -7,7 +7,7 @@
 <meta name="description" content="포켓몬 태그스타 스타더스트 1탄·2탄 ★6·★5 보스 공략. 보유 태그로 3턴 로테이션과 서포트 티켓을 추천합니다.">
 <meta name="theme-color" content="#120B2E">
 <meta name="color-scheme" content="dark">
-<meta name="version" content="1.30.0">
+<meta name="version" content="1.30.2">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -562,7 +562,8 @@ summary:focus-visible{outline:2.5px solid var(--cyan);outline-offset:-3px}
 .b23n{margin:0 0 13px;padding:10px 12px;border-radius:12px;font-size:11.5px;line-height:1.6;
   color:var(--ink-dim);background:rgba(255,200,49,.08);border:1px solid rgba(255,200,49,.3)}
 .b23n b{color:var(--ink)}
-.ctag .b23{position:absolute;top:6px;right:6px;padding:2px 6px;border-radius:6px;
+.ctag .b23w{position:absolute;top:6px;right:6px;display:flex;gap:4px;align-items:center}
+.ctag .b23{padding:2px 6px;border-radius:6px;
   font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.04em;
   background:linear-gradient(180deg,#FFD34A,#E09A16);color:#241300;
   box-shadow:0 1px 4px rgba(0,0,0,.55)}
@@ -741,8 +742,8 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
   <section>
     <div class="sec-head"><h2>컬렉션</h2><span class="hint" id="ownHint"></span></div>
     <div class="setsw" role="group" aria-label="컬렉션 화면 선택">
-      <button id="ct1" aria-pressed="true">전투</button>
-      <button id="ct2" aria-pressed="false">수집</button>
+      <button id="ct1" aria-pressed="true">전투태그</button>
+      <button id="ct2" aria-pressed="false">수집태그</button>
     </div>
     <p class="b23n" id="b23ct"></p>
     <div class="setsw" role="group" aria-label="컬렉션 탄 선택">
@@ -792,7 +793,7 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
   스탯·기술은 공식·팬페이지 표기값 (1탄 25 · 2탄 25 · 공통 6)<br>
   받는 피해는 보스 표기 기술 기준
   <span class="ver" id="ver" role="button" tabindex="0" title="눌러서 저장값 초기화">
-    v1.30.0 · 2026-08-09</span>
+    v1.30.2 · 2026-08-09</span>
 </footer>
 </div>
 
@@ -1063,7 +1064,7 @@ const TAGIMG={
 const tagArt=b=>TAGIMG[b.s+'-'+b.n]||null;
 
 const RANK_N=10;          // 순위에 보여줄 개수
-const VERSION='1.30.0';
+const VERSION='1.30.2';
 const BUILT='2026-08-09';
 
 /* ══ 자산을 CSS 로 한 번만 심는다 (DOM 에 base64 중복 방지) ══ */
@@ -1352,8 +1353,9 @@ const chip=(c,o={})=>{
     : `linear-gradient(120deg,${c1}AA,${c2}77)`;
   return `<button class="ctag ${artCls(c)}" style="--c:${RARITY[c.r].color};background:${bg}"
     ${o.pressed==null?'':`aria-pressed="${o.pressed}"`} data-id="${c.id}">
-    ${dexBest ? (dexBest.has(c.id)?'<span class="b23 rec">추천</span>':'')
-               : (BEST20.has(c.id)?'<span class="b23">BEST</span>':'')}
+    <span class="b23w">${
+      (dexBest&&dexBest.has(c.id)?'<span class="b23 rec">추천</span>':'')
+      +(BEST20.has(c.id)?'<span class="b23">BEST</span>':'')}</span>
     <span class="cn">${c.n}</span>
     <span class="cm"><span class="cr">★${c.r}</span>${c.t.map(x=>
       `<i class="ci ${TK[x]}" title="${x}"></i>`).join('')}
