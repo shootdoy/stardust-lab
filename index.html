@@ -7,7 +7,7 @@
 <meta name="description" content="포켓몬 태그스타 스타더스트 1탄·2탄 ★6·★5 보스 공략. 보유 태그로 3턴 로테이션과 서포트 티켓을 추천합니다.">
 <meta name="theme-color" content="#120B2E">
 <meta name="color-scheme" content="dark">
-<meta name="version" content="1.33.2">
+<meta name="version" content="1.35.0">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -67,7 +67,7 @@ body{padding-top:env(safe-area-inset-top,0px)}   /* 상태바·노치 회피 */
 .dock{position:fixed;z-index:90;
   left:calc(var(--bz) + 8px);right:calc(var(--bz) + 8px);
   bottom:calc(var(--bz) + env(safe-area-inset-bottom,0px) + 8px);
-  display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding:5px;
+  display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:4px;padding:5px;
   border-radius:15px;background:rgba(14,8,34,.92);
   border:1px solid var(--rim);box-shadow:0 8px 26px rgba(0,0,0,.6);
   backdrop-filter:blur(8px)}
@@ -520,14 +520,20 @@ summary:focus-visible{outline:2.5px solid var(--cyan);outline-offset:-3px}
 .pool{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:8px;padding:0 13px 15px}
 /* 수집 탭 — 아트 없이 번호·이름·타입만 */
 .dexg{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:6px;padding:0 13px 15px}
-.myqr{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}
-.myqr button{position:relative;padding:0;border:1px solid var(--rim);border-radius:12px;
-  background:#fff;cursor:pointer;aspect-ratio:1;overflow:hidden}
-.myqr button img{width:100%;height:100%;object-fit:contain;display:block}
-.myqr button .del{position:absolute;top:3px;right:3px;width:20px;height:20px;border-radius:6px;
-  border:0;background:rgba(12,7,34,.78);color:#fff;font-size:11px;line-height:1;cursor:pointer}
-.myqr .empty{grid-column:1/-1;padding:14px;text-align:center;font-size:12.5px;color:var(--dim);
-  border:1px dashed var(--rim);border-radius:12px}
+.myqr{display:block}
+/* 트레이너 ID 카드 — 틀 이미지 위에 QR 과 ID 를 얹는다. 좌표는 원본 대비 백분율 */
+.tidc{position:relative;width:100%;max-width:420px;margin:0 auto;aspect-ratio:1005/626;
+  background:var(--tidbg) center/100% 100% no-repeat;border-radius:14px;overflow:hidden;
+  border:0;padding:0;cursor:pointer;display:block}
+.tidc .q{position:absolute;left:36.82%;top:22.36%;width:28.86%;height:46.65%}
+.tidc .q img{width:100%;height:100%;object-fit:contain;display:block}
+.tidc .idt{position:absolute;left:29.85%;top:71.88%;width:41%;text-align:center;
+  color:#111;font-weight:800;font-size:clamp(9px,3.1vw,15px);letter-spacing:-.02em;line-height:1.25}
+.tidc .ph{position:absolute;left:36.82%;top:22.36%;width:28.86%;height:46.65%;
+  display:grid;place-items:center;border:2px dashed #C9C2DB;border-radius:8px;
+  color:#8A80A8;font-size:11px;text-align:center;padding:4px}
+.tidc .del{position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:7px;
+  border:0;background:rgba(12,7,34,.72);color:#fff;font-size:12px;line-height:1;cursor:pointer}
 .dx{position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:stretch;gap:4px;
   padding:7px 8px;border-radius:10px;border:1px solid var(--rim);background:transparent;
   color:var(--dim);text-align:left;cursor:pointer;transition:.12s}
@@ -635,19 +641,14 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
   </div>
 </header>
 
-<div class="viewsw" role="group" aria-label="화면 전환">
-  <button id="vB" aria-pressed="true">공략</button>
-  <button id="vC" aria-pressed="false">컬렉션 <span class="ct" id="vCct"></span></button>
-  <button id="vX" aria-pressed="false">룰렛 보정 <span class="ct" id="vXct"></span></button>
-</div>
-
-<div id="viewBattle" data-d="0">
-  <section id="sTID">
+<section id="sTID">
     <div class="sec-head"><h2>트레이너 ID</h2><span class="hint">게임 시작 때 스캔</span></div>
     <div class="card">
       <div class="myqr" id="myqr"></div>
-      <div class="bulk" style="padding:10px 0 0">
+      <div class="bulk" style="padding:12px 0 0;align-items:center">
         <button class="mini" id="qrFileLab">사진에서 등록</button>
+        <input class="mini" id="tidNum" type="text" inputmode="numeric" maxlength="24"
+          placeholder="ID 번호 (선택)" style="min-width:140px">
         <input type="file" id="qrFile" accept="image/*"
           style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none">
       </div>
@@ -655,6 +656,13 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
     </div>
   </section>
 
+<div class="viewsw" role="group" aria-label="화면 전환">
+  <button id="vB" aria-pressed="true">공략</button>
+  <button id="vC" aria-pressed="false">컬렉션 <span class="ct" id="vCct"></span></button>
+  <button id="vX" aria-pressed="false">룰렛 보정 <span class="ct" id="vXct"></span></button>
+</div>
+
+<div id="viewBattle" data-d="0">
   <section id="sBoss">
     <div class="sec-head"><h2>보스 선택</h2><span class="hint" id="bossHint"></span></div>
     <div class="setsw" role="group" aria-label="탄 선택">
@@ -814,7 +822,7 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
   스탯·기술은 공식·팬페이지 표기값 (1탄 25 · 2탄 25 · 공통 6)<br>
   받는 피해는 보스 표기 기술 기준
   <span class="ver" id="ver" role="button" tabindex="0" title="눌러서 저장값 초기화">
-    v1.33.2 · 2026-08-09</span>
+    v1.35.0 · 2026-08-09</span>
 </footer>
 </div>
 
@@ -828,18 +836,19 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
   <button data-go="sBoss">보스</button>
   <button data-go="sSup">서포트</button>
   <button data-go="sRot">로테이션</button>
-  <button data-go="sRank">보유태그순위</button>
+  <button data-go="sRank">순위</button>
 </nav>
 
 <div class="qrmodal" id="qrModal" hidden>
   <div class="qrbox" role="dialog" aria-modal="true" aria-labelledby="qrName">
-    <div class="qrhead">
+    <div class="qrhead" id="qrHead">
       <span class="qrth" id="qrThumb"></span>
       <span class="qrmeta"><b id="qrName"></b><span id="qrSub"></span></span>
       <button class="qrx" id="qrClose" aria-label="닫기">✕</button>
     </div>
     <img id="qrImg" alt="" width="400" height="400">
-    <p class="qrnote">배틀이 시작되기 전에 기기로 스캔하세요<br><span class="qrdim">아무 곳이나 눌러 닫기</span></p>
+    <div id="qrCard" hidden></div>
+    <p class="qrnote"><span id="qrNote">배틀이 시작되기 전에 기기로 스캔하세요</span><br><span class="qrdim">아무 곳이나 눌러 닫기</span></p>
   </div>
 </div>
 
@@ -1086,7 +1095,7 @@ const TAGIMG={
 const tagArt=b=>TAGIMG[b.s+'-'+b.n]||null;
 
 const RANK_N=10;          // 순위에 보여줄 개수
-const VERSION='1.33.2';
+const VERSION='1.35.0';
 const BUILT='2026-08-09';
 
 /* ══ 자산을 CSS 로 한 번만 심는다 (DOM 에 base64 중복 방지) ══ */
@@ -1192,13 +1201,16 @@ let dmaxLv=5;        // 룰렛에서 뜬 다이맥스 레벨 (꽝 0 · 5 · 10)
 let colTab='battle';           // 컬렉션 서브탭: battle | dex
 let dex=new Set();             // ★4 이하 수집 체크 (추천 계산과 무관)
 let dexBest=null;              // 수집 기준 BEST-20 결과 (Set|null)
-let myqr=null;                 // 트레이너 ID QR 의 dataURL — 이 기기에만 저장. 서버로 안 보낸다
+let myqr=null;                 // 트레이너 ID {d:QR dataURL, id:'번호'} — 이 기기에만 저장
 let dexCalcBusy=false;         // 계산 중에는 owned 를 임시로 쓴다. 클릭을 막을 것
 
 const KEY='tagstar:owned';
 // 사용자 QR 은 따로 저장한다. 본 저장값은 태그를 켤 때마다 다시 쓰이므로
 // 여기에 이미지를 섞으면 매번 수십 KB 를 재기록하게 된다.
 const QKEY='tagstar:myqr';
+// 트레이너 ID 카드 틀. 원본에서 QR 과 ID 글자를 지운 빈 판이다.
+// 개인 ID 를 이미지에 굽지 말 것 — 배포 파일에 그대로 실린다.
+const TIDBG='data:image/webp;base64,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';
 let backend='memory';
 async function load(){
   try{
@@ -1704,44 +1716,54 @@ async function qrLoad(){
     if(backend==='claude'){ const r=await window.storage.get(QKEY); myqr=JSON.parse(r.value)||null; return; }
     if(backend==='local'){ const r=localStorage.getItem(QKEY); if(r) myqr=JSON.parse(r)||null; }
   }catch(e){ myqr=null; }
-  // 예전 배열 형식이 남아 있으면 첫 장만 살린다
-  if(Array.isArray(myqr)) myqr = myqr.length ? (myqr[0].d||null) : null;
+  // 예전 형식 이관 — 배열[{n,d}] · 문자열(dataURL) → {d,id}
+  if(Array.isArray(myqr)) myqr = myqr.length ? {d:myqr[0].d,id:''} : null;
+  else if(typeof myqr==='string') myqr={d:myqr,id:''};
+  if(myqr&&!myqr.d) myqr=null;
+}
+function tidCard(big){
+  const inner = myqr
+    ? `<span class="q"><img src="${myqr.d}" alt="트레이너 ID QR코드"></span>`
+      + (myqr.id?`<span class="idt">(KR)<br>ID: ${myqr.id}</span>`:'')
+    : `<span class="ph">QR 사진을<br>등록하세요</span>`;
+  const del = (!big&&myqr) ? '<span class="del" role="button" aria-label="삭제">✕</span>' : '';
+  return `<button class="tidc" style="--tidbg:url(${TIDBG})"
+    aria-label="트레이너 ID 카드">${inner}${del}</button>`;
 }
 function renderMyQR(){
   const host=document.getElementById('myqr'); if(!host)return;
   host.innerHTML='';
   const lab=document.getElementById('qrFileLab');
   if(lab) lab.textContent = myqr ? '다시 등록' : '사진에서 등록';
-  if(!myqr){
-    host.appendChild(el('<p class="empty">트레이너 ID 태그의 QR 사진을 등록해 두면 게임 시작 때 바로 띄울 수 있습니다<br>'
-      +'<b>QR 이 사진 한가운데 오도록, 화면을 꽉 채워</b> 찍으면 잘 읽힙니다</p>'));
-  }else{
-    const b=el(`<button aria-label="트레이너 ID QR 크게 보기"><img src="${myqr}" alt="트레이너 ID QR코드">
-      <span class="del" role="button" aria-label="삭제">✕</span></button>`);
-    b.addEventListener('click',ev=>{
-      if(ev.target.classList.contains('del')){ myqr=null; qrSave(); renderMyQR(); return; }
-      openMyQR();
-    });
-    host.appendChild(b);
-  }
+  const num=document.getElementById('tidNum');
+  if(num && document.activeElement!==num) num.value = myqr&&myqr.id ? myqr.id : '';
+  const c=el(tidCard(false));
+  c.addEventListener('click',ev=>{
+    if(ev.target.classList.contains('del')){ myqr=null; qrSave(); renderMyQR(); return; }
+    if(myqr) openMyQR();
+  });
+  host.appendChild(c);
   const n=document.getElementById('myqrNote');
   if(n) n.textContent = myqr
-    ? `약 ${Math.round(myqr.length/1024)}KB · 이 기기에만 저장되며 어디로도 전송되지 않습니다`
-    : '사진은 이 기기에만 저장되며 어디로도 전송되지 않습니다';
+    ? `약 ${Math.round(myqr.d.length/1024)}KB · 이 기기에만 저장되며 어디로도 전송되지 않습니다`
+    : 'QR 이 사진 한가운데 오도록 화면을 꽉 채워 찍으면 잘 읽힙니다 · 이 기기에만 저장됩니다';
 }
 function openMyQR(){
   const m=document.getElementById('qrModal'); if(!m||!myqr)return;
-  const th=document.getElementById('qrThumb');
-  th.className='qrth'; th.style.background='#fff';
-  document.getElementById('qrName').textContent='트레이너 ID';
-  document.getElementById('qrSub').textContent='게임 시작 때 스캔 · 이 기기 저장';
-  document.getElementById('qrImg').src=myqr;
-  document.getElementById('qrImg').alt='트레이너 ID QR코드';
+  document.getElementById('qrHead').hidden=true;
+  document.getElementById('qrImg').hidden=true;
+  const box=document.getElementById('qrCard');
+  box.hidden=false; box.innerHTML=tidCard(true);
+  document.getElementById('qrNote').textContent='게임 시작 때 기기로 스캔하세요';
   m.hidden=false;
 }
 
 function openQR(s){
   const m=document.getElementById('qrModal'); if(!m)return;
+  document.getElementById('qrHead').hidden=false;
+  document.getElementById('qrImg').hidden=false;
+  document.getElementById('qrCard').hidden=true;
+  document.getElementById('qrNote').textContent='배틀이 시작되기 전에 기기로 스캔하세요';
   const th=document.getElementById('qrThumb');
   th.className='qrth '+(SK[s.n]||'');
   th.style.background = SUPIMG[s.n]?`var(--art) center/cover`
@@ -2180,6 +2202,11 @@ document.getElementById('dexBestClr').addEventListener('click',()=>{
    그 경우 «선택창이 열리지 않았습니다» 에서 멈춘다. */
 let qrPicked=false;
 const qrNote=t=>{ const n=document.getElementById('myqrNote'); if(n) n.textContent=t; };
+document.getElementById('tidNum').addEventListener('input',ev=>{
+  const v=ev.target.value.trim();
+  if(!myqr){ if(v) qrNote('QR 사진을 먼저 등록해 주세요.'); return; }
+  myqr.id=v; qrSave(); renderMyQR();
+});
 document.getElementById('qrFileLab').addEventListener('click',()=>{
   const inp=document.getElementById('qrFile');
   qrPicked=false;
@@ -2208,7 +2235,7 @@ document.getElementById('qrFile').addEventListener('change',ev=>{
       try{ url=qrProcess(img); }
       catch(e){ qrNote('사진을 처리하지 못했습니다: '+(e&&e.message||e)); return; }
       const prev=myqr;
-      myqr=url;                                  // 트레이너 ID 는 한 장만 둔다
+      myqr={d:url, id:(prev&&prev.id)||''};      // 트레이너 ID 는 한 장만 둔다
       qrNote(`저장하는 중… ${Math.round(url.length/1024)}KB`);
       const ok=await qrSave();
       if(!ok){ myqr=prev; renderMyQR(); qrNote('저장하지 못했습니다. 저장 공간이 부족할 수 있습니다.'); return; }
