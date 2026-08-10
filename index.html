@@ -7,7 +7,7 @@
 <meta name="description" content="포켓몬 태그스타 스타더스트 1탄·2탄 ★6·★5 보스 공략. 보유 태그로 3턴 로테이션과 서포트 티켓을 추천합니다.">
 <meta name="theme-color" content="#120B2E">
 <meta name="color-scheme" content="dark">
-<meta name="version" content="1.35.0">
+<meta name="version" content="1.37.0">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -527,8 +527,6 @@ summary:focus-visible{outline:2.5px solid var(--cyan);outline-offset:-3px}
   border:0;padding:0;cursor:pointer;display:block}
 .tidc .q{position:absolute;left:36.82%;top:22.36%;width:28.86%;height:46.65%}
 .tidc .q img{width:100%;height:100%;object-fit:contain;display:block}
-.tidc .idt{position:absolute;left:29.85%;top:71.88%;width:41%;text-align:center;
-  color:#111;font-weight:800;font-size:clamp(9px,3.1vw,15px);letter-spacing:-.02em;line-height:1.25}
 .tidc .ph{position:absolute;left:36.82%;top:22.36%;width:28.86%;height:46.65%;
   display:grid;place-items:center;border:2px dashed #C9C2DB;border-radius:8px;
   color:#8A80A8;font-size:11px;text-align:center;padding:4px}
@@ -647,8 +645,6 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
       <div class="myqr" id="myqr"></div>
       <div class="bulk" style="padding:12px 0 0;align-items:center">
         <button class="mini" id="qrFileLab">사진에서 등록</button>
-        <input class="mini" id="tidNum" type="text" inputmode="numeric" maxlength="24"
-          placeholder="ID 번호 (선택)" style="min-width:140px">
         <input type="file" id="qrFile" accept="image/*"
           style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none">
       </div>
@@ -822,7 +818,7 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
   스탯·기술은 공식·팬페이지 표기값 (1탄 25 · 2탄 25 · 공통 6)<br>
   받는 피해는 보스 표기 기술 기준
   <span class="ver" id="ver" role="button" tabindex="0" title="눌러서 저장값 초기화">
-    v1.35.0 · 2026-08-09</span>
+    v1.37.0 · 2026-08-09</span>
 </footer>
 </div>
 
@@ -1095,7 +1091,7 @@ const TAGIMG={
 const tagArt=b=>TAGIMG[b.s+'-'+b.n]||null;
 
 const RANK_N=10;          // 순위에 보여줄 개수
-const VERSION='1.35.0';
+const VERSION='1.37.0';
 const BUILT='2026-08-09';
 
 /* ══ 자산을 CSS 로 한 번만 심는다 (DOM 에 base64 중복 방지) ══ */
@@ -1201,7 +1197,7 @@ let dmaxLv=5;        // 룰렛에서 뜬 다이맥스 레벨 (꽝 0 · 5 · 10)
 let colTab='battle';           // 컬렉션 서브탭: battle | dex
 let dex=new Set();             // ★4 이하 수집 체크 (추천 계산과 무관)
 let dexBest=null;              // 수집 기준 BEST-20 결과 (Set|null)
-let myqr=null;                 // 트레이너 ID {d:QR dataURL, id:'번호'} — 이 기기에만 저장
+let myqr=null;                 // 트레이너 ID QR 의 dataURL — 이 기기에만 저장
 let dexCalcBusy=false;         // 계산 중에는 owned 를 임시로 쓴다. 클릭을 막을 것
 
 const KEY='tagstar:owned';
@@ -1679,12 +1675,72 @@ function otsu(hist,total){                    // 클래스 간 분산이 최대�
   }
   return thr;
 }
+/* QR 자리 자동 탐색 — 흑백 전환이 촘촘한 8px 블록을 모아 가장 큰 덩어리를 고른다.
+   멀리서 찍어 QR 이 작게 잡히면 가운데 정사각 크롭만으로는 모듈이 뭉개져 판독이 깨진다.
+   실측: 주변을 3배 덧댄 사진에서 크롭 없이는 판독 실패, 이 방식을 쓰면 성공. */
+function qrLocate(img,side){
+  const N=256, B=8, n=N/B;
+  const c=document.createElement('canvas'); c.width=c.height=N;
+  const x=c.getContext('2d',{willReadFrequently:true});
+  x.imageSmoothingQuality='high';
+  x.drawImage(img,(img.width-side)/2,(img.height-side)/2,side,side,0,0,N,N);
+  const p=x.getImageData(0,0,N,N).data, g=new Uint8Array(N*N), hist=new Array(256).fill(0);
+  for(let i=0,k=0;i<p.length;i+=4,k++){
+    const v=(p[i]*299+p[i+1]*587+p[i+2]*114)/1000|0; g[k]=v; hist[v]++;
+  }
+  const t=otsu(hist,N*N);
+  const b=new Uint8Array(N*N);
+  for(let i=0;i<g.length;i++) b[i]=g[i]>t?1:0;
+  // 블록별 전환 수
+  const act=new Float32Array(n*n); let mx=0;
+  for(let by=0;by<n;by++) for(let bx=0;bx<n;bx++){
+    let a=0;
+    for(let y=by*B;y<(by+1)*B;y++) for(let X=bx*B;X<(bx+1)*B-1;X++)
+      if(b[y*N+X]!==b[y*N+X+1]) a++;
+    for(let X=bx*B;X<(bx+1)*B;X++) for(let y=by*B;y<(by+1)*B-1;y++)
+      if(b[y*N+X]!==b[(y+1)*N+X]) a++;
+    act[by*n+bx]=a; if(a>mx) mx=a;
+  }
+  if(!mx) return null;
+  const on=new Uint8Array(n*n);
+  for(let i=0;i<act.length;i++) on[i]=act[i]>=mx*0.35?1:0;
+  // 가장 큰 연결 덩어리 (4방향 flood fill)
+  const seen=new Uint8Array(n*n); let best=null;
+  for(let i=0;i<n*n;i++){
+    if(!on[i]||seen[i]) continue;
+    const st=[i]; seen[i]=1; let x0=n,y0=n,x1=-1,y1=-1,cnt=0;
+    while(st.length){
+      const k=st.pop(), kx=k%n, ky=(k/n)|0; cnt++;
+      if(kx<x0)x0=kx; if(kx>x1)x1=kx; if(ky<y0)y0=ky; if(ky>y1)y1=ky;
+      [[1,0],[-1,0],[0,1],[0,-1]].forEach(([dx,dy])=>{
+        const nx=kx+dx, ny=ky+dy;
+        if(nx<0||ny<0||nx>=n||ny>=n) return;
+        const j=ny*n+nx; if(on[j]&&!seen[j]){seen[j]=1;st.push(j)}
+      });
+    }
+    if(!best||cnt>best.cnt) best={cnt,x0,y0,x1,y1};
+  }
+  if(!best||best.cnt<4) return null;
+  const cx=(best.x0+best.x1+1)/2*B, cy=(best.y0+best.y1+1)/2*B;
+  const half=Math.max(best.x1-best.x0+1,best.y1-best.y0+1)/2*B*1.12;
+  const sc=side/N;
+  return {cx:cx*sc, cy:cy*sc, half:half*sc};
+}
 function qrProcess(img){
-  const S=QR_SIZE, Q=QR_QUIET, side=Math.min(img.width,img.height);
+  const S=QR_SIZE, Q=QR_QUIET;
+  let side=Math.min(img.width,img.height);
+  let sx=(img.width-side)/2, sy=(img.height-side)/2;
+  const loc=qrLocate(img,side);
+  if(loc){                                   // QR 자리를 찾았으면 그쪽만 잘라 쓴다
+    const h=Math.min(loc.half, side/2);
+    sx += Math.max(0,Math.min(side-2*h, loc.cx-h));
+    sy += Math.max(0,Math.min(side-2*h, loc.cy-h));
+    side = 2*h;
+  }
   const c=document.createElement('canvas'); c.width=c.height=S;
   const x=c.getContext('2d',{willReadFrequently:true});
   x.imageSmoothingQuality='high';
-  x.drawImage(img,(img.width-side)/2,(img.height-side)/2,side,side,0,0,S,S);
+  x.drawImage(img,sx,sy,side,side,0,0,S,S);
   const d=x.getImageData(0,0,S,S), p=d.data, hist=new Array(256).fill(0);
   for(let i=0;i<p.length;i+=4){
     const g=(p[i]*299+p[i+1]*587+p[i+2]*114)/1000|0;
@@ -1716,15 +1772,14 @@ async function qrLoad(){
     if(backend==='claude'){ const r=await window.storage.get(QKEY); myqr=JSON.parse(r.value)||null; return; }
     if(backend==='local'){ const r=localStorage.getItem(QKEY); if(r) myqr=JSON.parse(r)||null; }
   }catch(e){ myqr=null; }
-  // 예전 형식 이관 — 배열[{n,d}] · 문자열(dataURL) → {d,id}
-  if(Array.isArray(myqr)) myqr = myqr.length ? {d:myqr[0].d,id:''} : null;
-  else if(typeof myqr==='string') myqr={d:myqr,id:''};
-  if(myqr&&!myqr.d) myqr=null;
+  // 예전 형식 이관 — 배열[{n,d}] · {d,id} → dataURL 문자열
+  if(Array.isArray(myqr)) myqr = myqr.length ? (myqr[0].d||null) : null;
+  else if(myqr && typeof myqr==='object') myqr = myqr.d||null;
+  if(typeof myqr!=='string') myqr=null;
 }
 function tidCard(big){
   const inner = myqr
-    ? `<span class="q"><img src="${myqr.d}" alt="트레이너 ID QR코드"></span>`
-      + (myqr.id?`<span class="idt">(KR)<br>ID: ${myqr.id}</span>`:'')
+    ? `<span class="q"><img src="${myqr}" alt="트레이너 ID QR코드"></span>`
     : `<span class="ph">QR 사진을<br>등록하세요</span>`;
   const del = (!big&&myqr) ? '<span class="del" role="button" aria-label="삭제">✕</span>' : '';
   return `<button class="tidc" style="--tidbg:url(${TIDBG})"
@@ -1735,8 +1790,6 @@ function renderMyQR(){
   host.innerHTML='';
   const lab=document.getElementById('qrFileLab');
   if(lab) lab.textContent = myqr ? '다시 등록' : '사진에서 등록';
-  const num=document.getElementById('tidNum');
-  if(num && document.activeElement!==num) num.value = myqr&&myqr.id ? myqr.id : '';
   const c=el(tidCard(false));
   c.addEventListener('click',ev=>{
     if(ev.target.classList.contains('del')){ myqr=null; qrSave(); renderMyQR(); return; }
@@ -1745,7 +1798,7 @@ function renderMyQR(){
   host.appendChild(c);
   const n=document.getElementById('myqrNote');
   if(n) n.textContent = myqr
-    ? `약 ${Math.round(myqr.d.length/1024)}KB · 이 기기에만 저장되며 어디로도 전송되지 않습니다`
+    ? `약 ${Math.round(myqr.length/1024)}KB · 이 기기에만 저장되며 어디로도 전송되지 않습니다`
     : 'QR 이 사진 한가운데 오도록 화면을 꽉 채워 찍으면 잘 읽힙니다 · 이 기기에만 저장됩니다';
 }
 function openMyQR(){
@@ -2202,11 +2255,6 @@ document.getElementById('dexBestClr').addEventListener('click',()=>{
    그 경우 «선택창이 열리지 않았습니다» 에서 멈춘다. */
 let qrPicked=false;
 const qrNote=t=>{ const n=document.getElementById('myqrNote'); if(n) n.textContent=t; };
-document.getElementById('tidNum').addEventListener('input',ev=>{
-  const v=ev.target.value.trim();
-  if(!myqr){ if(v) qrNote('QR 사진을 먼저 등록해 주세요.'); return; }
-  myqr.id=v; qrSave(); renderMyQR();
-});
 document.getElementById('qrFileLab').addEventListener('click',()=>{
   const inp=document.getElementById('qrFile');
   qrPicked=false;
@@ -2235,7 +2283,7 @@ document.getElementById('qrFile').addEventListener('change',ev=>{
       try{ url=qrProcess(img); }
       catch(e){ qrNote('사진을 처리하지 못했습니다: '+(e&&e.message||e)); return; }
       const prev=myqr;
-      myqr={d:url, id:(prev&&prev.id)||''};      // 트레이너 ID 는 한 장만 둔다
+      myqr=url;                                  // 트레이너 ID 는 한 장만 둔다
       qrNote(`저장하는 중… ${Math.round(url.length/1024)}KB`);
       const ok=await qrSave();
       if(!ok){ myqr=prev; renderMyQR(); qrNote('저장하지 못했습니다. 저장 공간이 부족할 수 있습니다.'); return; }
