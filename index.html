@@ -7,7 +7,7 @@
 <meta name="description" content="포켓몬 태그스타 스타더스트 1탄·2탄 ★6·★5 보스 공략. 보유 태그로 3턴 로테이션과 서포트 티켓을 추천합니다.">
 <meta name="theme-color" content="#120B2E">
 <meta name="color-scheme" content="dark">
-<meta name="version" content="1.31.0">
+<meta name="version" content="1.33.2">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -520,6 +520,14 @@ summary:focus-visible{outline:2.5px solid var(--cyan);outline-offset:-3px}
 .pool{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:8px;padding:0 13px 15px}
 /* 수집 탭 — 아트 없이 번호·이름·타입만 */
 .dexg{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:6px;padding:0 13px 15px}
+.myqr{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}
+.myqr button{position:relative;padding:0;border:1px solid var(--rim);border-radius:12px;
+  background:#fff;cursor:pointer;aspect-ratio:1;overflow:hidden}
+.myqr button img{width:100%;height:100%;object-fit:contain;display:block}
+.myqr button .del{position:absolute;top:3px;right:3px;width:20px;height:20px;border-radius:6px;
+  border:0;background:rgba(12,7,34,.78);color:#fff;font-size:11px;line-height:1;cursor:pointer}
+.myqr .empty{grid-column:1/-1;padding:14px;text-align:center;font-size:12.5px;color:var(--dim);
+  border:1px dashed var(--rim);border-radius:12px}
 .dx{position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:stretch;gap:4px;
   padding:7px 8px;border-radius:10px;border:1px solid var(--rim);background:transparent;
   color:var(--dim);text-align:left;cursor:pointer;transition:.12s}
@@ -634,6 +642,19 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
 </div>
 
 <div id="viewBattle" data-d="0">
+  <section id="sTID">
+    <div class="sec-head"><h2>트레이너 ID</h2><span class="hint">게임 시작 때 스캔</span></div>
+    <div class="card">
+      <div class="myqr" id="myqr"></div>
+      <div class="bulk" style="padding:10px 0 0">
+        <button class="mini" id="qrFileLab">사진에서 등록</button>
+        <input type="file" id="qrFile" accept="image/*"
+          style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none">
+      </div>
+      <p class="tab-note" id="myqrNote"></p>
+    </div>
+  </section>
+
   <section id="sBoss">
     <div class="sec-head"><h2>보스 선택</h2><span class="hint" id="bossHint"></span></div>
     <div class="setsw" role="group" aria-label="탄 선택">
@@ -793,7 +814,7 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
   스탯·기술은 공식·팬페이지 표기값 (1탄 25 · 2탄 25 · 공통 6)<br>
   받는 피해는 보스 표기 기술 기준
   <span class="ver" id="ver" role="button" tabindex="0" title="눌러서 저장값 초기화">
-    v1.31.0 · 2026-08-09</span>
+    v1.33.2 · 2026-08-09</span>
 </footer>
 </div>
 
@@ -803,8 +824,9 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
 </div>
 
 <nav class="dock" id="dock" aria-label="섹션 바로가기">
-  <button data-go="sSup">서포트</button>
+  <button data-go="sTID">ID</button>
   <button data-go="sBoss">보스</button>
+  <button data-go="sSup">서포트</button>
   <button data-go="sRot">로테이션</button>
   <button data-go="sRank">보유태그순위</button>
 </nav>
@@ -1064,7 +1086,7 @@ const TAGIMG={
 const tagArt=b=>TAGIMG[b.s+'-'+b.n]||null;
 
 const RANK_N=10;          // 순위에 보여줄 개수
-const VERSION='1.31.0';
+const VERSION='1.33.2';
 const BUILT='2026-08-09';
 
 /* ══ 자산을 CSS 로 한 번만 심는다 (DOM 에 base64 중복 방지) ══ */
@@ -1170,9 +1192,13 @@ let dmaxLv=5;        // 룰렛에서 뜬 다이맥스 레벨 (꽝 0 · 5 · 10)
 let colTab='battle';           // 컬렉션 서브탭: battle | dex
 let dex=new Set();             // ★4 이하 수집 체크 (추천 계산과 무관)
 let dexBest=null;              // 수집 기준 BEST-20 결과 (Set|null)
+let myqr=null;                 // 트레이너 ID QR 의 dataURL — 이 기기에만 저장. 서버로 안 보낸다
 let dexCalcBusy=false;         // 계산 중에는 owned 를 임시로 쓴다. 클릭을 막을 것
 
 const KEY='tagstar:owned';
+// 사용자 QR 은 따로 저장한다. 본 저장값은 태그를 켤 때마다 다시 쓰이므로
+// 여기에 이미지를 섞으면 매번 수십 KB 를 재기록하게 된다.
+const QKEY='tagstar:myqr';
 let backend='memory';
 async function load(){
   try{
@@ -1621,6 +1647,99 @@ const bat=w=>{const c=w.charCodeAt(w.length-1);
   return c>=0xAC00&&c<=0xD7A3&&(c-0xAC00)%28!==0};      // 끝 글자에 받침이 있나
 const jo=(w,a,b)=>w+(bat(w)?a:b);                        // jo('거북왕','이','가') → 거북왕이
 
+/* ══ 내 QR ══
+   사용자가 찍은 QR 사진을 캔버스로 가공해 이 기기에만 저장한다.
+   원본 폰 사진은 1.5~5MB 라 그대로 넣으면 localStorage(약 5MB)가 한 장으로 찬다.
+   가운데 정사각 크롭 → 512px 축소 → Otsu 이진화 → 흰 여백 → 무손실 압축 하면 3~4KB 다.
+   실측: 트레이너 QR 사진 1.49MB → 3.6KB(WebP), 가공 후에도 판독 성공.
+   적응형 이진화는 노이즈가 끼어 용량이 두 배가 되므로 쓰지 않는다.
+   저장은 QKEY 로 분리한다 — 본 저장값에 섞으면 태그 하나 켤 때마다 이미지까지 다시 쓴다. */
+const QR_SIZE=512, QR_QUIET=32;
+function otsu(hist,total){                    // 클래스 간 분산이 최대인 임계값
+  let sum=0; for(let i=0;i<256;i++) sum+=i*hist[i];
+  let sumB=0,wB=0,best=0,thr=127;
+  for(let t=0;t<256;t++){
+    wB+=hist[t]; if(!wB) continue;
+    const wF=total-wB; if(!wF) break;
+    sumB+=t*hist[t];
+    const mB=sumB/wB, mF=(sum-sumB)/wF, v=wB*wF*(mB-mF)*(mB-mF);
+    if(v>best){best=v;thr=t}
+  }
+  return thr;
+}
+function qrProcess(img){
+  const S=QR_SIZE, Q=QR_QUIET, side=Math.min(img.width,img.height);
+  const c=document.createElement('canvas'); c.width=c.height=S;
+  const x=c.getContext('2d',{willReadFrequently:true});
+  x.imageSmoothingQuality='high';
+  x.drawImage(img,(img.width-side)/2,(img.height-side)/2,side,side,0,0,S,S);
+  const d=x.getImageData(0,0,S,S), p=d.data, hist=new Array(256).fill(0);
+  for(let i=0;i<p.length;i+=4){
+    const g=(p[i]*299+p[i+1]*587+p[i+2]*114)/1000|0;
+    p[i]=p[i+1]=p[i+2]=g; hist[g]++;
+  }
+  const t=otsu(hist,S*S);
+  for(let i=0;i<p.length;i+=4){
+    const v=p[i]>t?255:0; p[i]=p[i+1]=p[i+2]=v; p[i+3]=255;
+  }
+  x.putImageData(d,0,0);
+  const o=document.createElement('canvas'); o.width=o.height=S+Q*2;
+  const ox=o.getContext('2d');
+  ox.fillStyle='#fff'; ox.fillRect(0,0,o.width,o.height);
+  ox.drawImage(c,Q,Q);
+  let url=o.toDataURL('image/webp');          // Safari 16 미만은 webp 인코딩을 못 한다
+  if(url.slice(0,15)!=='data:image/webp') url=o.toDataURL('image/png');
+  return url;
+}
+async function qrSave(){
+  try{
+    const j=JSON.stringify(myqr);   // null 이면 지운 것과 같다
+    if(backend==='claude'){ const r=await window.storage.set(QKEY,j); return !!r; }
+    if(backend==='local'){ localStorage.setItem(QKEY,j); return true; }
+  }catch(e){ return false; }
+  return backend==='memory';        // 저장 없이 이번 세션만 유지
+}
+async function qrLoad(){
+  try{
+    if(backend==='claude'){ const r=await window.storage.get(QKEY); myqr=JSON.parse(r.value)||null; return; }
+    if(backend==='local'){ const r=localStorage.getItem(QKEY); if(r) myqr=JSON.parse(r)||null; }
+  }catch(e){ myqr=null; }
+  // 예전 배열 형식이 남아 있으면 첫 장만 살린다
+  if(Array.isArray(myqr)) myqr = myqr.length ? (myqr[0].d||null) : null;
+}
+function renderMyQR(){
+  const host=document.getElementById('myqr'); if(!host)return;
+  host.innerHTML='';
+  const lab=document.getElementById('qrFileLab');
+  if(lab) lab.textContent = myqr ? '다시 등록' : '사진에서 등록';
+  if(!myqr){
+    host.appendChild(el('<p class="empty">트레이너 ID 태그의 QR 사진을 등록해 두면 게임 시작 때 바로 띄울 수 있습니다<br>'
+      +'<b>QR 이 사진 한가운데 오도록, 화면을 꽉 채워</b> 찍으면 잘 읽힙니다</p>'));
+  }else{
+    const b=el(`<button aria-label="트레이너 ID QR 크게 보기"><img src="${myqr}" alt="트레이너 ID QR코드">
+      <span class="del" role="button" aria-label="삭제">✕</span></button>`);
+    b.addEventListener('click',ev=>{
+      if(ev.target.classList.contains('del')){ myqr=null; qrSave(); renderMyQR(); return; }
+      openMyQR();
+    });
+    host.appendChild(b);
+  }
+  const n=document.getElementById('myqrNote');
+  if(n) n.textContent = myqr
+    ? `약 ${Math.round(myqr.length/1024)}KB · 이 기기에만 저장되며 어디로도 전송되지 않습니다`
+    : '사진은 이 기기에만 저장되며 어디로도 전송되지 않습니다';
+}
+function openMyQR(){
+  const m=document.getElementById('qrModal'); if(!m||!myqr)return;
+  const th=document.getElementById('qrThumb');
+  th.className='qrth'; th.style.background='#fff';
+  document.getElementById('qrName').textContent='트레이너 ID';
+  document.getElementById('qrSub').textContent='게임 시작 때 스캔 · 이 기기 저장';
+  document.getElementById('qrImg').src=myqr;
+  document.getElementById('qrImg').alt='트레이너 ID QR코드';
+  m.hidden=false;
+}
+
 function openQR(s){
   const m=document.getElementById('qrModal'); if(!m)return;
   const th=document.getElementById('qrThumb');
@@ -2000,7 +2119,7 @@ function renderChance(){
 }
 
 function renderAll(){
-  renderBosses();renderReadout();renderRotation();renderSupport();renderRank();renderRoster();renderDex();renderBackend();renderChance();renderDmax();renderMega();renderGuide();renderDetail();renderDock();
+  renderBosses();renderReadout();renderRotation();renderSupport();renderRank();renderRoster();renderDex();renderMyQR();renderBackend();renderChance();renderDmax();renderMega();renderGuide();renderDetail();renderDock();
   document.getElementById('vCct').innerHTML=
     `<span>전투 ${owned.size}/${POOL.length}</span><span>수집 ${dex.size}/${dexTotal()}</span>`;
   const bh=document.getElementById('b23ct');
@@ -2056,6 +2175,49 @@ document.getElementById('dexBestClr').addEventListener('click',()=>{
   if(dexCalcBusy) return;
   dexBest=null; renderDexBestMsg(''); renderAll();
 });
+/* 어디서 막히는지 알 수 있게 단계마다 문구를 남긴다.
+   아티팩트 샌드박스에서는 파일 선택창 자체가 안 열릴 수 있다 (alert 이 막히는 것과 같은 이유).
+   그 경우 «선택창이 열리지 않았습니다» 에서 멈춘다. */
+let qrPicked=false;
+const qrNote=t=>{ const n=document.getElementById('myqrNote'); if(n) n.textContent=t; };
+document.getElementById('qrFileLab').addEventListener('click',()=>{
+  const inp=document.getElementById('qrFile');
+  qrPicked=false;
+  qrNote('사진 선택창을 여는 중…');
+  try{ inp.click(); }
+  catch(e){ qrNote('이 환경에서는 사진을 열 수 없습니다. 배포된 주소에서 시도해 주세요.'); return; }
+  setTimeout(()=>{ if(!qrPicked) qrNote(
+    '선택창이 열리지 않았습니다. 미리보기(아티팩트)에서는 막혀 있을 수 있으니 배포된 주소에서 시도해 주세요.'); },2500);
+});
+document.getElementById('qrFile').addEventListener('change',ev=>{
+  qrPicked=true;
+  const f=ev.target.files&&ev.target.files[0];
+  ev.target.value='';                                   // 같은 파일 다시 고를 수 있게
+  if(!f){ qrNote('사진을 고르지 않았습니다.'); return; }
+  const note=document.getElementById('myqrNote');
+  qrNote(`사진을 읽는 중… ${Math.round(f.size/1024)}KB`);
+  const fr=new FileReader();
+  fr.onerror=()=>qrNote('사진을 읽지 못했습니다.');
+  fr.onload=()=>{
+    qrNote('이미지를 여는 중…');
+    const img=new Image();
+    img.onerror=()=>qrNote('이미지 형식을 읽지 못했습니다.');
+    img.onload=async()=>{
+      qrNote(`가공하는 중… ${img.width}x${img.height}`);
+      let url;
+      try{ url=qrProcess(img); }
+      catch(e){ qrNote('사진을 처리하지 못했습니다: '+(e&&e.message||e)); return; }
+      const prev=myqr;
+      myqr=url;                                  // 트레이너 ID 는 한 장만 둔다
+      qrNote(`저장하는 중… ${Math.round(url.length/1024)}KB`);
+      const ok=await qrSave();
+      if(!ok){ myqr=prev; renderMyQR(); qrNote('저장하지 못했습니다. 저장 공간이 부족할 수 있습니다.'); return; }
+      renderMyQR();
+    };
+    img.src=fr.result;
+  };
+  fr.readAsDataURL(f);
+});
 document.getElementById('ct1').addEventListener('click',()=>setColTab('battle'));
 document.getElementById('ct2').addEventListener('click',()=>setColTab('dex'));
 document.getElementById('rs1').addEventListener('click',()=>{rosterSet='1';renderRoster();renderDex()});
@@ -2067,7 +2229,7 @@ function setMode(m){mode=m;
   document.getElementById('tabA').setAttribute('aria-selected',m==='flex');
   document.getElementById('tabB').setAttribute('aria-selected',m==='power');
   renderRotation()}
-load().then(renderAll);
+load().then(qrLoad).then(renderAll);
 </script>
 </body>
 </html>
