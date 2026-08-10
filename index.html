@@ -7,7 +7,7 @@
 <meta name="description" content="포켓몬 태그스타 스타더스트 1탄·2탄 ★6·★5 보스 공략. 보유 태그로 3턴 로테이션과 서포트 티켓을 추천합니다.">
 <meta name="theme-color" content="#120B2E">
 <meta name="color-scheme" content="dark">
-<meta name="version" content="1.39.3">
+<meta name="version" content="1.50.1">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -281,8 +281,13 @@ section:first-child{margin-top:0}
 .vd .v{font-size:13.5px;font-weight:700}
 
 .matrix{display:grid;gap:9px;margin-top:16px;padding-top:15px;border-top:1px solid var(--rim)}
-.row{display:flex;gap:7px;align-items:flex-start;flex-wrap:wrap}
-.row .lab{flex:none;width:76px;font-family:var(--mono);font-size:11px;font-weight:600;padding-top:3px}
+/* 라벨 칸과 칩 칸을 그리드로 나눈다. 한 줄 flex 로 두면 칩이 줄바꿈될 때
+   두 번째 줄이 라벨 자리까지 파고들어 어긋난다 (약점 5개일 때 발생). */
+.row{display:grid;grid-template-columns:76px 1fr;gap:7px;align-items:start}
+.row .lab{font-family:var(--mono);font-size:11px;font-weight:600;padding-top:3px}
+.row .rv{display:flex;flex-wrap:wrap;gap:6px;min-width:0}
+@media(max-width:360px){.row{grid-template-columns:64px 1fr;gap:5px}
+  .row .lab{font-size:10.5px}}
 .lab.x4{color:#FF5A5A}.lab.x2{color:#FFA23A}.lab.res{color:var(--cyan)}.lab.nil{color:var(--ink-dim)}
 .row .none{font-size:12px;color:var(--ink-dim);padding-top:2px}
 
@@ -487,13 +492,18 @@ summary .ct{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--
 
 .roul{margin:2px 0 14px;text-align:center}
 .roul svg{display:block;margin:0 auto;max-width:320px}
-.chips circle{fill:#1E9EB4;stroke:#0B0718;stroke-width:3}
-.chips rect{fill:#E4000F;stroke:#0B0718;stroke-width:3}
-.chips text{fill:#fff;font-family:var(--display);font-size:15px;
-  text-anchor:middle;dominant-baseline:central}
-.chips .hit text{font-size:17px}
-.chips g:nth-child(2) circle,.chips g:nth-child(5) circle{fill:#F0A81E}
-.ball{fill:#fff;stroke:#0B0718;stroke-width:2}
+.chips circle{fill:#2BC4DB;stroke:#0B0718;stroke-width:3}
+.chips .o circle{fill:#F5921E}
+.chips text{fill:#fff;font-family:var(--display);font-size:14px;
+  text-anchor:middle;dominant-baseline:central;
+  paint-order:stroke;stroke:#0B0718;stroke-width:3.5}
+.chips .win rect{fill:#0B0718;stroke:#fff;stroke-width:2;
+  stroke-dasharray:3 5;stroke-linecap:round}
+.chips .win polygon{fill:#fff}
+.chips .win .star polygon{fill:#F23F63;stroke:#0B0718;stroke-width:2.5;stroke-linejoin:round}
+.chips .win .star text{font-size:15px}
+.dots{fill:none;stroke:rgba(150,205,255,.6);stroke-width:3;
+  stroke-linecap:round;stroke-dasharray:.1 10.5}
 .roul-c{display:block;margin-top:2px;font-family:var(--mono);font-size:10px;color:var(--ink-dim)}
 
 .crow{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:8px 0;
@@ -522,6 +532,7 @@ summary:focus-visible{outline:2.5px solid var(--cyan);outline-offset:-3px}
 /* 수집 탭 — 아트 없이 번호·이름·타입만 */
 .dexg{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:6px;padding:0 13px 15px}
 .myqr{display:block}
+.dx{position:relative}
 /* 트레이너 ID 카드 — 틀 이미지 위에 QR 과 ID 를 얹는다. 좌표는 원본 대비 백분율 */
 .tidc{position:relative;width:100%;max-width:296px;margin:0 auto;aspect-ratio:1005/626;
   background:var(--tidbg) center/100% 100% no-repeat;border-radius:14px;overflow:hidden;
@@ -672,7 +683,6 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
     <div class="boss-grid" id="bossGrid"></div>
   </section>
 
-
   <section id="sSup">
     <div class="sec-head"><h2>서포트 티켓</h2><span class="hint">배틀 중 나타나 도와줍니다</span></div>
     <div class="card"><div class="sup" id="sup"></div>
@@ -683,10 +693,6 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
     <div class="sec-head"><h2>추천 로테이션</h2><span class="hint">보유 태그 기준 · 탄 무관</span></div>
     <div class="card" id="readout"></div>
     <div class="card">
-      <div class="tabs" role="tablist">
-        <button class="tab" role="tab" id="tabA" aria-selected="true">밸런스</button>
-        <button class="tab" role="tab" id="tabB" aria-selected="false">최대 화력</button>
-      </div>
       <div class="seg" role="group" aria-label="표시 단계">
         <button data-lv="0" aria-pressed="true">태그</button>
         <button data-lv="1">상성</button>
@@ -720,23 +726,27 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
     <div class="card">
       <p style="font-size:12.5px;color:var(--ink-dim);margin:0 0 14px;line-height:1.7">
         룰렛에서 뜬 숫자가 공격력에 그대로 더해집니다. 다이맥스는 태그의 다이맥스 레벨에 따라
-        룰렛 숫자가 커지고, 다이맥스밴드+의 거다이맥스 보너스+가 발동하면 최대 80까지 나옵니다.<br><b style="color:var(--ink)">기본값 10 / 30 / 70은 실제 플레이에서 관찰한 평균</b>입니다. 체감이 다르면 조절하세요.</p>
+        룰렛 숫자가 커지고, 다이맥스밴드+의 거다이맥스 보너스+가 발동하면 최대 80까지 나옵니다.<br><b style="color:var(--ink)">기본값 30 / 50 / 60 / 70은 실제 플레이에서 관찰한 평균</b>입니다. 체감이 다르면 조절하세요.</p>
       <div class="roul" aria-hidden="true">
-        <svg viewBox="0 0 300 132" width="100%" height="132" role="img">
-          <path d="M18 124 A118 118 0 0 1 282 124" fill="none"
-                stroke="#0B0718" stroke-width="30" stroke-linecap="round"/>
-          <path d="M18 124 A118 118 0 0 1 282 124" fill="none"
-                stroke="rgba(255,255,255,.10)" stroke-width="30"
-                stroke-dasharray="2 22" stroke-linecap="round"/>
+        <svg viewBox="0 0 300 150" width="100%" height="150" role="img">
+          <path d="M38 132 A112 112 0 0 1 262 132" fill="none"
+                stroke="#0B0718" stroke-width="34" stroke-linecap="round"/>
+          <path class="dots" d="M25 132 A125 125 0 0 1 275 132"/>
+          <path class="dots" d="M51 132 A99 99 0 0 1 249 132"/>
           <g class="chips">
-            <g transform="translate(30,86)"><circle r="16"/><text>5</text></g>
-            <g transform="translate(66,45)"><circle r="16"/><text>10</text></g>
-            <g transform="translate(116,20)"><circle r="16"/><text>10</text></g>
-            <g class="hit" transform="translate(172,17)"><rect x="-18" y="-18" width="36" height="36" rx="7"/><text>20</text></g>
-            <g transform="translate(228,42)"><circle r="16"/><text>5</text></g>
-            <g transform="translate(266,88)"><circle r="16"/><text>10</text></g>
+            <g class="o" transform="translate(42,103)"><circle r="15"/><text>20</text></g>
+            <g transform="translate(63,61)"><circle r="15"/><text>10</text></g>
+            <g transform="translate(99,32)"><circle r="15"/><text>10</text></g>
+            <g class="win" transform="translate(150,20)">
+              <rect x="-24" y="-17" width="48" height="34" rx="7"/>
+              <polygon points="-36,-6 -36,6 -28,0"/>
+              <polygon points="36,-6 36,6 28,0"/>
+              <g class="star"><polygon points="0.0,-19.5 4.9,-15.2 11.5,-15.8 12.9,-9.4 18.5,-6.0 16.0,0.0 18.5,6.0 12.9,9.4 11.5,15.8 4.9,15.2 0.0,19.5 -4.9,15.2 -11.5,15.8 -12.9,9.4 -18.5,6.0 -16.0,0.0 -18.5,-6.0 -12.9,-9.4 -11.5,-15.8 -4.9,-15.2"/><text>35</text></g>
+            </g>
+            <g class="o" transform="translate(201,32)"><circle r="15"/><text>20</text></g>
+            <g transform="translate(237,61)"><circle r="15"/><text>10</text></g>
+            <g class="o" transform="translate(258,103)"><circle r="15"/><text>20</text></g>
           </g>
-          <circle class="ball" cx="150" cy="122" r="6"/>
         </svg>
         <span class="roul-c">룰렛에서 멈춘 숫자가 그대로 공격력에 더해집니다</span>
       </div>
@@ -765,7 +775,8 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
 
 <div id="viewCollection" hidden>
   <section>
-    <div class="sec-head"><h2>컬렉션</h2><span class="hint" id="ownHint"></span></div>
+    <div class="sec-head"><h2>컬렉션</h2><span class="hint" id="ownHint"></span>
+    </div>
     <div class="setsw" role="group" aria-label="컬렉션 화면 선택">
       <button id="ct1" aria-pressed="true">전투태그</button>
       <button id="ct2" aria-pressed="false">수집태그</button>
@@ -778,8 +789,8 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
     <div id="backend" class="backend"></div>
     <div id="colBattle">
       <div class="bulk" style="padding:0 0 8px">
-        <button class="mini" id="dexBestGo">수집 기준 추천-20</button>
-        <button class="mini" id="dexBestOn" hidden>이 20장만 켜기</button>
+        <button class="mini" id="dexBestGo">수집 기준 추천-25</button>
+        <button class="mini" id="dexBestOn" hidden>이 25장만 켜기</button>
         <button class="mini" id="dexBestClr" hidden>추천 지우기</button>
       </div>
       <p class="hint" id="dexBestMsg" style="padding:0 0 10px"></p>
@@ -818,7 +829,7 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
   스탯·기술은 공식·팬페이지 표기값 (1탄 25 · 2탄 25 · 공통 6)<br>
   받는 피해는 보스 표기 기술 기준
   <span class="ver" id="ver" role="button" tabindex="0" title="눌러서 저장값 초기화">
-    v1.39.3 · 2026-08-09</span>
+    v1.50.1 · 2026-08-11</span>
 </footer>
 </div>
 
@@ -849,6 +860,29 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
 </div>
 
 <script>
+/* 태그 장수를 세는 집합. 같은 태그를 여러 장 가질 수 있어 Set 으로는 부족하다.
+   0 이 되면 키를 지우므로 has() 는 «한 장 이상 보유» 와 같다. */
+class Bag extends Map{
+  constructor(init){ super();
+    if(Array.isArray(init)) init.forEach(x=>Array.isArray(x)?this.set(x[0],x[1]):this.add(x));
+    else if(init) init.forEach&&init.forEach((v,k)=>this.set(k,v));
+  }
+  cnt(id){ return this.get(id)||0 }
+  add(id,n=1){ const v=this.cnt(id)+n; v>0?this.set(id,v):this.delete(id); return this }
+  setCnt(id,n){ n>0?this.set(id,n):this.delete(id); return this }
+  cycle(id,max=3){ const v=this.cnt(id); this.setCnt(id, v>=max?0:v+1); return this.cnt(id) }
+  get total(){ let t=0; for(const v of this.values()) t+=v; return t }
+  ids(){ return [...this.keys()] }
+  toJSON(){ return [...this.entries()] }
+}
+// 예전 저장값(문자열 배열)도 읽는다 — 전부 1장으로 본다
+const toBag=v=>{
+  const b=new Bag();
+  if(!Array.isArray(v)) return b;
+  v.forEach(x=>Array.isArray(x)?b.setCnt(x[0],x[1]):b.setCnt(x,1));
+  return b;
+};
+
 /* ══ 타입 상성 (공격 → 방어) ══ */
 const T=['노말','불꽃','물','전기','풀','얼음','격투','독','땅','비행','에스퍼','벌레','바위','고스트','드래곤','악','강철','페어리'];
 const CHART={
@@ -1091,8 +1125,8 @@ const TAGIMG={
 const tagArt=b=>TAGIMG[b.s+'-'+b.n]||null;
 
 const RANK_N=10;          // 순위에 보여줄 개수
-const VERSION='1.39.3';
-const BUILT='2026-08-09';
+const VERSION='1.50.1';
+const BUILT='2026-08-11';
 
 /* ══ 자산을 CSS 로 한 번만 심는다 (DOM 에 base64 중복 방지) ══ */
 const AK={}, TK={}, GK={}, SK={};
@@ -1107,10 +1141,10 @@ const AK={}, TK={}, GK={}, SK={};
 })();
 const artCls=c=>AK[c.s+'-'+c.n]||'';
 
-/* ══ BEST-20 — 1탄 ★5 를 뺀 35보스 x 2모드 기준으로 뽑은 핵심 태그.
+/* ══ BEST-25 — 1탄 ★5 를 뺀 35보스 x 2모드 기준으로 뽑은 핵심 태그.
    화력 보존율 99.74% (1탄★6 99.58 · 2탄★6 99.25 · 2탄★5 100.02).
    메가·다이맥스 보정 반영본. 데이터나 규칙을 바꾸면 다시 계산할 것. ══ */
-const BEST20=new Set(["1-5-거대코뿌리","2-6-큐레무","1-6-메타그로스","2-5-알로라 나인테일","2-6-그란돈","2-6-짜랑고우거","1-6-마기라스","2-5-초염몽","1-6-자시안","공통-S-따라큐","1-5-글레이시아","1-6-이상해꽃","2-5-갈가부기","2-5-엠페르트","2-6-레시라무","1-5-플라이곤","2-6-코라이돈","2-6-제크로무","2-5-님피아","2-6-피카츄"]);
+const BEST25=new Bag([['1-5-거대코뿌리',1],['1-6-마기라스',1],['2-5-알로라 나인테일',1],['2-6-큐레무',1],['1-5-플라이곤',1],['1-6-메타그로스',1],['2-5-토대부기',1],['2-6-짜랑고우거',1],['2-5-엠페르트',1],['공통-S-따라큐',1],['2-6-제크로무',1],['2-5-님피아',1],['1-6-자시안',1],['2-6-그란돈',1],['1-6-이상해꽃',1],['2-5-갈가부기',1],['2-6-레시라무',1],['2-6-코라이돈',1],['2-5-마휘핑',1],['2-6-잠만보',1],['1-5-윈디',1],['1-6-리자몽',1],['2-6-가이오가',1],['2-5-초염몽',1],['1-5-에이스번',1]]);
 
 /* ══ 메가진화 — 에너지(=스탯)가 오르고, 폼에 따라 타입이 바뀌기도 한다.
    실측된 것만 채운다. 비어 있으면 보정 없이 원본 스탯으로 계산한다. ══ */
@@ -1178,13 +1212,24 @@ const dexValidKeys=()=>{
 // 수집 전체 칸 수 — 1탄 70 + 2탄 70 + 공통(레귤러·스페셜) 6
 const dexTotal=()=>dexValidKeys().size;
 const dexPrune=()=>{ const V=dexValidKeys();
-  dex=new Set([...dex].filter(k=>V.has(k))); };
+  const n=new Bag(); dex.forEach((v,k)=>{ if(V.has(k)) n.setCnt(k,v) }); dex=n; };
 
 /* ══ 상태 ══ */
 // 기본 모드는 밸런스. 최대 화력은 약점을 찔리는 태그도 서슴없이 넣어
 // 한 대에 기절하는 일이 생긴다 (가이오가전 거대코뿌리 물 x4 실사례).
-let bossId='2-6-가이오가', mode='flex', setView='2', bossRank='6', rosterSet='1';
-const DEFAULT_OWNED=()=>new Set(POOL.filter(p=>p.s==='1'&&p.r==='6').map(p=>p.id));
+let bossId='2-6-가이오가', setView='2', bossRank='6', rosterSet='1';
+/* 앱 초기값은 «아무것도 안 켜짐» 이다. 임의의 태그를 미리 켜두면
+   남의 보유를 기준으로 추천이 나와 오해를 부른다. */
+const DEFAULT_OWNED=()=>new Bag();
+
+/* 검증용 기준 컬렉션 — 잭의 실제 보유 26장. `dev/fixture.js` 와 샌드박스 시드가 쓴다. */
+const FIXTURE_OWNED=()=>new Bag([
+  ...POOL.filter(p=>p.s==='1'&&p.r==='6').map(p=>p.id),
+  '1-5-글레이시아','1-5-윈디','1-5-거대코뿌리','1-5-플라이곤',
+  '2-6-코라이돈','2-6-피카츄','2-6-잠만보','2-6-짜랑고우거','2-6-레시라무','2-6-제크로무',
+  '2-5-님피아','2-5-초염몽','2-5-엠페르트','2-5-알로라 나인테일','2-5-갈가부기',
+  '공통-S-따라큐'
+]);
 let owned=DEFAULT_OWNED();
 let guideHidden=false;
 let detail=0;
@@ -1195,8 +1240,8 @@ let rankSort='score';
 const DMAX_MUL={0:1, 5:1.1042, 10:1.1536};
 let dmaxLv=5;        // 룰렛에서 뜬 다이맥스 레벨 (꽝 0 · 5 · 10)
 let colTab='battle';           // 컬렉션 서브탭: battle | dex
-let dex=new Set();             // ★4 이하 수집 체크 (추천 계산과 무관)
-let dexBest=null;              // 수집 기준 BEST-20 결과 (Set|null)
+let dex=new Bag();             // 수집 장수 (추천 계산과 무관)
+let dexBest=null;              // 수집 기준 추천-25 결과 (Bag|null)
 let myqr=null;                 // 트레이너 ID QR 의 dataURL — 이 기기에만 저장
 let dexCalcBusy=false;         // 계산 중에는 owned 를 임시로 쓴다. 클릭을 막을 것
 
@@ -1208,6 +1253,14 @@ const QKEY='tagstar:myqr';
 // 개인 ID 를 이미지에 굽지 말 것 — 배포 파일에 그대로 실린다.
 const TIDBG='data:image/webp;base64,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';
 let backend='memory';
+/* 아티팩트 미리보기(샌드박스)에서만 검증용 26장을 미리 켠다.
+   저장이 안 남는 환경이라 열 때마다 0장이면 시험이 번거롭다.
+   배포본(localStorage)은 손대지 않는다 — 초기값 0장 그대로. */
+let loaded=false, seeded=false;
+function seedSandbox(){
+  if(loaded || backend!=='claude' || owned.total) return;
+  owned=FIXTURE_OWNED(); seeded=true;
+}
 async function load(){
   try{
     const saved=JSON.parse((await window.storage.get(KEY)).value);
@@ -1219,12 +1272,15 @@ async function load(){
     if(saved&&saved.bossRank) bossRank=saved.bossRank;
     if(saved&&saved.dmaxLv!=null) dmaxLv=saved.dmaxLv;
     if(saved&&saved.megaTier) megaTier=saved.megaTier;
-    if(saved&&Array.isArray(saved.dex)) dex=new Set(saved.dex);
+    if(saved&&Array.isArray(saved.dex)) dex=toBag(saved.dex);
     backend='claude';
-    if(Array.isArray(arr)) owned=new Set(arr.filter(id=>POOL.some(p=>p.id===id)));
+    if(Array.isArray(arr)){ owned=toBag(arr.filter(x=>{const id=Array.isArray(x)?x[0]:x;
+      return POOL.some(p=>p.id===id)})); loaded=true; }
+    seedSandbox();
     dexPrune();
     return;
-  }catch(e){ if(window.storage&&typeof window.storage.set==='function'){backend='claude';dexPrune();return} }
+  }catch(e){ if(window.storage&&typeof window.storage.set==='function'){
+    backend='claude'; seedSandbox(); dexPrune(); return} }
   try{
     localStorage.setItem(KEY+':probe','1'); localStorage.removeItem(KEY+':probe');
     backend='local';
@@ -1238,9 +1294,11 @@ async function load(){
       if(saved&&saved.bossRank) bossRank=saved.bossRank;
       if(saved&&saved.dmaxLv!=null) dmaxLv=saved.dmaxLv;
       if(saved&&saved.megaTier) megaTier=saved.megaTier;
-      if(saved&&Array.isArray(saved.dex)) dex=new Set(saved.dex);
-        if(Array.isArray(arr)) owned=new Set(arr.filter(id=>POOL.some(p=>p.id===id)))}
+      if(saved&&Array.isArray(saved.dex)) dex=toBag(saved.dex);
+        if(Array.isArray(arr)){ owned=toBag(arr.filter(x=>{const id=Array.isArray(x)?x[0]:x;
+          return POOL.some(p=>p.id===id)})); loaded=true; }}
   }catch(e){ backend='memory' }
+  seedSandbox();
   dexPrune();
 }
 let sT;
@@ -1255,7 +1313,9 @@ const BT={claude:['저장 켜짐','Claude 계정에 저장 — 다른 기기에�
  memory:['저장 꺼짐','새로고침하면 초기화됩니다']};
 function renderBackend(){
   const n=document.getElementById('backend'); if(!n)return;
-  const [a,b]=BT[backend]; n.className='backend '+backend; n.innerHTML=`<b>${a}</b><span>${b}</span>`;
+  const [a,b]=BT[backend]; n.className='backend '+backend;
+  const note = seeded ? ' · 시험용 26장을 미리 켜 뒀습니다' : '';   // 내가 켠 게 아님을 알린다
+  n.innerHTML=`<b>${a}</b><span>${b}${note}</span>`;
 }
 
 /* ══ 평가 ══ */
@@ -1274,11 +1334,12 @@ const POWER={
  초월나선연격:190,레이징지오프리즈:190,무한암야로의유인:180
 };
 // 공격 찬스 보너스는 공격력에 가산 (조절 가능)
-// 셋 다 매판 달라지는 값의 기대값이다. Z기술은 룰렛이 아니라
-// 플레이어의 기술 입력을 기계가 판정해 매번 다르게 준다. 70은 그 평균.
-const CHANCE_DEFAULTS={'일반':10,'다이맥스':30,'Z기술':70};
+// 넷 다 매판 달라지는 값의 기대값이다. 일반·메가진화·다이맥스는 룰렛,
+// Z기술은 룰렛이 아니라 플레이어의 기술 입력을 기계가 판정해 매번 다르게 준다.
+const CHANCE_DEFAULTS={'일반':30,'메가진화':50,'다이맥스':60,'Z기술':70};
 let chance={...CHANCE_DEFAULTS};
-const bonusOf=m=>chance[m.tagx]??chance['일반'];
+// 메가진화는 기술 자체에 tagx 가 붙지 않는다. 카드 기믹이라서 두 번째 인자로 받는다.
+const bonusOf=(m,mega)=>chance[m.tagx] ?? (mega?chance['메가진화']:chance['일반']);
 
 function offense(card,boss,banGim){
   if(card.measured){
@@ -1298,6 +1359,33 @@ function offense(card,boss,banGim){
 }
 const incoming=(card,boss)=>Math.max(...boss.mv.map(m=>eff(m.t,card.t)));
 const DW={0:1.5,.25:1.35,.5:1.2,1:1,2:.85,4:.7};
+
+/* ── 생존 판정 ──
+   보스 공격은 매 턴 필드의 3장 전부를 때린다. 기절한 태그는 배틀에서 완전히 빠진다.
+   그래서 «자기 턴에 얼마나 아픈가» 가 아니라 «3대를 버티는가» 로 걸러야 한다.
+   지표를 HP 비율로 바꾸려면 비례상수가 필요하다. KHP 는 실측 비급소 6건에서 얻은 0.191 이다
+   (룰렛 미상 표본에 일반 기대값 30 을 넣고 적합 — 기대값을 바꾸면 재적합할 것).
+   측정 오차가 ±4%p 라 SAFE 로 여유를 둬 경계선은 탈락시킨다. */
+const KHP=0.191, SAFE=1.15;
+function bossHit(c,boss,m){
+  const pw=POWER[m.n]??100;
+  const def=(m.k==='물리')?c.d:c.sd;
+  return pw*(boss.a+bonusOf(m))/def*eff(m.t,c.t)*KHP*SAFE/c.hp;
+}
+// N턴 동안 이 태그가 받는 HP 비율.
+// 보스의 기믹 기술도 배틀당 한 번뿐이므로 «일반 N-1 대 + 기믹 1대» 로 본다.
+function incN(c,boss,N){
+  const norm=boss.mv.filter(m=>!m.tagx), gim=boss.mv.filter(m=>m.tagx);
+  const n=norm.length?Math.max(...norm.map(m=>bossHit(c,boss,m))):0;
+  const g=gim.length ?Math.max(...gim .map(m=>bossHit(c,boss,m))):n;
+  return gim.length ? (N-1)*n+g : N*n;
+}
+const incPct=(c,boss)=>incN(c,boss,3)/3;     // 한 대 평균 (화면 표시용)
+const survivesN=(c,boss,N)=>incN(c,boss,N)<1;
+const survives3=(c,boss)=>survivesN(c,boss,3);
+// 2턴에 끝낼 수 있다고 볼 기준. 빗나가면 3턴째를 맞으므로 여유를 둔다.
+const KO_SAFE=1.15;
+const koIn2=(dmg,boss)=>dmg*KHP >= boss.hp*KO_SAFE;
 function evalCard(card,boss,banGim){
   const o=offense(card,boss,banGim);
   if(!o) return null;
@@ -1312,7 +1400,7 @@ const ranked=(boss,banGim,skip)=>POOL.filter(p=>owned.has(p.id)&&p.id!==boss.id&
 function evalMove(card,boss,m,megaOn){
   const M=megaOn?megaOf(card):null;
   const mult=eff(m.t,boss.t);
-  const bonus=bonusOf(m);
+  const bonus=bonusOf(m,!!M);
   // 다이맥스는 태그의 에너지(=스탯)를 올린다. 레벨당 +3 (마기라스 144→159 실측)
   const base=(m.k==='물리'? card.a : card.sa);
   const dmax=(m.tagx==='다이맥스') ? (DMAX_MUL[dmaxLv]??1) : 1;
@@ -1335,53 +1423,99 @@ function evalMove(card,boss,m,megaOn){
 const RANDOM={c:{id:'__rand',n:'랜덤 태그',s:'랜덤',r:'?',t:[],mv:[],g:null},
   move:null,mult:1,d:1,dmg:0,pw:0,bonus:0,raw:0,atk:0,def:0,s:0,rand:true};
 
-function buildSeq(boss,mode){
+/* 로테이션 탐색 — 완전탐색.
+
+   ── 목표는 «되도록 2턴에 끝내기» 다.
+   2턴에 잡으면 보스 공격을 두 번만 맞는다. 먼저 2턴 격파가 되는지 보고,
+   되면 1·2턴 화력을 최대화한다. 안 되면 3턴 합계를 최대화한다.
+
+   ── 탈진은 «카드 단위» 다 (잭 확인).
+   직전 턴에 쓴 카드만 막히므로 같은 태그를 2장 가지면 1·2턴 연속 사용이 가능하다.
+   1장뿐이면 1·3턴에만 쓸 수 있다. 3턴 순서는 항상 `X → Y → X` 꼴이므로
+   **공격하는 칸은 두 개뿐이고 세 번째 칸은 화력에 기여하지 않는다.**
+
+   ── 생존
+   보스 공격은 매 턴 필드 3칸 전부를 때리고, 기절한 태그는 배틀에서 빠진다.
+   2턴에 끝내면 2대, 3턴까지 가면 3대를 버텨야 한다.
+
+   되돌리지 말 것 — v1.39 까지 «자기 턴에만 맞는다», v1.41 까지 «세 칸이 한 번씩 공격»
+   으로 봤는데 둘 다 틀렸다. */
+function buildSeq(boss){
   const all=POOL.filter(p=>owned.has(p.id)&&p.id!==boss.id);
   if(!all.length) return [];
-  const cards=all;
-  const distinct = mode==='flex' && cards.length>=3;   // 3장 미만이면 재사용 허용
-  const opts=[];
-  const V=r=> mode==='flex' ? r.dmg*(DW[r.d]??1) : r.dmg;
-  cards.forEach(c=>c.mv.forEach(m=>{
-    const canMega = !m.tagx && c.g==='메가진화';
-    const base=evalMove(c,boss,m,false);
-    const mega=canMega ? evalMove(c,boss,m,true) : null;   // 메가 슬롯을 쓸 때의 값
-    opts.push({c,m,mega:canMega,base,megaBase:mega,val:V(base),megaVal:mega?V(mega):0});
-  }));
-  // 태그가 모자라면 기기가 랜덤으로 채워준다. 값이 0이라 다른 수가 있으면 안 쓰인다.
-  opts.push({c:RANDOM.c,m:null,mega:false,base:RANDOM,val:0,rand:true});
 
-  const maxOne=Math.max(...opts.map(o=>Math.max(o.val,o.megaVal||0)));
-  // 합계가 같으면 큰 피해를 앞턴에. 보스가 먼저 쓰러질 수 있어 앞이 유리하다.
-  let bestSeq=null, bestVal=-1, bestTie=-1;
-  const acc=[];
-  const step=(turn,prev,used,val,tie)=>{
-    if(turn===3){
-      if(val>bestVal+1e-9 || (Math.abs(val-bestVal)<=1e-9 && tie>bestTie)){
-        bestVal=val; bestTie=tie; bestSeq=acc.slice();
-      }
-      return;
-    }
-    if(val + (3-turn)*maxOne < bestVal-1e-9) return;      // 가지치기 (동점은 살려 둔다)
-    for(const o of opts){
-      if(!o.rand){                                         // 랜덤은 탈진·중복 제약 없음
-        if(prev===o.c.id) continue;                        // 탈진
-        if(distinct && acc.some(x=>x.c.id===o.c.id)) continue;
-      }
-      if(o.m && o.m.tagx && used.has(o.m.tagx)) continue;  // 기믹 1회
-      const mega = o.mega && !used.has('메가진화');
-      const r = mega ? {...o.megaBase,mega:true} : o.base;
-      const v = mega ? o.megaVal : o.val;
-      acc.push(r);
-      let nu=used;
-      const gk = (o.m && o.m.tagx) || (mega ? '메가진화' : null);
-      if(gk){ nu=new Set(used); nu.add(gk) }
-      step(turn+1,o.c.id,nu,val+v,tie+v*(3-turn));
-      acc.pop();
-    }
+  const movesOf=(c)=>{
+    const l=[];
+    c.mv.forEach(m=>l.push({c,m,gk:m.tagx||null,r:evalMove(c,boss,m,false)}));
+    if(c.g==='메가진화') c.mv.filter(m=>!m.tagx)
+      .forEach(m=>l.push({c,m,gk:'메가진화',r:{...evalMove(c,boss,m,true),mega:true}}));
+    return l;
   };
-  step(0,null,new Set(),0,0);
-  return bestSeq||[];
+  const clash=(...o)=>{                        // 기믹 종류가 겹치는가
+    const u=new Set();
+    for(const x of o){ if(!x||!x.gk) continue; if(u.has(x.gk)) return true; u.add(x.gk); }
+    return false;
+  };
+
+  // ── 1단계: 2턴 격파를 노린다 (2대만 버티면 되므로 후보가 넓다)
+  const safe2=all.filter(c=>survivesN(c,boss,2));
+  let two=null;
+  if(safe2.length){
+    const M2=new Map(safe2.map(c=>[c.id,movesOf(c)]));
+    for(const X of safe2) for(const Y of safe2){
+      if(X.id===Y.id && owned.cnt(X.id)<2) continue;   // 연속 사용은 2장 필요
+      for(const a of M2.get(X.id)) for(const b of M2.get(Y.id)){
+        if(clash(a,b)) continue;
+        const v=a.r.dmg+b.r.dmg;
+        if(!two||v>two.v) two={v,rows:[a.r,b.r]};
+      }
+    }
+  }
+  if(two && koIn2(two.v,boss)){
+    /* 3턴째는 안 올 예정이지만 슬롯은 채워야 하고, 빗나가면 실제로 쓰인다.
+       그러니 3턴까지 갈 때의 규칙을 그대로 지켜야 한다 —
+       2턴 태그와 겹치면 안 되고(탈진), 이미 쓴 기믹도 못 쓰고, 3대를 버텨야 한다. */
+    const a0=two.rows[0], b0=two.rows[1];
+    const usedG=new Set([a0.move&&a0.move.tagx, a0.mega&&'메가진화',
+                         b0.move&&b0.move.tagx, b0.mega&&'메가진화'].filter(Boolean));
+    let third=null;
+    all.filter(c=>c.id!==b0.c.id && survivesN(c,boss,3)).forEach(c=>{
+      movesOf(c).forEach(o=>{
+        if(o.gk && usedG.has(o.gk)) return;
+        if(!third || o.r.dmg>third.dmg) third=o.r;
+      });
+    });
+    if(!third) third=RANDOM;
+    const out=[a0,b0,third];
+    out.ko2=true; out.risky=safe2.length<3;
+    return out;
+  }
+
+  // ── 2단계: 3턴 합계 최대화 (3대 생존)
+  const safe3=all.filter(c=>survivesN(c,boss,3));
+  const cards=safe3.length?safe3:all;
+  const M3=new Map(cards.map(c=>[c.id,movesOf(c)]));
+  let best=null, bestVal=-1, bestTie=-1;
+  for(const X of cards) for(const Y of cards){
+    if(X.id===Y.id && owned.cnt(X.id)<2) continue;
+    for(const a of M3.get(X.id)) for(const b of M3.get(Y.id)) for(const c2 of M3.get(X.id)){
+      if(clash(a,b,c2)) continue;
+      const v=a.r.dmg+b.r.dmg+c2.r.dmg;
+      const tie=a.r.dmg*2+b.r.dmg;             // 같은 합이면 앞턴에 큰 피해
+      if(v>bestVal+1e-9 || (Math.abs(v-bestVal)<=1e-9 && tie>bestTie)){
+        bestVal=v; bestTie=tie; best=[a.r,b.r,c2.r];
+      }
+    }
+  }
+  if(!best){
+    const one=cards[0] && movesOf(cards[0]);
+    best = one && one.length
+      ? [one.reduce((p,q)=>q.r.dmg>p.r.dmg?q:p).r, RANDOM, RANDOM]
+      : [RANDOM,RANDOM,RANDOM];
+  }
+  const out=best.slice();
+  out.ko2=false; out.risky=safe3.length<3;
+  return out;
 }
 
 /* ══ 렌더 ══ */
@@ -1403,7 +1537,7 @@ const chip=(c,o={})=>{
     ${o.pressed==null?'':`aria-pressed="${o.pressed}"`} data-id="${c.id}">
     <span class="b23w">${
       (dexBest&&dexBest.has(c.id)?'<span class="b23 rec">추천</span>':'')
-      +(BEST20.has(c.id)?'<span class="b23">BEST</span>':'')}</span>
+      +(BEST25.has(c.id)?'<span class="b23">BEST</span>':'')}</span>
     <span class="cn">${c.n}</span>
     <span class="cm"><span class="cr">★${c.r}</span>${c.t.map(x=>
       `<i class="ci ${TK[x]}" title="${x}"></i>`).join('')}
@@ -1447,7 +1581,6 @@ function renderDock(){
   const d=document.getElementById('dock'); if(d) d.hidden = view!=='battle';
 }
 
-
 function renderBosses(){
   const g=document.getElementById('bossGrid');g.innerHTML='';
   const list=BOSSES.filter(b=>b.s===setView&&b.r===bossRank);
@@ -1470,7 +1603,8 @@ function renderReadout(){
   const bk={x4:[],x2:[],res:[],nil:[]};
   T.forEach(x=>{const m=eff(x,b.t);
     if(m>=4)bk.x4.push(x);else if(m>1)bk.x2.push(x);else if(m===0)bk.nil.push(x);else if(m<1)bk.res.push(x)});
-  const row=(c,l,ls)=>`<div class="row"><span class="lab ${c}">${l}</span>${ls.length?ls.map(tp).join(''):'<span class="none">없음</span>'}</div>`;
+  const row=(c,l,ls)=>`<div class="row"><span class="lab ${c}">${l}</span>`
+    +`<span class="rv">${ls.length?ls.map(tp).join(''):'<span class="none">없음</span>'}</span></div>`;
   const mx=Math.max(b.hp,b.a,b.d,b.sa,b.sd,b.sp,180);
   const bar=(k,v,col,hl)=>`<div class="st${hl?' hl':''}"><span class="k">${k}</span>
     <span class="bar"><i style="width:${Math.round(v/mx*100)}%;background:${col}"></i></span>
@@ -1571,7 +1705,7 @@ function renderRotation(){
     rot.innerHTML=`<p class="empty">켜진 태그가 없습니다.<br>상단의 <b>컬렉션</b> 탭에서 가진 것을 켜 주세요.</p>`;
     note.textContent=''; return;
   }
-  const seq=buildSeq(boss,mode);
+  const seq=buildSeq(boss);
 
   const reuse=seq.length===3 && !seq[0].rand && seq[0].c.id===seq[2].c.id;
   const gims=[...new Set(seq.map(r=>(r.move&&r.move.tagx)||(r.mega?'메가진화':null)).filter(Boolean))];
@@ -1580,7 +1714,10 @@ function renderRotation(){
 
   // ── 레인: 기기 슬롯 3칸에 무엇을 올릴지. 턴 순서와 별개다.
   const uniq=[...new Map(seq.filter(r=>!r.rand).map(r=>[r.c.id,r])).values()];
-  const pool=ranked(boss).filter(r=>!uniq.some(u=>u.c.id===r.c.id));
+  // 예비도 필드에 올라가 매 턴 맞으므로 3대를 버티는 것만 고른다
+  const pool0=ranked(boss).filter(r=>!uniq.some(u=>u.c.id===r.c.id));
+  const poolSafe=pool0.filter(r=>survives3(r.c,boss));
+  const pool=poolSafe.length?poolSafe:pool0;
   const fastPool=pool.filter(r=>r.c.sp>boss.sp);
   const spare=uniq.length&&uniq.length<3
     ? (fastPool.length?fastPool:pool).slice(0,3-uniq.length) : [];
@@ -1622,16 +1759,21 @@ function renderRotation(){
   const real=l=>l.filter(r=>!r.rand);          // 랜덤 턴은 합계·배율에서 제외
   const sum=l=>Math.round(l.reduce((a,r)=>a+(r.dmg||0),0));
   const worst=l=>{const v=real(l).map(r=>r.d); return v.length?Math.max(...v):0};
-  const P=buildSeq(boss,'power'), F=buildSeq(boss,'flex');
-  const tp2=sum(P), tf=sum(F), wp=worst(P), wf=worst(F);
-  const cap=(v,w)=>`<span class="tl2">최대 받는 ×${w}</span>`;
+  const field=[...uniq.map(r=>r.c), ...spare.map(r=>r.c)];
+  const holdOut=c=>{ let n=0; while(n<9 && survivesN(c,boss,n+1)) n++; return n; };
+  const minHit=field.length?Math.min(...field.map(holdOut)):0;
+  const need=seq.ko2?2:3;
+  const t2=Math.round((seq[0]?seq[0].dmg:0)+(seq[1]?seq[1].dmg:0));
+  const holdTxt=minHit>=9?'끄떡없음':minHit+'대까지';
   rot.appendChild(el(`<div class="total">
-    <div class="tsum ${mode==='flex'?'on':''}">
-      <span class="tl">밸런스</span><b>${tf}</b>${wf<wp?'<span class="tw ok">덜 맞음</span>':''}
-      ${cap(tf,wf)}</div>
-    <div class="tsum ${mode==='power'?'on':''}">
-      <span class="tl">최대 화력</span><b>${tp2}</b>${tp2>tf?'<span class="tw">화력 우세</span>':''}
-      ${cap(tp2,wp)}</div>
+    <div class="tsum on">
+      <span class="tl">${seq.ko2?'2턴 격파':'3턴 필요'}</span><b>${seq.ko2?t2:sum(seq)}</b>
+      <span class="tl2">${seq.ko2?'1·2턴 피해 합':'3턴 피해 합'} · 최대 받는 ×${worst(seq)}</span></div>
+    <div class="tsum">
+      <span class="tl">필드 내구</span><b>${holdTxt}</b>
+      <span class="tl2">${seq.risky
+        ? '버티는 태그가 모자랍니다'
+        : `이번 계획에서 <b style="color:var(--ink)">${need}대</b>를 맞습니다`}</span></div>
   </div>`));
 
   const nr=seq.filter(r=>r.rand).length;
@@ -1643,12 +1785,14 @@ function renderRotation(){
   const lead = nr
     ? `켠 태그로 채울 수 있는 만큼만 짰습니다.`
     : null;
-  note.innerHTML = lead ? `${lead} ${gtxt}` : mode==='power'
-    ? `${reuse
-        ? `1턴 태그를 3턴에 다시 씁니다. 탈진은 바로 다음 턴만 막으니 2턴만 비켜 주면 됩니다.`
-        : `세 장을 모두 다르게 씁니다.`} ${gtxt}`
-    : `화력과 내구를 함께 저울질해 서로 다른 태그 3장을 골랐습니다. 최대 화력보다 조금 덜 넣는 대신
-       약점을 덜 찔립니다. ${gtxt}`;
+  const surv = seq.risky
+    ? `<b style="color:var(--star)">보스 공격을 버티는 태그가 3장이 안 됩니다.</b> 도중에 쓰러질 수 있습니다.`
+    : seq.ko2
+      ? `<b style="color:var(--ok)">1·2턴에 끝나는 조합입니다.</b> 3턴 태그는 빗나갔을 때를 위한 예비이고,
+         2턴에 끝나면 보스 공격을 두 번만 맞습니다.`
+      : `2턴에 잡기는 어려운 보스라 <b style="color:var(--ink)">3턴 합계</b>로 짰습니다.
+         필드 3장 모두 보스 공격 3대를 버팁니다.`;
+  note.innerHTML = lead ? `${lead} ${gtxt}` : `${surv} ${gtxt}`;
 }
 
 const bat=w=>{const c=w.charCodeAt(w.length-1);
@@ -1903,7 +2047,7 @@ function renderRank(){
     </span></div>`).join('');
 }
 
-/* ══ 수집 기준 BEST-20 ══
+/* ══ 수집 기준 BEST-25 ══
    수집(dex) 체크한 태그 중에서 다시 뽑는다. `buildSeq` 가 보유 장수의 세제곱이라
    정확 탐욕은 후보 56장에서 Node 14초 · 폰은 그 몇 배다. 그래서 2단계로 나눈다.
      1) 단독 기여도(보스별 한 장만 놓고 최고 피해)로 후보를 26장까지 좁힌다 — 20ms
@@ -1911,8 +2055,8 @@ function renderRank(){
    후보가 20장 이하면 계산 없이 전부가 답이다.
    지연 탐욕(lazy greedy)은 쓰지 말 것 — 탈진·기믹 제약 탓에 한계이득 감소가
    성립하지 않아 결과가 7% 나빠진다. 실제로 재봤다. */
-const DEXBEST_N=20, DEXBEST_SHORT=26;
-const dexBossSet=()=>BOSSES.filter(b=>!(b.s==='1'&&b.r==='5'));   // BEST-20 과 같은 35보스 기준
+const DEXBEST_N=25, DEXBEST_SHORT=38;   // 추림 폭은 목표 장수보다 넉넉해야 한다
+const dexBossSet=()=>BOSSES.filter(b=>!(b.s==='1'&&b.r==='5'));   // BEST-25 과 같은 35보스 기준
 function dexBattleIds(){
   const out=new Set();
   ['1','2'].forEach(st=>DEXRANK.forEach(r=>dexList(st,r).forEach(it=>{
@@ -1931,15 +2075,14 @@ function dexSoloRank(ids){
   return [...ids].sort((a,b)=>sc[b]-sc[a]);
 }
 function dexSeqTotal(set){
-  owned=new Set(set); let t=0;
-  for(const m of ['power','flex']) for(const b of dexBossSet())
-    t+=buildSeq(b,m).reduce((a,r)=>a+(r.dmg||0),0);
+  owned=toBag(set); let t=0;
+  for(const b of dexBossSet()) t+=buildSeq(b).reduce((a,r)=>a+(r.dmg||0),0);
   return t;
 }
 function calcDexBest(cb){        // cb={step,done} — 벗은 콜백 이름은 undef.js 가 오탐한다
   const cand=dexBattleIds();
   if(cand.length<=DEXBEST_N){ cb.done(cand,false); return; }
-  const snap=new Set(owned), short=dexSoloRank(cand).slice(0,DEXBEST_SHORT), cur=[];
+  const snap=new Bag(owned), short=dexSoloRank(cand).slice(0,DEXBEST_SHORT), cur=[];
   dexCalcBusy=true;
   const step=()=>{
     let bi=null,bv=-1;
@@ -1975,26 +2118,27 @@ function renderRoster(){
     list.forEach(c=>{
       const n=el(chip(c,{pressed:owned.has(c.id)}));
       n.addEventListener('click',()=>{ if(dexCalcBusy) return;
-        owned.has(c.id)?owned.delete(c.id):owned.add(c.id); save(); renderAll()});
+        owned.has(c.id)?owned.delete(c.id):owned.setCnt(c.id,1);
+        save(); renderAll()});
       pool.appendChild(n);
     });
     d.querySelectorAll('[data-b]').forEach(btn=>btn.addEventListener('click',()=>{
-      list.forEach(c=>btn.dataset.b==='on'?owned.add(c.id):owned.delete(c.id));save();renderAll()}));
+      list.forEach(c=>btn.dataset.b==='on'?owned.setCnt(c.id,1):owned.delete(c.id));save();renderAll()}));
     host.appendChild(d);
   });
   document.getElementById('rs1').setAttribute('aria-pressed',rosterSet==='1');
   document.getElementById('rs2').setAttribute('aria-pressed',rosterSet==='2');
-  const total=owned.size;
+  // 중복 보유를 쓰지 않으므로 «장수» 와 «종» 이 늘 같다. 분모 있는 한 가지 표기로 통일한다.
   document.getElementById('ownHint').innerHTML=
-    `전투 <b>${total}</b> / ${POOL.length}개 켜짐 · 수집 <b>${dex.size}</b> / ${dexTotal()}종`;
+    `전투 <b>${owned.size}</b> / ${POOL.length} · 수집 <b>${dex.size}</b> / ${dexTotal()}`;
 }
 
 /* 수집 탭 — 전투 보유(owned)와 완전히 분리된 dex 집합만 쓴다.
    여기서 무엇을 켜고 꺼도 추천 계산과 전투 탭에는 아무 영향이 없다. */
 const dexOn=(r,it)=>dex.has(dexKey(rosterSet,r,it.no,it.n));
-function dexToggle(r,it){
-  const k=dexKey(rosterSet,r,it.no,it.n); dex.has(k)?dex.delete(k):dex.add(k);
-}
+const dexCnt=(r,it)=>dex.cnt(dexKey(rosterSet,r,it.no,it.n));
+function dexToggle(r,it){ const k=dexKey(rosterSet,r,it.no,it.n);
+  dex.has(k)?dex.delete(k):dex.setCnt(k,1); }
 function renderDex(){
   const host=document.getElementById('dexHost'); if(!host)return;
   host.innerHTML='';
@@ -2011,16 +2155,18 @@ function renderDex(){
 
   const g=el('<div class="dexg"></div>');
   rows.forEach(x=>{
-    const col=RARITY[x.r].color, it=x.it;
+    const col=RARITY[x.r].color, it=x.it, cn=dex.cnt(keyOf(x));
     const n=el(`<button class="dx" style="--c:${col};--sc:${it.no?SETC[rosterSet]:col}" aria-pressed="${isOn(x)}">
       <span class="hd"><span class="no${it.no?'':' un'}">${it.no??'–'}</span>
+        ${cn>1?`<span class="rk" style="background:var(--sc)">x${cn}</span>`:''}
         <span class="rk">${RKLAB[x.r]}</span></span>
       <span class="dn">${it.n}</span>
       <span class="dt">${it.t.map(t=>`<i class="ci ${TK[t]}" title="${t}"></i>`).join('')}
         ${it.card&&it.card.g?`<span class="sep"></span><i class="gi ${GK[it.card.g]}" title="${it.card.g}"></i>`:''}
       </span></button>`);
     n.addEventListener('click',()=>{const k=keyOf(x);
-      dex.has(k)?dex.delete(k):dex.add(k); save(); renderDex()});
+      dex.has(k)?dex.delete(k):dex.setCnt(k,1);
+      save(); renderDex()});
     g.appendChild(n);
   });
   host.appendChild(g);
@@ -2065,7 +2211,7 @@ function wipe(){
   try{ localStorage.removeItem(KEY) }catch(e){}
   try{ window.storage && window.storage.delete && window.storage.delete(KEY) }catch(e){}
   owned=DEFAULT_OWNED(); chance={...CHANCE_DEFAULTS};
-  guideHidden=false; detail=0; rankSort='score'; mode='flex';
+  guideHidden=false; detail=0; rankSort='score';
   renderAll();
   verEl.textContent='초기화 완료'; verEl.classList.remove('arm'); verEl.classList.add('done');
   clearTimeout(armed); setTimeout(verReset,2200);
@@ -2125,14 +2271,14 @@ brand.addEventListener('keydown',e=>{
 document.getElementById('chanceReset').addEventListener('click',()=>{
   chance={...CHANCE_DEFAULTS}; save(); renderAll()});
 const preset=(st)=>{
-  owned=new Set(POOL.filter(p=>p.s===st&&p.r==='6').map(p=>p.id)); save(); renderAll();
+  owned=new Bag(POOL.filter(p=>p.s===st&&p.r==='6').map(p=>p.id)); save(); renderAll();
 };
 document.getElementById('preset16').addEventListener('click',()=>preset('1'));
 document.getElementById('preset26').addEventListener('click',()=>preset('2'));
 document.getElementById('resetOwn').addEventListener('click',()=>{
-  owned=new Set(POOL.map(p=>p.id)); save(); renderAll()});
+  owned=new Bag(POOL.map(p=>p.id)); save(); renderAll()});
 document.getElementById('clearOwn').addEventListener('click',()=>{
-  owned=new Set(); save(); renderAll()});
+  owned=new Bag(); save(); renderAll()});
 Object.entries(VIEWS).forEach(([k,ids])=>
   document.getElementById(ids[1]).addEventListener('click',()=>setView2(k)));
 
@@ -2175,8 +2321,9 @@ function renderChance(){
   const rb=document.getElementById('chanceReset');
   if(rb) rb.textContent='기본값 ('+Object.values(CHANCE_DEFAULTS).join(' / ')+')';
   const host=document.getElementById('chanceRows'); if(!host)return;
-  const meta={'일반':'기믹 없음 · 룰렛 기대값',
-    '다이맥스':'다이맥스 기술 · 다이썬더, 다이스틸 등',
+  const meta={'일반':'기믹없음 - 공격룰렛+서포트룰렛 기대값',
+    '메가진화':'메가진화 - 공격룰렛+서포트룰렛 기대값',
+    '다이맥스':'다이맥스 - 공격룰렛+서포트룰렛 기대값',
     'Z기술':'Z기술 · 기술 입력 판정 · 평균값'};
   host.innerHTML='';
   Object.keys(CHANCE_DEFAULTS).forEach(k=>{
@@ -2192,7 +2339,7 @@ function renderChance(){
     host.appendChild(row);
   });
   document.getElementById('vXct').textContent=
-    `${chance['일반']}/${chance['다이맥스']}/${chance['Z기술']}`;
+    `${chance['일반']}/${chance['메가진화']}/${chance['다이맥스']}/${chance['Z기술']}`;
 }
 
 function renderAll(){
@@ -2200,9 +2347,11 @@ function renderAll(){
   document.getElementById('vCct').innerHTML=
     `<span>전투 ${owned.size}/${POOL.length}</span><span>수집 ${dex.size}/${dexTotal()}</span>`;
   const bh=document.getElementById('b23ct');
-  if(bh){ const have=[...BEST20].filter(id=>owned.has(id)).length;
-    bh.innerHTML=`<b>BEST-20</b> 핵심 태그 <b style="color:${have===BEST20.size?'var(--ok)':'var(--star)'}">${have}/${BEST20.size}</b>`
-      +' · 1탄 ★5 보스를 뺀 35보스 기준, 화력의 99.7%를 커버합니다'; }
+  if(bh){                                  // BEST-25 는 25종 각 1장 — 중복 없음
+    const need=BEST25.size;
+    const have=[...BEST25.keys()].filter(id=>owned.has(id)).length;
+    bh.innerHTML=`<b>BEST-25</b> 핵심 태그 <b style="color:${have===need?'var(--ok)':'var(--star)'}">${have}/${need}</b>`
+      +' · 1탄 ★5 보스를 뺀 35보스 기준으로 뽑은 우선 확보 목록입니다'; }
 }
 const pickBoss=()=>{                       // 탄·등급을 바꾸면 그 그룹의 첫 보스로
   const f=BOSSES.find(b=>b.s===setView&&b.r===bossRank);
@@ -2216,17 +2365,17 @@ document.getElementById('sr5').addEventListener('click',()=>{bossRank='5'; pickB
 document.getElementById('dexFromOwn').addEventListener('click',()=>{
   // owned → dex 단방향 복사. dex 는 전투 계산에 영향을 주지 않는다.
   ['1','2'].forEach(s=>DEXRANK.forEach(r=>dexList(s,r).forEach(it=>{
-    if(it.card && owned.has(it.card.id)) dex.add(dexKey(s,r,it.no,it.n)); })));
+    if(it.card && owned.has(it.card.id)) dex.setCnt(dexKey(s,r,it.no,it.n), owned.cnt(it.card.id)); })));
   POOL.filter(p=>p.s==='공통'&&(p.r==='R'||p.r==='S')&&owned.has(p.id))
-    .forEach(c=>dex.add('공통-'+c.r+'-@'+c.n));
+    .forEach(c=>dex.setCnt('공통-'+c.r+'-@'+c.n, owned.cnt(c.id)));
   save(); renderDex();
 });
 document.getElementById('dexAll').addEventListener('click',()=>{
   const host=document.getElementById('dexHost');
-  JSON.parse(host.dataset.keys||'[]').forEach(k=>dex.add(k));
+  JSON.parse(host.dataset.keys||'[]').forEach(k=>{ if(!dex.has(k)) dex.setCnt(k,1) });
   save(); renderDex();
 });
-document.getElementById('dexClear').addEventListener('click',()=>{dex=new Set();save();renderDex()});
+document.getElementById('dexClear').addEventListener('click',()=>{dex=new Bag();save();renderDex()});
 document.getElementById('dexBestGo').addEventListener('click',()=>{
   if(dexCalcBusy) return;
   const n=dexBattleIds().length;
@@ -2235,7 +2384,7 @@ document.getElementById('dexBestGo').addEventListener('click',()=>{
   calcDexBest({
     step:(k,t)=>renderDexBestMsg(`계산 중… ${k} / ${t}`),
     done:(list,computed)=>{
-      dexBest=new Set(list);
+      dexBest=new Bag(list);
       const nm=list.map(id=>POOL.find(p=>p.id===id).n).join(' · ');
       const head=computed
         ? `수집 ${dexBattleIds().length}장 중 <b>${list.length}장</b> 추천`
@@ -2246,7 +2395,7 @@ document.getElementById('dexBestGo').addEventListener('click',()=>{
 });
 document.getElementById('dexBestOn').addEventListener('click',()=>{
   if(!dexBest||dexCalcBusy) return;
-  owned=new Set(dexBest); save(); renderAll();
+  owned=new Bag([...dexBest.entries?dexBest.entries():dexBest]); save(); renderAll();
 });
 document.getElementById('dexBestClr').addEventListener('click',()=>{
   if(dexCalcBusy) return;
@@ -2300,13 +2449,6 @@ document.getElementById('ct1').addEventListener('click',()=>setColTab('battle'))
 document.getElementById('ct2').addEventListener('click',()=>setColTab('dex'));
 document.getElementById('rs1').addEventListener('click',()=>{rosterSet='1';renderRoster();renderDex()});
 document.getElementById('rs2').addEventListener('click',()=>{rosterSet='2';renderRoster();renderDex()});
-// tabA=밸런스 · tabB=최대 화력. 기본값이 밸런스라 화면 순서도 그에 맞춘다.
-document.getElementById('tabA').addEventListener('click',()=>setMode('flex'));
-document.getElementById('tabB').addEventListener('click',()=>setMode('power'));
-function setMode(m){mode=m;
-  document.getElementById('tabA').setAttribute('aria-selected',m==='flex');
-  document.getElementById('tabB').setAttribute('aria-selected',m==='power');
-  renderRotation()}
 load().then(qrLoad).then(renderAll);
 </script>
 </body>
