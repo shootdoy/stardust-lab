@@ -7,7 +7,7 @@
 <meta name="description" content="포켓몬 태그스타 스타더스트 1탄·2탄 ★6·★5 보스 공략. 보유 태그로 3턴 로테이션과 서포트 티켓을 추천합니다.">
 <meta name="theme-color" content="#120B2E">
 <meta name="color-scheme" content="dark">
-<meta name="version" content="1.98.0">
+<meta name="version" content="1.99.0">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1052,7 +1052,7 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
   스탯·기술은 공식·팬페이지 표기값 (1탄 25 · 2탄 25 · 공통 6)<br>
   받는 피해는 보스 표기 기술 기준
   <span class="ver" id="ver">
-    v1.98.0 · 2026-08-14</span>
+    v1.99.0 · 2026-08-14</span>
 </footer>
 </div>
 
@@ -1603,7 +1603,7 @@ const TAGIMG={
 const tagArt=b=>TAGIMG[b.s+'-'+b.r+'-'+b.n]||null;
 
 const RANK_N=10;          // 순위에 보여줄 개수
-const VERSION='1.98.0';
+const VERSION='1.99.0';
 const BUILT='2026-08-14';
 
 /* ══ 자산을 CSS 로 한 번만 심는다 (DOM 에 base64 중복 방지) ══ */
@@ -2111,33 +2111,77 @@ function renderDock(){
    기믹(메가·Z·다이맥스)은 배틀당 1회뿐이라 **서브에는 쓰지 않는다** — 대상에 남겨야 한다.
    같은 값이면 **대상 화력이 낮은 태그**를 고른다. 센 카드를 서브에 소모하지 않기 위해서다. */
 const foeHitOne=(c,f)=>Math.max(0,...f.mv.map(m=>bossHit(c,f,m)));   // 그 장에게 한 대 맞을 때 비율
-function planFor(foe,boss,isBoss){
+/* 한 상대에게 낼 만한 카드를 **카드마다 최선의 기술 하나씩** 골라 좋은 순으로 준다.
+   v1.99.0 전까지는 최선 한 장만 돌려줬는데, 세 열이 서로 겹치는지 볼 수 없어
+   **같은 카드가 두 열에 추천되는 일**이 있었다 (잭 지적). 이제 목록을 주고 배정은 밖에서 한다. */
+function foeCands(foe,boss,isBoss){
   const mine=POOL.filter(p=>owned.has(p.id)&&p.id!==boss.id);
-  if(!mine.length||!foe) return null;
+  if(!mine.length||!foe) return [];
   const keepOf=c=>Math.max(0,...c.mv.filter(m=>!m.tagx).map(m=>evalMove(c,boss,m,false).dmg));
   const rows=[];
   mine.forEach(c=>{
     const list = isBoss ? c.mv : c.mv.filter(m=>!m.tagx);   // 서브에는 기믹 기술을 안 쓴다
+    let best=null;
     list.forEach(m=>{
       const r=evalMove(c,foe,m,false);
-      /* evalMove 결과를 **통째로** 넘긴다 (v1.97.0). 종전에는 dmg·mult 만 챙겨
-         위력·공격·방어·받는 배율을 버렸는데, 가로 슬롯이 그 값을 다 쓴다. */
-      rows.push({...r, c, m,
-                 ko:r.dmg*KHP>=foe.hp, spd:c.sp-foe.sp,
-                 inc:foeHitOne(c,foe), keep:keepOf(c)});
+      /* evalMove 결과를 통째로 넘긴다 — 가로 슬롯이 위력·공격·방어까지 쓴다 */
+      const row={...r, c, m, ko:r.dmg*KHP>=foe.hp, spd:c.sp-foe.sp,
+                 inc:foeHitOne(c,foe), keep:keepOf(c)};
+      row.tier = isBoss ? 'boss' : (row.ko&&row.spd>0 ? 0 : row.ko ? 1 : 2);
+      if(!best||cmpCand(row,best,isBoss)<0) best=row;
     });
+    if(best) rows.push(best);
   });
-  if(!rows.length) return null;
-  if(isBoss){                                   // 대상은 그냥 최대 화력
-    rows.sort((a,b)=>b.dmg-a.dmg);
-    return {...rows[0],tier:'boss'};
-  }
-  const tier=r=> r.ko&&r.spd>0 ? 0 : r.ko ? 1 : 2;
-  rows.sort((a,b)=> tier(a)-tier(b)
-    || (tier(a)===0 ? a.keep-b.keep                       // 무피해면 약한 카드부터
-                    : (a.inc-b.inc)||(a.keep-b.keep)));   // 아니면 덜 맞는 쪽
-  const w=rows[0];
-  return {...w,tier:tier(w)};
+  return rows.sort((a,b)=>cmpCand(a,b,isBoss));
+}
+/* 대상은 그냥 최대 화력. 서브는 «무피해 → 한 대 맞고 처치 → 버티기» 순이고,
+   무피해면 약한 카드부터(센 카드를 아낀다), 아니면 덜 맞는 쪽부터. */
+function cmpCand(a,b,isBoss){
+  if(isBoss) return b.dmg-a.dmg;
+  return (a.tier-b.tier)
+      || (a.tier===0 ? a.keep-b.keep : (a.inc-b.inc)||(a.keep-b.keep));
+}
+
+/* 세 열에 **서로 다른 카드**를 배정한다 (v1.99.0 · 잭 지적).
+   지역배틀은 내 카드 3장을 동시에 필드에 올리므로 **같은 카드를 두 칸에 못 놓는다** —
+   다만 그 카드를 2장 가졌으면 두 번 쓸 수 있어 `owned.cnt` 까지 본다.
+   로테이션 엔진은 진작 `owned.cnt(X.id)<2` 로 이걸 보고 있었고 여기만 빠져 있었다.
+
+   고르는 기준(위에서부터): ① 서브 등급 합이 작을수록 ② 대상 피해가 클수록
+   ③ 서브 피격 합이 작을수록. **서브의 «무피해» 를 대상 화력보다 앞에 둔다** —
+   서브를 무피해로 넘기면 그 장이 배틀에서 빠져 남은 턴이 통째로 벌린다.
+   열마다 상위 14장만 후보로 봐서 최악 2744 조합이면 끝난다. */
+function assignPlans(cols, foeOf, boss){
+  const lists = cols.map(at=>{ const f=foeOf(at); return f? foeCands(f,boss,at==='B').slice(0,14) : null; });
+  const idx = cols.map((at,i)=> lists[i]&&lists[i].length ? 0 : -1);
+  let bestSel=null, bestKey=null;
+  const key=sel=>{
+    let tier=0, inc=0, dmg=0;
+    cols.forEach((at,i)=>{ const r=sel[i]; if(!r) return;
+      if(at==='B') dmg=r.dmg; else { tier+=r.tier; inc+=r.inc; } });
+    return [tier,-dmg,inc];
+  };
+  const better=(a,b)=>{ for(let i=0;i<a.length;i++){ if(a[i]!==b[i]) return a[i]<b[i]; } return false; };
+  const n=cols.length;
+  const walk=(i,sel,used)=>{
+    if(i===n){
+      const k=key(sel);
+      if(!bestKey||better(k,bestKey)){ bestKey=k; bestSel=sel.slice(); }
+      return;
+    }
+    if(idx[i]<0){ sel[i]=null; walk(i+1,sel,used); return; }
+    lists[i].forEach(r=>{
+      const id=r.c.id;
+      if((used.get(id)||0) >= owned.cnt(id)) return;   // 가진 장수를 넘겨 쓸 수 없다
+      used.set(id,(used.get(id)||0)+1);
+      sel[i]=r; walk(i+1,sel,used);
+      used.set(id,used.get(id)-1);
+    });
+  };
+  walk(0,new Array(n).fill(null),new Map());
+  /* 후보가 모자라 아무 조합도 못 만들면 겹치더라도 각자 최선을 준다 — 빈 화면보다 낫다 */
+  if(!bestSel) return cols.map((at,i)=> lists[i]&&lists[i][0] || null);
+  return bestSel;
 }
 
 /* 상대 파티 3슬롯. 가운데는 보스 선택과 연동되고, 양옆만 여기서 고른다. */
@@ -2211,13 +2255,10 @@ function renderFoes(){
           +`<span class="fl-s one">HP ${f.hp}·속도 ${f.sp}</span>`
          :`<span class="fl-r">서브 선택</span>`)+`</div>`;
   };
-  /* 세로 칸과 가로 슬롯이 **같은 계산을 두 번 하지 않도록** 열마다 한 번만 풀고 쥔다.
-     `planFor` 는 보유 태그 전부를 훑으므로 공짜가 아니다 (v1.98.0). */
-  const planCache={};
-  const plan=(at)=>{
-    if(!(at in planCache)){ const f=foeOf(at); planCache[at]= f? planFor(f,boss,at==='B') : null; }
-    return planCache[at];
-  };
+  /* 세 열을 **한꺼번에** 푼다. 열마다 따로 풀면 같은 카드가 두 칸에 앉는다 (v1.99.0).
+     세로 칸과 가로 슬롯이 같은 결과를 나눠 쓰므로 계산은 한 번뿐이다. */
+  const assigned = assignPlans(cols, foeOf, boss);
+  const plan=(at)=> assigned[cols.indexOf(at)] || null;
 
   /* 세로 «낼 태그» 칸 — 한눈에 보는 쪽. 아래 가로 슬롯이 같은 내용을 수치까지 펼친다. */
   const meCell=(at)=>{
