@@ -7,7 +7,7 @@
 <meta name="description" content="포켓몬 태그스타 스타더스트 1탄·2탄 ★6·★5 보스 공략. 보유 태그로 3턴 로테이션과 서포트 티켓을 추천합니다.">
 <meta name="theme-color" content="#120B2E">
 <meta name="color-scheme" content="dark">
-<meta name="version" content="1.97.0">
+<meta name="version" content="1.98.0">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -282,12 +282,26 @@ section:first-child{margin-top:0}
 .fl-n.wt .nm{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .fl-n.wt .t{flex:none}
 
-/* v1.97.0 에서 세로 «낼 태그» 칸을 가로 슬롯(.mslot)으로 갈아치우며
-   `.fl-m`(기술명 줄) · `.fl-m .mx`(상성 배율) · `.fl-n .fl-gi`(기믹 아이콘) 규칙을 지웠다.
-   그 자리의 규칙들은 **가로 슬롯이 로테이션 CSS(.slot / .mults)를 그대로 쓰므로 필요 없다.**
-   되살리려면 세로 칸부터 되살려야 한다 — 규칙만 도로 넣으면 아무 데도 안 붙는다. */
-/* 상대마다 낼 태그 — 로테이션과 같은 가로 슬롯을 세로로 쌓는다 (v1.97.0 · 잭 지정) */
-.mplans{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+/* 기술명 줄 — 접지 않고 **이름만** 줄여 «…» 로 자른다. 배율(«공×2»)은 판단에 쓰는 값이라
+   `flex:none` 으로 절대 안 잘리게 한다 — 이름이 잘리는 편이 낫다. */
+.fl-m{display:flex;flex-wrap:nowrap;align-items:center;justify-content:center;
+  max-width:100%;font-weight:600;font-size:9.5px;line-height:1.25;color:var(--ink-dim);letter-spacing:-.01em}
+.fl-m .mv{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* 상성 배율 — «×2» 만 쓰면 «기술을 두 번 쓴다» 로 읽힌다 (v1.92.0 · 잭 지적).
+   **이름 뒤에 맨 «×N» 을 붙이지 말 것.** */
+.fl-m .mx{flex:none;margin-left:3px;padding:0 3px;border-radius:4px;
+  background:rgba(255,255,255,.08);font-weight:800}
+.fl-m .mx.good{color:var(--ok);background:rgba(56,214,140,.16)}
+.fl-m .mx.bad{color:var(--bad);background:rgba(255,90,90,.14)}
+/* 기믹은 **카드가 가진 것**이라 이름 옆에 붙는다. 흐리면 «보유», 밝으면 «이 매치에서 쓴다».
+   **«쓸 때만 보이게» 로 되돌리지 말 것** (v1.96.0 · 잭 지적). */
+.fl-n .fl-gi{width:11px;height:11px;flex:none;margin-left:3px;opacity:.32}
+.fl-n .fl-gi.use{opacity:1;filter:drop-shadow(0 0 3px var(--star))}
+/* 상대마다 낼 태그의 **자세한 수치**. 위의 3칸 그룹은 그대로 두고 그 아래에 덧붙인다
+   (v1.98.0 · 잭 지정 — v1.97.0 처럼 3칸을 없애지 말 것). */
+.mplans{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.mplans-l{display:block;margin-bottom:7px;font-family:var(--mono);font-size:10px;
+  letter-spacing:.1em;color:var(--ink-dim)}
 .mslot.mid{border-color:rgba(255,196,0,.45);
   background:linear-gradient(180deg,rgba(255,196,0,.10),rgba(18,11,46,.55))}
 .mslot .vsline{display:flex;align-items:center;gap:4px;margin-top:3px;
@@ -881,7 +895,7 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
       <button data-lv="2">상세</button>
     </div>
     <div class="card" id="foeBox" hidden>
-      <div class="fl-h">상대 파티<span>가운데가 보스 · 눌러서 서브를 넣으세요</span></div>
+      <div class="fl-h">상대 파티<span>가운데가 보스 · 위 상대 ▼ 아래 낼 태그</span></div>
       <div class="fl-grid" id="foeLanes"></div>
       <!-- 상대마다 낼 태그. 세로 3칸에는 수치를 다 못 넣어 로테이션과 같은
            가로 슬롯으로 뺐다 (v1.97.0 · 잭 지정). -->
@@ -1038,7 +1052,7 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
   스탯·기술은 공식·팬페이지 표기값 (1탄 25 · 2탄 25 · 공통 6)<br>
   받는 피해는 보스 표기 기술 기준
   <span class="ver" id="ver">
-    v1.97.0 · 2026-08-14</span>
+    v1.98.0 · 2026-08-14</span>
 </footer>
 </div>
 
@@ -1589,7 +1603,7 @@ const TAGIMG={
 const tagArt=b=>TAGIMG[b.s+'-'+b.r+'-'+b.n]||null;
 
 const RANK_N=10;          // 순위에 보여줄 개수
-const VERSION='1.97.0';
+const VERSION='1.98.0';
 const BUILT='2026-08-14';
 
 /* ══ 자산을 CSS 로 한 번만 심는다 (DOM 에 base64 중복 방지) ══ */
@@ -2197,7 +2211,40 @@ function renderFoes(){
           +`<span class="fl-s one">HP ${f.hp}·속도 ${f.sp}</span>`
          :`<span class="fl-r">서브 선택</span>`)+`</div>`;
   };
-  /* 상대마다 «낼 태그» 한 장. **로테이션 슬롯(.slot)과 같은 마크업**을 쓴다 —
+  /* 세로 칸과 가로 슬롯이 **같은 계산을 두 번 하지 않도록** 열마다 한 번만 풀고 쥔다.
+     `planFor` 는 보유 태그 전부를 훑으므로 공짜가 아니다 (v1.98.0). */
+  const planCache={};
+  const plan=(at)=>{
+    if(!(at in planCache)){ const f=foeOf(at); planCache[at]= f? planFor(f,boss,at==='B') : null; }
+    return planCache[at];
+  };
+
+  /* 세로 «낼 태그» 칸 — 한눈에 보는 쪽. 아래 가로 슬롯이 같은 내용을 수치까지 펼친다. */
+  const meCell=(at)=>{
+    const isB=at==='B', f=foeOf(at);
+    /* 아래 줄에는 머리말을 두지 않는다 (v1.87.0 · 잭 지정). 세 칸 모두 «낼 태그» 라
+       읽을 것이 없는데 줄 높이만 먹었다. **되살리지 말 것.** */
+    const head='';
+    if(!f) return `<div class="fl-cell empty${isB?' mid':''}">${head}${art(null)}<span class="fl-r">—</span></div>`;
+    const p=plan(at);
+    if(!p) return `<div class="fl-cell empty${isB?' mid':''}">${head}${art(null)}<span class="fl-r">보유 태그 없음</span></div>`;
+    const sp = p.spd>0?`선공 +${p.spd}`: p.spd===0?'동속':`후공 ${p.spd}`;
+    const tag = isB ? `<b class="fl-b boss">최대 화력</b>`
+      : p.tier===0 ? `<b class="fl-b ok">무피해</b>`
+      : p.tier===1 ? `<b class="fl-b warn">한 대 맞고 처치</b>`
+                   : `<b class="fl-b bad">버티기</b>`;
+    /* 피격은 «무피해» 일 때만 감춘다 — `isB` 로 감추지 말 것 (v1.93.0). */
+    const hit = p.tier===0 ? '' : `·피격 ${p.inc<0.005?'&lt;1':Math.round(p.inc*100)}%`;
+    return `<div class="fl-cell${isB?' mid':''} ${artCls(p.c)}">${head}${art(p.c)}`
+      +`<span class="fl-n wt fl-tp">${tp(p.m.t)}<span class="nm">${p.c.n}</span>`
+      +`${p.c.g?`<i class="gi fl-gi ${GK[p.c.g]}${p.m.tagx?' use':''}" title="${p.c.g}${p.m.tagx?' 사용':' 보유 · 이 매치에서는 안 씀'}"></i>`:''}</span>`
+      +`<span class="fl-m">`
+      +`<span class="mv">${p.m.n}</span>`
+      +`${p.mult!==1?`<span class="mx ${p.mult>=2?'good':'bad'}">공×${p.mult}</span>`:''}</span>`
+      +`<span class="fl-s one">${sp}${hit}</span>`+tag+`</div>`;
+  };
+
+  /* 같은 내용을 **수치까지 펼친** 가로 슬롯. **로테이션 슬롯(.slot)과 같은 마크업**을 쓴다 —
      세로 3칸에는 위력·공격·방어까지 못 넣어 v1.97.0 에서 갈아탔다 (잭 지정).
      `.slot-body` 는 `[data-d]` 규칙이 이미 «상성/상세» 로 여닫아 준다. */
   const planSlot=(at)=>{
@@ -2208,7 +2255,7 @@ function renderFoes(){
         <span class="qm">?</span></span>
       <span class="who"><span class="n">${inner}</span></span></div></div>`;
     if(!f) return shell('상대를 넣으면 낼 태그가 나옵니다');
-    const p=planFor(f,boss,isB);
+    const p=plan(at);
     if(!p) return shell('보유 태그 없음');
     const c=p.c, art=tagArt(c);
     const c1=COLOR[c.t[0]], c2=COLOR[c.t[1]||c.t[0]];
@@ -2252,8 +2299,12 @@ function renderFoes(){
   };
 
   wrap.className='fl-grid';
-  wrap.innerHTML = cols.map(foeCell).join('');
-  document.getElementById('foePlans').innerHTML = cols.map(planSlot).join('');
+  wrap.innerHTML = cols.map(foeCell).join('')
+    + cols.map(at=>`<div class="fl-link${at==='B'?' mid':''}">▼</div>`).join('')
+    + cols.map(meCell).join('');
+  /* 3칸 그룹은 그대로 두고 **그 아래에** 수치를 펼친 슬롯을 덧붙인다 (v1.98.0 · 잭 지정) */
+  document.getElementById('foePlans').innerHTML =
+    `<span class="mplans-l">낼 태그 자세히</span>` + cols.map(planSlot).join('');
 
   wrap.querySelectorAll('.fl-cell.foe[data-at]').forEach(n=>{
     const i=+n.dataset.at;
@@ -2307,7 +2358,7 @@ function renderFoes(){
        두 문장은 **잭 지정으로 뺐다** (v1.94.0). 길어서 안 읽힌다.
        **내용 자체는 여전히 참이고 CLAUDE.md «판정 기준» 절에 남아 있다** —
        판정 로직을 낙관 쪽으로 바꾸는 근거로 삼지 말 것. 되살리지도 말 것. */
-    ? `서브 ${k}장 반영. 아래는 <b>상대 한 장마다 낼 태그</b>입니다 — 서브는 «선공 + 원턴킬»이면 `
+    ? `서브 ${k}장 반영. 아래 칸은 <b>바로 위 상대가 활성일 때 낼 태그</b>입니다 — 서브는 «선공 + 원턴킬»이면 `
       +`그 턴 피해가 0 이고 그 장은 배틀에서 빠집니다.`
     : '위 서브 칸을 눌러 상대를 넣으면 아래에 대응 태그가 나옵니다. 비워두면 <b>대상 한 장</b>만 때린다고 봅니다.';
 }
