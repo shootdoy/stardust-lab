@@ -7,7 +7,7 @@
 <meta name="description" content="포켓몬 태그스타 스타더스트 1탄·2탄 ★6·★5 보스 공략. 보유 태그로 3턴 로테이션과 서포트 티켓을 추천합니다.">
 <meta name="theme-color" content="#120B2E">
 <meta name="color-scheme" content="dark">
-<meta name="version" content="2.6.0">
+<meta name="version" content="3.8.0">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -352,6 +352,9 @@ section:first-child{margin-top:0}
 /* 검색 결과는 성급·탄이 섞여 나오므로 이름 아래에 작게 적는다 */
 .foegrid button small{display:block;margin-top:2px;font-size:9px;font-weight:700;
   opacity:.68;letter-spacing:-.02em}
+/* 전투 태그 분류 단추 — 이름 아래에 받는 성급을 적어 둔다 (v3.1.0) */
+#tagClassSw button small,#matchClassSw button small{display:block;margin-top:2px;
+  font-size:9.5px;font-weight:700;opacity:.7}
 /* 목록에서 «이 칸에 지금 들어 있는 태그» — 진하게 채워 구분한다 (v1.84.0 · 잭 지정).
    종전에는 아무 표시가 없어 무엇을 골랐는지 목록만 봐서는 알 수 없었다. */
 .foegrid button.on{background:var(--cyan);border-color:var(--cyan);color:#08111A;
@@ -599,9 +602,13 @@ section:first-child{margin-top:0}
 .pickhead b{flex:1;min-width:0;font-size:15px;font-weight:700}
 .pickstep{margin-left:6px;padding:1px 6px;border-radius:7px;background:rgba(255,255,255,.12);
   font:700 10.5px/1.5 var(--mono);color:var(--ink-dim);vertical-align:1px}
-.foesearch{width:100%;margin:0 0 10px;padding:9px 11px;border-radius:10px;
+/* ⚠ **글자 크기는 16px 아래로 내리지 말 것.** iOS 사파리는 16px 미만 입력창에 포커스가
+   가면 화면을 **자동으로 확대하고, 포커스가 빠져도 되돌리지 않는다** —
+   검색해서 태그를 고르고 나면 화면이 확대된 채 남는다 (v2.9.0 에서 잭이 겪었다).
+   `maximum-scale=1` 로 막는 방법도 있지만 그건 손가락 확대까지 죽여서 안 쓴다. */
+.foesearch{width:100%;margin:0 0 10px;padding:10px 11px;border-radius:10px;
   border:1px solid var(--rim);background:rgba(8,5,22,.55);color:var(--ink);
-  font-weight:600;font-size:13px;line-height:1.2;-webkit-appearance:none}
+  font-weight:600;font-size:16px;line-height:1.2;-webkit-appearance:none}
 .foesearch::placeholder{color:var(--ink-dim);font-weight:600}
 .foesearch:focus{outline:none;border-color:var(--cyan);
   box-shadow:0 0 0 2px rgba(56,225,255,.22)}
@@ -852,7 +859,10 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
 <div class="viewsw" role="group" aria-label="화면 전환">
   <button id="vB" aria-pressed="true">플레이</button>
   <button id="vC" aria-pressed="false">컬렉션 <span class="ct" id="vCct"></span></button>
-  <button id="vX" aria-pressed="false">룰렛 보정 <span class="ct" id="vXct"></span></button>
+  <!-- 이 탭은 룰렛 보정 말고도 다이맥스 레벨·메가 성공도·초기화까지 들고 있어서
+       v2.7.0 에 «설정» 으로 바꿨다 (잭 지정). 값 뱃지(vXct)는 «설정 30/45/30/70» 이
+       읽히지 않으므로 섹션 안내줄로 옮겼다 — 지우지는 않았다(renderChance 가 쓴다). -->
+  <button id="vX" aria-pressed="false">설정</button>
 </div>
 
 <div id="viewBattle" data-d="0">
@@ -880,13 +890,14 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
 
   <section id="sBoss">
     <div class="sec-head"><h2>보스 선택</h2><span class="hint" id="bossHint"></span></div>
-    <div class="setsw" role="group" aria-label="탄 선택">
+    <div class="setsw" role="group" aria-label="탄 선택" id="bossSetSw">
       <button id="sw1" class="s1" aria-pressed="false">1탄</button>
       <button id="sw2" class="s2" aria-pressed="true">2탄</button>
     </div>
     <div class="setsw" role="group" aria-label="등급 전환">
       <button id="sr6" aria-pressed="true">★6</button>
       <button id="sr5" aria-pressed="false">★5</button>
+      <button id="srR" aria-pressed="false">레귤러</button>
     </div>
     <div class="boss-grid" id="bossGrid"></div>
   </section>
@@ -899,6 +910,13 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
 
   <section id="sRot">
     <div class="sec-head"><h2 id="rotH2">추천 로테이션</h2><span class="hint" id="rotHint">보유 태그 기준 · 탄 무관</span></div>
+    <!-- 어느 전투 태그 세트로 뛰는지. 컬렉션의 분류 스위치와 **같은 상태**(`tagClass`)를 쓴다 —
+         여기서 바꾸면 컬렉션 화면도 따라 바뀐다 (v3.8.0 · 잭 지정). -->
+    <div class="setsw" role="group" aria-label="쓸 전투 태그" id="matchClassSw">
+      <button data-tc="A" aria-pressed="true">전투태그A <small>★5·★6</small></button>
+      <button data-tc="B" aria-pressed="false">전투태그B <small>★4·★5</small></button>
+    </div>
+    <p class="tab-note" id="matchClassNote"></p>
     <div class="seg" id="foeSeg" role="group" aria-label="표시 단계" hidden>
       <button data-lv="1" aria-pressed="true">상성</button>
       <button data-lv="2">상세</button>
@@ -942,7 +960,19 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
 
 <div id="viewChance" hidden>
   <section>
-    <div class="sec-head"><h2>룰렛 보정</h2><span class="hint">기믹별 룰렛값 · 공격력에 가산</span></div>
+    <div class="sec-head"><h2>상대 태그 탄</h2>
+      <span class="hint">기계에 걸린 탄만 켜 두세요 · <b>내 수집 태그와는 무관</b></span></div>
+    <div class="card">
+      <div class="setsw" role="group" aria-label="상대로 나오는 탄" id="foeSetsSw">
+        <button data-fs="1" aria-pressed="true">1탄</button>
+        <button data-fs="2" aria-pressed="true">2탄</button>
+      </div>
+      <p class="tab-note" id="foeSetsNote"></p>
+    </div>
+  </section>
+  <section>
+    <div class="sec-head"><h2>룰렛 보정</h2>
+      <span class="hint">기믹별 룰렛값 · 공격력에 가산 <b class="ct" id="vXct"></b></span></div>
     <div class="card">
       <p style="font-size:12.5px;color:var(--ink-dim);margin:0 0 14px;line-height:1.7">
         룰렛에서 뜬 숫자가 공격력에 그대로 더해집니다. 다이맥스는 태그의 다이맥스 레벨에 따라
@@ -1013,6 +1043,11 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
       <button id="ct1" aria-pressed="true">전투태그</button>
       <button id="ct2" aria-pressed="false">수집태그</button>
     </div>
+    <div class="setsw" role="group" aria-label="전투 태그 분류" id="tagClassSw">
+      <button data-tc="A" aria-pressed="true">전투태그A <small>★5·★6</small></button>
+      <button data-tc="B" aria-pressed="false">전투태그B <small>★4·★5</small></button>
+    </div>
+    <p class="tab-note" id="tagClassNote"></p>
     <p class="b23n" id="b23ct"></p>
     <div class="setsw" role="group" aria-label="컬렉션 탄 선택">
       <button id="rs1" class="s1" aria-pressed="true">1탄</button>
@@ -1061,7 +1096,7 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
   스탯·기술은 공식·팬페이지 표기값 (1탄 25 · 2탄 25 · 공통 6)<br>
   받는 피해는 보스 표기 기술 기준
   <span class="ver" id="ver">
-    v2.6.0 · 2026-08-14</span>
+    v3.8.0 · 2026-08-14</span>
 </footer>
 </div>
 
@@ -1260,7 +1295,7 @@ const COMMON=[
 
 /* ══ 1탄 ★4 (상대 서브용) ══════════════════════════════════════════════
    지역배틀에서 상대 파티의 «서브» 로 나오는 태그들. 2026-08-12 팬페이지 화면에서 입력.
-   **`POOL` 에 넣지 않는다** — 추천·BEST-25 계산을 흔들지 않게 분리했다.
+   **`POOL` 에 넣지 않는다** — 추천·BEST-A25 계산을 흔들지 않게 분리했다.
    기술 위력은 팬페이지에 안 나와 `POWER` 미등록 상태다 (평가 시 기본 100 이 쓰인다).
    물리/특수 구분은 화면에 없다. 처음엔 «공격 vs 특공 중 높은 쪽» 으로 판정했으나,
    ★2 야돈(물대포 · 공37 > 특공24 인데 물대포는 특수기)이 **기술 분류는 스탯이 아니라
@@ -1405,7 +1440,11 @@ const POOL=[
    mv:mv.map(([mn,mt,mk,tagx])=>({n:mn,t:mt,k:mk,tagx})),g,
    id:'공통-'+r+'-'+n,measured:true}))
 ];
-const BOSSES=POOL.filter(p=>p.r==='6'||p.r==='5');
+/* 보스 후보. **레귤러태그도 보스로 나온다** (2026-08-14 잭 실측 · v3.7.0) —
+   피카츄·루카리오·잠만보 3장이며 셋 다 다이맥스 기믹을 가졌다.
+   레귤러는 «공통» 이라 탄이 없다 — 보스 화면에서 탄 거르개를 태우면 하나도 안 뜬다.
+   스페셜(S)은 아직 보스로 본 적이 없어 넣지 않았다. */
+const BOSSES=POOL.filter(p=>p.r==='6'||p.r==='5'||p.r==='R');
 
 const GIMICON={
 "메가진화":"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",
@@ -1615,7 +1654,7 @@ const TAGIMG={
 const tagArt=b=>TAGIMG[b.s+'-'+b.r+'-'+b.n]||null;
 
 const RANK_N=10;          // 순위에 보여줄 개수
-const VERSION='2.6.0';
+const VERSION='3.8.0';
 const BUILT='2026-08-14';
 
 /* ══ 자산을 CSS 로 한 번만 심는다 (DOM 에 base64 중복 방지) ══ */
@@ -1631,10 +1670,24 @@ const AK={}, TK={}, GK={}, SK={};
 })();
 const artCls=c=>AK[c.s+'-'+c.r+'-'+c.n]||'';
 
-/* ══ BEST-25 — 1탄 ★5 를 뺀 35보스 x 2모드 기준으로 뽑은 핵심 태그.
-   화력 보존율 99.74% (1탄★6 99.58 · 2탄★6 99.25 · 2탄★5 100.02).
-   메가·다이맥스 보정 반영본. 데이터나 규칙을 바꾸면 다시 계산할 것. ══ */
-const BEST25=new Bag([['1-5-거대코뿌리',1],['1-6-마기라스',1],['2-5-알로라 나인테일',1],['2-6-큐레무',1],['1-5-플라이곤',1],['1-6-메타그로스',1],['2-5-토대부기',1],['2-6-짜랑고우거',1],['2-5-엠페르트',1],['공통-S-따라큐',1],['2-6-제크로무',1],['2-5-님피아',1],['1-6-자시안',1],['2-6-그란돈',1],['1-6-이상해꽃',1],['2-5-갈가부기',1],['2-6-레시라무',1],['2-6-코라이돈',1],['2-5-마휘핑',1],['2-6-잠만보',1],['1-5-윈디',1],['1-6-리자몽',1],['2-6-가이오가',1],['2-5-초염몽',1],['1-5-에이스번',1]]);
+/* ══ BEST-A25 — **전투태그A(★5·★6)** 기준 핵심 태그. **53보스 전체** 기준
+   (v3.7.0 에 레귤러 보스 3개가 더해져 재계산 — **목록은 그대로였다.** 2턴 격파 43/53).
+   ★6 을 포함하므로 **전투태그A 전용이다.** 전투태그B(★4·★5) 용 목록은 아직 없다 —
+   만들면 `BESTB25` 로 두고 후보를 B 쪽으로 좁힐 것.
+   지표는 **① 2턴 격파한 보스 수 ② 피해 합** 순이다.
+   v3.3.0 까지 쓰던 «피해 합» 하나는 단조롭지 않아 보존율이 100% 를 넘었다
+   (엔진이 2턴 격파를 우선해 좋은 카드가 늘면 더 적은 피해로 끝내기도 한다).
+   **지표를 바꿔도 25장 구성은 똑같았다** — 순서만 달라졌다.
+   **14장에서 2턴 격파 43/53 으로 포화한다** (56장 전부여도 43/53).
+   나머지 11장은 격파 수를 못 늘리고 피해만 더한다.
+   메가·다이맥스 보정 반영본. 데이터나 규칙을 바꾸면 `dev/best25.js` 를 다시 돌릴 것. ══ */
+const BESTA25=new Bag([['1-5-거대코뿌리',1],['1-5-윈디',1],['1-5-플라이곤',1],['1-6-리자몽',1],['1-6-마기라스',1],['1-6-메타그로스',1],['1-6-자시안',1],['2-5-갈가부기',1],['2-5-님피아',1],['2-5-리피아',1],['2-5-마휘핑',1],['2-5-알로라 나인테일',1],['2-5-엠페르트',1],['2-5-초염몽',1],['2-5-토대부기',1],['2-6-가이오가',1],['2-6-그란돈',1],['2-6-레시라무',1],['2-6-잠만보',1],['2-6-제크로무',1],['2-6-짜랑고우거',1],['2-6-코라이돈',1],['2-6-큐레무',1],['공통-S-따라큐',1],['공통-S-피카츄 (현장이벤트)',1]]);
+/* ══ BEST-B25 — **전투태그B(★4·★5)** 용. ★6 만 빼고 A 판과 같은 **53보스** 기준 (v3.6.0).
+   **14장에서 2턴 격파 39/53 으로 포화한다** (70장 전부여도 39/53 · A 는 43/53).
+   ⚠ **★4 는 25장 중 두 장뿐이다** (포푸니라 20위 · 가디안 21위 · 한계이득 213·187).
+   ★4 기술 위력이 대부분 미상이라 기본 100 으로 계산된 탓일 수 있다 —
+   **위력이 실측되면 이 목록부터 다시 뽑을 것.** 재계산은 `dev/best-b25.js`. ══ */
+const BESTB25=new Bag([['1-4-포푸니라',1],['1-5-거대코뿌리',1],['1-5-글레이시아',1],['1-5-에이스번',1],['1-5-윈디',1],['1-5-플라이곤',1],['1-5-피죤투',1],['2-4-가디안',1],['2-5-갈가부기',1],['2-5-님피아',1],['2-5-단지래플',1],['2-5-루카리오',1],['2-5-리피아',1],['2-5-마기라스',1],['2-5-마휘핑',1],['2-5-메타그로스',1],['2-5-알로라 나인테일',1],['2-5-에브이',1],['2-5-엠페르트',1],['2-5-초염몽',1],['2-5-토대부기',1],['공통-R-루카리오',1],['공통-S-따라큐',1],['공통-S-피카츄 (밴드증정)',1],['공통-S-피카츄 (현장이벤트)',1]]);
 
 /* ══ 메가진화 — 에너지(=스탯)가 오르고, 폼에 따라 타입이 바뀌기도 한다.
    실측된 것만 채운다. 비어 있으면 보정 없이 원본 스탯으로 계산한다. ══ */
@@ -1708,6 +1761,23 @@ const dexPrune=()=>{ const V=dexValidKeys();
 // 기본 모드는 밸런스. 최대 화력은 약점을 찔리는 태그도 서슴없이 넣어
 // 한 대에 기절하는 일이 생긴다 (가이오가전 거대코뿌리 물 x4 실사례).
 let bossId='2-6-가이오가', setView='2', bossRank='6', rosterSet='1';
+/* 전투 태그 분류 (v3.1.0 · 잭 지정). 기계가 두 종류라 넣을 수 있는 성급이 다르다.
+     A = 전투태그A ★5·★6 — ★4 를 안 받는다
+     B = 전투태그B ★4·★5 — ★6 을 안 받는다
+   **A 와 B 는 완전히 분리된 리스트다** (v3.2.0 · 잭 지정). ★5 는 양쪽에 다 «뜨지만»
+   보유는 따로다 — A 에서 켠 ★5 가 B 에서 켜지지 않는다. 기계가 둘이고 덱을 따로 꾸리기 때문.
+   레귤러·스페셜은 성급이 아니라 «공통» 이라 양쪽에 다 보여 준다(보유는 역시 따로).
+
+   앞으로 A = 최대화력 모드, B = 하이스코어 모드가 된다.
+   **하이스코어는 «상대보다 낮은 등급으로 이기면 보너스»** 로 알려져 있다 (미확인) —
+   B 의 추천 기준은 «화력» 이 아니라 «이길 수 있는 가장 낮은 등급» 이 되어야 한다.
+   그 규칙을 넣기 전에 실측으로 보너스 폭을 확인할 것. */
+let tagClass='A';
+const CLASSES={
+  A:{label:'전투태그A', sub:'★5·★6', ranks:['6','5','R','S']},
+  B:{label:'전투태그B', sub:'★4·★5', ranks:['5','4','R','S']}
+};
+const classRanks=()=>CLASSES[tagClass].ranks;
 /* 앱 초기값은 «아무것도 안 켜짐» 이다. 임의의 태그를 미리 켜두면
    남의 보유를 기준으로 추천이 나와 오해를 부른다. */
 const DEFAULT_OWNED=()=>new Bag();
@@ -1720,7 +1790,17 @@ const FIXTURE_OWNED=()=>new Bag([
   '2-5-님피아','2-5-초염몽','2-5-엠페르트','2-5-알로라 나인테일','2-5-갈가부기',
   '공통-S-따라큐'
 ]);
-let owned=DEFAULT_OWNED();
+/* 분류마다 따로 쥔다. `owned` 는 **지금 보고 있는 분류의 가방**을 가리키는 별칭이라
+   분류를 바꿀 때마다 다시 묶어 준다 (`useClass`). 모든 코드가 `owned` 를 그대로 쓰면 된다. */
+let ownedSets={A:DEFAULT_OWNED(), B:new Bag()};
+let owned=ownedSets.A;
+const useClass=()=>{ owned=ownedSets[tagClass]; };
+/* 그 분류가 받는 성급만 남긴다 — 잘못 실린 카드가 추천을 흔들지 않게. */
+const classIds=cl=>new Set(MYPOOL.filter(p=>CLASSES[cl].ranks.includes(p.r)).map(p=>p.id));
+const trimClass=(bag,cl)=>{ const ok=classIds(cl);
+  /* Bag 은 Map 이라 그냥 펼치면 [id,장수] 쌍이 나온다. **`ids()` 를 쓸 것** —
+     `[...bag]` 로 돌리면 id 가 배열이라 아무것도 안 걸러진다 (v3.2.0 에서 당했다). */
+  bag.ids().forEach(id=>{ if(!ok.has(id)) bag.delete(id); }); return bag; };
 let guideHidden=false;
 let detail=0;
 let rankSort='score';
@@ -1729,6 +1809,16 @@ let rankSort='score';
 //        짜랑고우거 L10 158→182 · 플라이곤 L10 114→132  (4건 모두 일치)
 const DMAX_MUL={0:1, 1:1.0506, 5:1.1042, 10:1.1536};  // lv1: 에너지 158→166 실측 (2026-08-12)
 let dmaxLv=5;        // 룰렛에서 뜬 다이맥스 레벨 (꽝 0 · 1 · 5 · 10)
+/* 상대로 나오는 탄. **기계에 걸린 탄이 바뀌면 여기서 끈다** (v2.8.0 · 잭 지정).
+   지금은 1·2탄이 함께 돌지만 곧 2탄만 남는다 — 그때 1탄을 꺼야 옛 카드가 후보에 안 뜬다.
+   레귤러·스페셜은 «공통» 이라 탄이 없으므로 이 스위치와 무관하게 늘 나온다.
+   **둘 다 끄는 것은 막는다** — 후보가 0장이 되면 화면이 통째로 빈다.
+
+   ⚠ **이 스위치는 «상대 후보(FOEPOOL)» 에만 건다. 내 쪽에는 절대 걸지 말 것** (잭 확인) —
+   기계에서 1탄이 내려가도 **내가 가진 1탄 태그는 계속 쓸 수 있다.**
+   `owned` · `POOL` · 컬렉션 · 로테이션 · BEST-A25 에 `foeOn` 을 끼워 넣지 말 것. */
+let foeSets={'1':true,'2':true};
+const foeOn=c=> c.s==='공통' || foeSets[c.s]!==false;
 let colTab='battle';           // 컬렉션 서브탭: battle | dex
 let dex=new Bag();             // 수집 장수 (추천 계산과 무관)
 let dexBest=null;              // 수집 기준 추천-25 결과 (Bag|null)
@@ -1746,10 +1836,24 @@ let backend='memory';
 /* 아티팩트 미리보기(샌드박스)에서만 검증용 26장을 미리 켠다.
    저장이 안 남는 환경이라 열 때마다 0장이면 시험이 번거롭다.
    배포본(localStorage)은 손대지 않는다 — 초기값 0장 그대로. */
+/* 보유 복원. **v3.2.0 부터 A·B 를 따로 저장한다** (`ownedA` · `ownedB`).
+   옛 저장(`owned` 하나)은 **분류마다 받는 성급만 골라 양쪽에 나눠 넣는다** —
+   ★6 은 A 로, ★4 는 B 로, ★5·레귤러·스페셜은 양쪽에. 지우는 것보다 덜 놀랍고
+   틀렸으면 화면에서 끄면 된다. **이관 코드를 지우지 말 것** — 옛 저장이 남아 있다. */
+function loadOwned(saved,arr){
+  const pick=(list,cl)=>trimClass(toBag((list||[]).filter(x=>{
+    const id=Array.isArray(x)?x[0]:x; return MYBY.has(id)})), cl);
+  if(saved && (saved.ownedA||saved.ownedB)){
+    ownedSets={A:pick(saved.ownedA,'A'), B:pick(saved.ownedB,'B')};
+  } else if(Array.isArray(arr)){
+    ownedSets={A:pick(arr,'A'), B:pick(arr,'B')};   // 옛 형식 이관
+  } else return false;
+  useClass(); return true;
+}
 let loaded=false, seeded=false;
 function seedSandbox(){
   if(loaded || backend!=='claude' || owned.total) return;
-  owned=FIXTURE_OWNED(); seeded=true;
+  ownedSets.A=FIXTURE_OWNED(); ownedSets.B=trimClass(FIXTURE_OWNED(),'B'); useClass(); seeded=true;
 }
 async function load(){
   try{
@@ -1761,13 +1865,14 @@ async function load(){
     if(saved&&saved.rankSort) rankSort=saved.rankSort;
     if(saved&&saved.bossRank) bossRank=saved.bossRank;
     if(saved&&saved.dmaxLv!=null) dmaxLv=saved.dmaxLv;
+    if(saved&&saved.foeSets) foeSets={'1':saved.foeSets['1']!==false,'2':saved.foeSets['2']!==false};
+    if(saved&&CLASSES[saved.tagClass]){ tagClass=saved.tagClass; useClass(); }
     if(saved&&saved.megaTier) megaTier=saved.megaTier;
     if(saved&&saved.mode&&MODES[saved.mode]) mode=saved.mode;
     if(saved&&Array.isArray(saved.foes)) foes=[0,1].map(i=>SUBBY.has(saved.foes[i])?saved.foes[i]:null);
     if(saved&&Array.isArray(saved.dex)) dex=toBag(saved.dex);
     backend='claude';
-    if(Array.isArray(arr)){ owned=toBag(arr.filter(x=>{const id=Array.isArray(x)?x[0]:x;
-      return POOL.some(p=>p.id===id)})); loaded=true; }
+    if(loadOwned(saved,arr)) loaded=true;
     seedSandbox();
     dexPrune();
     return;
@@ -1785,19 +1890,20 @@ async function load(){
       if(saved&&saved.rankSort) rankSort=saved.rankSort;
       if(saved&&saved.bossRank) bossRank=saved.bossRank;
       if(saved&&saved.dmaxLv!=null) dmaxLv=saved.dmaxLv;
+    if(saved&&saved.foeSets) foeSets={'1':saved.foeSets['1']!==false,'2':saved.foeSets['2']!==false};
+    if(saved&&CLASSES[saved.tagClass]){ tagClass=saved.tagClass; useClass(); }
       if(saved&&saved.megaTier) megaTier=saved.megaTier;
       if(saved&&saved.mode&&MODES[saved.mode]) mode=saved.mode;
     if(saved&&Array.isArray(saved.foes)) foes=[0,1].map(i=>SUBBY.has(saved.foes[i])?saved.foes[i]:null);
       if(saved&&Array.isArray(saved.dex)) dex=toBag(saved.dex);
-        if(Array.isArray(arr)){ owned=toBag(arr.filter(x=>{const id=Array.isArray(x)?x[0]:x;
-          return POOL.some(p=>p.id===id)})); loaded=true; }}
+        if(loadOwned(saved,arr)) loaded=true; }
   }catch(e){ backend='memory' }
   seedSandbox();
   dexPrune();
 }
 let sT;
 function save(){clearTimeout(sT);sT=setTimeout(async()=>{
-  const p=JSON.stringify({owned:[...owned],chance,guideHidden,detail,rankSort,bossRank,dmaxLv,megaTier,mode,foes,dex:[...dex]});
+  const p=JSON.stringify({ownedA:[...ownedSets.A],ownedB:[...ownedSets.B],chance,guideHidden,detail,rankSort,bossRank,dmaxLv,megaTier,mode,foes,foeSets,tagClass,dex:[...dex]});
   if(backend==='claude'){try{await window.storage.set(KEY,p);return}catch(e){}}
   if(backend==='claude'||backend==='local'){try{localStorage.setItem(KEY,p);backend='local';return}catch(e){}}
   backend='memory'; renderBackend();
@@ -1908,6 +2014,19 @@ let foes=[null,null];
    스페셜(S)은 아직 서브로 본 적이 없어 넣지 않았다. 보이면 여기 한 줄만 더하면 된다. */
 const FOEPOOL=[...POOL.filter(p=>p.r==='6'||p.r==='5'||p.r==='R'), ...SUBS];
 const SUBBY=new Map(FOEPOOL.map(s=>[s.id,s]));
+/* **내가 가질 수 있는 전투 태그** = `POOL`(★6·★5·레귤러·스페셜) + **★4 서브 34장** (v3.0.0 · 잭 지정).
+   ★4 는 원래 상대 전용(`SUBS`)이라 `POOL` 밖에 뒀는데, 실제로는 내가 뽑아서 쓸 수 있다.
+   `SUBS` 항목은 `POOL` 과 **모양이 같고 id 도 안 겹친다** (`탄-성급-이름`) — 그대로 섞인다.
+
+   ⚠ **★3 이하로 더 넓히기 전에 생각할 것.** 성급이 낮을수록 «위력 미상» 문제가 커진다.
+   ⚠ **BEST-A25·순위는 여전히 `POOL` 기준이다** (`ranked` 는 보유분만 보므로 자동 반영).
+      «가질 만한 태그» 추천에 위력이 추정치인 카드를 끼우지 않으려는 것이다. */
+const MYPOOL=[...POOL, ...SUBS.filter(c=>c.r==='4')];
+/* 지금 분류가 받는 카드만. **기계에 못 넣는 카드를 추천하지 않으려는 것** (v3.2.0). */
+const classPool=()=>MYPOOL.filter(p=>CLASSES[tagClass].ranks.includes(p.r));
+/* 분류에 맞는 핵심 목록. **배지·안내가 둘 다 이걸 쓴다** — 한쪽만 바꾸면 어긋난다. */
+const bestSet=()=>tagClass==='A'?BESTA25:BESTB25;
+const MYBY=new Map(MYPOOL.map(c=>[c.id,c]));
 // 이 배틀에서 나를 때릴 수 있는 상대 전부. 지역배틀 + 서브 지정일 때만 3장이 된다.
 const foeAll=boss=>{
   if(mode!=='지역') return [boss];
@@ -1928,7 +2047,7 @@ function evalCard(card,boss,banGim){
   const d=Math.max(...boss.mv.map(m=>eff(m.t,types)));
   return {c:card,mult:o.mult,move:o.move,ratio:o.ratio,pw:o.pw,bonus:o.bonus,raw:o.raw,atk:o.atk,def:o.def,dmg:o.dmg,d,s:o.v*(DW[d]??1)};
 }
-const ranked=(boss,banGim,skip)=>POOL.filter(p=>owned.has(p.id)&&p.id!==boss.id&&!(skip&&skip.has(p.id)))
+const ranked=(boss,banGim,skip)=>classPool().filter(p=>owned.has(p.id)&&p.id!==boss.id&&!(skip&&skip.has(p.id)))
   .map(c=>evalCard(c,boss,banGim)).filter(Boolean).sort((a,b)=>b.s-a.s||b.mult-a.mult);
 
 // 한 장을 특정 기술로 썼을 때의 평가
@@ -1976,7 +2095,7 @@ const RANDOM={c:{id:'__rand',n:'랜덤 태그',s:'랜덤',r:'?',t:[],mv:[],g:nul
    되돌리지 말 것 — v1.39 까지 «자기 턴에만 맞는다», v1.41 까지 «세 칸이 한 번씩 공격»
    으로 봤는데 둘 다 틀렸다. */
 function buildSeq(boss){
-  const all=POOL.filter(p=>owned.has(p.id)&&p.id!==boss.id);
+  const all=classPool().filter(p=>owned.has(p.id)&&p.id!==boss.id);
   if(!all.length) return [];
 
   const movesOf=(c)=>{
@@ -2093,7 +2212,7 @@ const chip=(c,o={})=>{
     ${o.pressed==null?'':`aria-pressed="${o.pressed}"`} data-id="${c.id}">
     <span class="b23w">${
       (dexBest&&dexBest.has(c.id)?'<span class="b23 rec">추천</span>':'')
-      +(BEST25.has(c.id)?'<span class="b23">BEST</span>':'')}</span>
+      +(bestSet().has(c.id)?`<span class="b23">${tagClass}25</span>`:'')}</span>
     <span class="cn">${c.n}</span>
     <span class="cm"><span class="cr">★${c.r}</span>${c.t.map(x=>
       `<i class="ci ${TK[x]}" title="${x}"></i>`).join('')}
@@ -2109,7 +2228,7 @@ function bossTag(b,sel){
     : `linear-gradient(135deg,${c1}D9,${c2}A6 58%,rgba(12,7,34,.92))`;
   return `<button class="btag ${artCls(b)}" aria-pressed="${sel}" data-id="${b.id}">
     <span class="face" style="background:${bg}">
-      <span class="row1"><span class="stars">${'★'.repeat(+b.r||6)}</span><span class="code">${b.code}</span></span>
+      <span class="row1"><span class="stars">${/^\d$/.test(b.r)?'★'.repeat(+b.r):rlab(b.r)}</span><span class="code">${b.code}</span></span>
       <span class="nm">${b.n}</span>
       <span class="row2">
         <span class="tps">${b.t.map(tp).join('')}</span>
@@ -2151,7 +2270,7 @@ const foeHitOne=(c,f)=>Math.max(0,...f.mv.map(m=>bossHit(c,f,m)));   // 그 장�
    v1.99.0 전까지는 최선 한 장만 돌려줬는데, 세 열이 서로 겹치는지 볼 수 없어
    **같은 카드가 두 열에 추천되는 일**이 있었다 (잭 지적). 이제 목록을 주고 배정은 밖에서 한다. */
 function foeCands(foe,boss,isBoss){
-  const mine=POOL.filter(p=>owned.has(p.id)&&p.id!==boss.id);
+  const mine=classPool().filter(p=>owned.has(p.id)&&p.id!==boss.id);
   if(!mine.length||!foe) return [];
   const keepOf=c=>Math.max(0,...c.mv.filter(m=>!m.tagx).map(m=>evalMove(c,boss,m,false).dmg));
   const rows=[];
@@ -2412,16 +2531,24 @@ function renderFoes(){
                                                           : ' <span class="pickstep">2 / 2</span>') : '';
     document.getElementById('foePickH').innerHTML=`서브 ${foePickAt===0?1:2} 선택${step}`;
     document.querySelectorAll('#foeRank button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.r===foeRank));
-    document.querySelectorAll('#foeSet button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.s===foeSet));
+    /* 켜진 탄이 하나뿐이면 픽커의 탄 스위치는 고를 것이 없다 — 줄째 감춘다 */
+    const onSets=['1','2'].filter(k=>foeSets[k]);
+    if(!foeSets[foeSet]) foeSet=onSets[0];
+    document.querySelectorAll('#foeSet button').forEach(b=>{
+      b.hidden = !foeSets[b.dataset.s];
+      b.setAttribute('aria-pressed',b.dataset.s===foeSet);
+    });
     const searching = !!foeQ;
     /* 검색 중에는 성급·탄 거르개를 통째로 감춘다 — 안 감추면 «눌러도 목록이 안 바뀐다» 로 보인다 */
     document.getElementById('foeRank').hidden = searching;
-    document.getElementById('foeSet').hidden = searching || (foeRank==='R');
+    document.getElementById('foeSet').hidden = searching || (foeRank==='R') || onSets.length<2;
     const g=document.getElementById('foeGrid'); g.innerHTML='';
     /* 레귤러는 «공통» 이라 탄이 없다. 탄 거르개를 태우면 목록이 텅 빈다 (v2.1.0) */
-    const list = searching
+    /* 설정에서 끈 탄은 후보에서 통째로 뺀다 (v2.8.0). 검색도 마찬가지 —
+       «안 나오는 탄» 을 검색으로 우회해 넣을 수 있으면 끈 의미가 없다. */
+    const list = (searching
       ? FOEPOOL.filter(s=>foeMatch(s.n,foeQ))
-      : FOEPOOL.filter(s=>s.r===foeRank&&(foeRank==='R'||s.s===foeSet));
+      : FOEPOOL.filter(s=>s.r===foeRank&&(foeRank==='R'||s.s===foeSet))).filter(foeOn);
     if(searching && !list.length)
       g.innerHTML='<p class="tab-note" style="grid-column:1/-1;margin:2px">찾는 이름이 없습니다</p>';
     /* 안내줄은 **목록을 만든 뒤** 채운다 — 개수를 쓰기 때문이다.
@@ -2478,8 +2605,17 @@ function setBoss(id){
   save(); return true;
 }
 function renderBosses(){
+  /* 설정에서 켠 탄이 하나뿐이면 **보스도 그 탄으로 고정하고 스위치를 감춘다** (v2.9.0 · 잭 지정).
+     고를 것이 없는 스위치를 두면 눌러도 아무 일이 없어 고장처럼 보인다.
+     여기서는 `foeOn` 을 쓰지 않는다 — 그 함수는 «상대 후보 목록» 전용이고,
+     `sync.js` 가 등장 횟수로 번짐을 감시한다. 탄 여부는 `foeSets` 를 직접 본다. */
+  const onSets=['1','2'].filter(k=>foeSets[k]);
+  if(!foeSets[setView]) setView=onSets[0];
+  /* 레귤러 보스는 «공통» 이라 탄이 없다 — 그때는 탄 스위치를 감춘다 (v3.7.0) */
+  const isR = bossRank==='R';
+  const sw=document.getElementById('bossSetSw'); if(sw) sw.hidden = isR || onSets.length<2;
   const g=document.getElementById('bossGrid');g.innerHTML='';
-  const list=BOSSES.filter(b=>b.s===setView&&b.r===bossRank);
+  const list=BOSSES.filter(b=>isR ? b.r==='R' : (b.s===setView&&b.r===bossRank));
   list.forEach(b=>{
     const n=el(bossTag(b,b.id===bossId));
     n.addEventListener('click',()=>{setBoss(b.id);renderAll();goSection('sSup')});
@@ -2491,11 +2627,11 @@ function renderBosses(){
     b.setAttribute('aria-pressed', b.dataset.mode===mode));
   const mn=document.getElementById('modeNote');
   if(mn) mn.innerHTML=MODES[mode].note;
-  document.getElementById('sr6').setAttribute('aria-pressed',bossRank==='6');
-  document.getElementById('sr5').setAttribute('aria-pressed',bossRank==='5');
+  ['6','5','R'].forEach(r=>document.getElementById('sr'+r).setAttribute('aria-pressed',bossRank===r));
+  const lab = isR ? '레귤러' : `${setView}탄 ★${bossRank}`;
   document.getElementById('bossHint').textContent = list.length
-    ? `${setView}탄 ★${bossRank} · ${list[0].code} ~ ${list[list.length-1].code}`
-    : `${setView}탄 ★${bossRank} 데이터 없음`;
+    ? `${lab} · ${list[0].code} ~ ${list[list.length-1].code}`
+    : `${lab} 데이터 없음`;
 }
 
 function renderReadout(){
@@ -2965,7 +3101,7 @@ function renderRank(){
     </span></div>`;}).join('');
 }
 
-/* ══ 수집 기준 BEST-25 ══
+/* ══ 수집 기준 추천-25 (BEST-A25 의 «내가 가진 것만» 판) ══
    수집(dex) 체크한 태그 중에서 다시 뽑는다. `buildSeq` 가 보유 장수의 세제곱이라
    정확 탐욕은 후보 56장에서 Node 14초 · 폰은 그 몇 배다. 그래서 2단계로 나눈다.
      1) 단독 기여도(보스별 한 장만 놓고 최고 피해)로 후보를 26장까지 좁힌다 — 20ms
@@ -2974,7 +3110,9 @@ function renderRank(){
    지연 탐욕(lazy greedy)은 쓰지 말 것 — 탈진·기믹 제약 탓에 한계이득 감소가
    성립하지 않아 결과가 7% 나빠진다. 실제로 재봤다. */
 const DEXBEST_N=25, DEXBEST_SHORT=38;   // 추림 폭은 목표 장수보다 넉넉해야 한다
-const dexBossSet=()=>BOSSES.filter(b=>!(b.s==='1'&&b.r==='5'));   // BEST-25 과 같은 35보스 기준
+/* 고정 BEST-A25 와 **같은 기준을 써야 한다** — 한쪽만 바꾸면 두 추천이 말없이 어긋난다.
+   v3.3.0 에 1탄 ★5 를 되돌려 50보스 전체가 됐다 (잭 지정). */
+const dexBossSet=()=>BOSSES.slice();
 function dexBattleIds(){
   const out=new Set();
   ['1','2'].forEach(st=>DEXRANK.forEach(r=>dexList(st,r).forEach(it=>{
@@ -3021,14 +3159,16 @@ function renderDexBestMsg(txt){
 
 function renderRoster(){
   const host=document.getElementById('roster'); host.innerHTML='';
-  const inSet=POOL.filter(p=>p.s===rosterSet||p.s==='공통');
-  ['6','5','R','S'].forEach(k=>{
+  const inSet=MYPOOL.filter(p=>p.s===rosterSet||p.s==='공통');
+  classRanks().forEach(k=>{
     const list=inSet.filter(p=>p.r===k); if(!list.length)return;
     const on=list.filter(p=>owned.has(p.id)).length;
     const d=el(`<details open>
       <summary><span class="band" style="background:${RARITY[k].color}"></span>${RARITY[k].label}
         ${list[0].s==='공통'?'<span class="badge b-set">탄 공통</span>':''}
         <span class="ct">${on} / ${list.length}</span></summary>
+      ${k==='4'?`<p class="tab-note" style="margin:2px 0 6px">★4 는 <b>기술 위력이 미표기</b>라
+        기본 100 으로 계산합니다 — 예상 피해와 판정을 ★5·★6 만큼 믿지 마세요.</p>`:''}
       <div class="bulk"><button class="mini" data-b="on">전체 켜기</button>
         <button class="mini" data-b="off">전체 끄기</button></div>
       <div class="pool"></div></details>`);
@@ -3048,7 +3188,8 @@ function renderRoster(){
   document.getElementById('rs2').setAttribute('aria-pressed',rosterSet==='2');
   // 중복 보유를 쓰지 않으므로 «장수» 와 «종» 이 늘 같다. 분모 있는 한 가지 표기로 통일한다.
   document.getElementById('ownHint').innerHTML=
-    `전투 <b>${owned.size}</b> / ${POOL.length} · 수집 <b>${dex.size}</b> / ${dexTotal()}`;
+    `${CLASSES[tagClass].label} 전투 <b>${owned.size}</b> / ${classPool().length}`
+    + ` · 수집 <b>${dex.size}</b> / ${dexTotal()}`;
 }
 
 /* 수집 탭 — 전투 보유(owned)와 완전히 분리된 dex 집합만 쓴다.
@@ -3094,6 +3235,33 @@ function renderDex(){
   if(h) h.textContent=`${rosterSet}탄 ${have} / ${rows.length}종 수집 · 전투 보유와 별개로 저장됩니다`;
   host.dataset.keys=JSON.stringify(rows.map(keyOf));
 }
+/* 분류를 바꿔도 **보유는 그대로다** — 보는 창만 바뀐다. 저장까지 해서 다음에도 그 창으로 연다. */
+function setTagClass(v){ tagClass=v; useClass(); save(); renderAll(); }
+function renderTagClass(){
+  /* 스위치가 두 군데(컬렉션·매치)다. **둘 다 갱신할 것** — 한쪽만 하면
+     다른 화면에서 눌린 표시가 어긋난다 (같은 `tagClass` 를 보는데도). */
+  ['tagClassSw','matchClassSw'].forEach(id=>{
+    const n=document.getElementById(id); if(!n) return;
+    n.querySelectorAll('button').forEach(b=>
+      b.setAttribute('aria-pressed', String(b.dataset.tc===tagClass)));
+  });
+  const mn=document.getElementById('matchClassNote');
+  if(mn){
+    const C=CLASSES[tagClass], n=classPool().filter(p=>owned.has(p.id)).length;
+    mn.innerHTML = `<b>${C.label}</b> ${C.sub} 로 계산합니다 · 보유 <b>${n}</b>장`
+      + (n<3 ? ' — <b>3장은 있어야 로테이션이 섭니다</b>' : '');
+  }
+  const sw=document.getElementById('tagClassSw'); if(!sw) return;
+  const C=CLASSES[tagClass];
+  const list=MYPOOL.filter(p=>(p.s===rosterSet||p.s==='공통')&&C.ranks.includes(p.r));
+  const on=list.filter(p=>owned.has(p.id)).length;
+  const other=tagClass==='A'?'B':'A';
+  document.getElementById('tagClassNote').innerHTML =
+    `<b>${C.label}</b> ${C.sub} · 이 분류에서 <b>${on}</b> / ${list.length}장 보유`
+    + ` <span class="qm">|</span> ${CLASSES[other].label} ${ownedSets[other].size}장`
+    + `<br><b>A 와 B 는 따로 저장됩니다.</b> ★5 는 양쪽에 다 뜨지만 보유는 별개예요 —`
+    + ` A 에서 켠 ★5 가 B 에서 켜지지는 않습니다. 추천도 지금 분류가 받는 성급만 씁니다.`;
+}
 function setColTab(v){
   colTab=v;
   document.getElementById('colBattle').hidden = v!=='battle';
@@ -3101,6 +3269,9 @@ function setColTab(v){
   document.getElementById('ct1').setAttribute('aria-pressed',v==='battle');
   document.getElementById('ct2').setAttribute('aria-pressed',v==='dex');
   const b=document.getElementById('b23ct'); if(b) b.hidden = v!=='battle';
+  /* 분류 스위치는 «전투태그» 를 볼 때만 쓸모가 있다 */
+  ['tagClassSw','tagClassNote'].forEach(id=>{
+    const n=document.getElementById(id); if(n) n.hidden = v!=='battle'; });
   renderAll();
 }
 
@@ -3115,6 +3286,26 @@ function setView2(v){
   window.scrollTo({top:0,behavior:'instant'});
   renderDock();
 }
+/* 상대 탄 토글. **마지막 하나는 못 끈다** — 후보가 0장이 되면 서브를 아예 못 고른다.
+   탄을 끄면 이미 넣어 둔 서브는 **건드리지 않는다** (그 자체는 멀쩡한 데이터다).
+   다만 픽커의 탄 스위치가 꺼진 탄을 가리키고 있으면 켜진 쪽으로 옮긴다. */
+document.querySelectorAll('#tagClassSw button,#matchClassSw button').forEach(b=>
+  b.addEventListener('click',()=>setTagClass(b.dataset.tc)));
+document.querySelectorAll('#foeSetsSw button').forEach(b=>
+  b.addEventListener('click',()=>{
+    const k=b.dataset.fs, other=k==='1'?'2':'1';
+    if(foeSets[k] && !foeSets[other]) return;      // 마지막 하나
+    foeSets[k]=!foeSets[k];
+    if(!foeSets[foeSet]) foeSet = foeSets['1']?'1':'2';
+    /* 꺼진 탄의 보스를 쥐고 있으면 켜진 탄의 첫 보스로 옮긴다. `setBoss` 를 타므로
+       서브도 함께 비워진다 — 지난 파티 기준 추천이 새 보스에 남는 것보다 낫다. */
+    if(!foeSets[setView]){
+      setView = foeSets['1']?'1':'2';
+      const f=BOSSES.find(b=>b.s===setView&&b.r===bossRank) || BOSSES.find(b=>b.s===setView);
+      if(f){ bossRank=f.r; setBoss(f.id); }
+    }
+    save(); renderAll();
+  }));
 document.querySelectorAll('.ranksort button').forEach(b=>
   b.addEventListener('click',()=>{rankSort=b.dataset.sort; save(); renderRank()}));
 document.querySelectorAll('.seg button').forEach(b=>
@@ -3126,9 +3317,10 @@ function wipe(){
   try{ localStorage.removeItem(KEY) }catch(e){}
   try{ window.storage && window.storage.delete && window.storage.delete(KEY) }catch(e){}
   // save() 가 저장하는 모든 항목을 되돌린다 — 하나라도 빠지면 다음 save 때 옛 값이 되살아난다
-  owned=DEFAULT_OWNED(); chance={...CHANCE_DEFAULTS};
+  ownedSets={A:DEFAULT_OWNED(), B:new Bag()}; useClass(); chance={...CHANCE_DEFAULTS};
   guideHidden=false; detail=0; rankSort='score'; bossRank='6';
-  dmaxLv=5; megaTier='대성공'; mode='지역'; foes=[null,null]; dex=new Bag();
+  dmaxLv=5; megaTier='대성공'; mode='지역'; foes=[null,null]; foeSets={'1':true,'2':true};
+  tagClass='A'; dex=new Bag();
   renderAll();
 }
 const wipeBtn=document.getElementById('wipeBtn'),
@@ -3213,7 +3405,8 @@ brand.addEventListener('keydown',e=>{
 document.getElementById('chanceReset').addEventListener('click',()=>{
   chance={...CHANCE_DEFAULTS}; save(); renderAll()});
 const preset=(st)=>{
-  owned=new Bag(POOL.filter(p=>p.s===st&&p.r==='6').map(p=>p.id)); save(); renderAll();
+  ownedSets[tagClass]=trimClass(new Bag(POOL.filter(p=>p.s===st&&p.r==='6').map(p=>p.id)),tagClass);
+  useClass(); save(); renderAll();
 };
 document.querySelectorAll('.modesw button').forEach(b=>
   b.addEventListener('click',()=>{ mode=b.dataset.mode; save(); renderAll(); }));
@@ -3224,9 +3417,9 @@ document.querySelectorAll('#foeSet button').forEach(b=>
 document.getElementById('preset16').addEventListener('click',()=>preset('1'));
 document.getElementById('preset26').addEventListener('click',()=>preset('2'));
 document.getElementById('resetOwn').addEventListener('click',()=>{
-  owned=new Bag(POOL.map(p=>p.id)); save(); renderAll()});
+  ownedSets[tagClass]=trimClass(new Bag(MYPOOL.map(p=>p.id)),tagClass); useClass(); save(); renderAll()});
 document.getElementById('clearOwn').addEventListener('click',()=>{
-  owned=new Bag(); save(); renderAll()});
+  ownedSets[tagClass]=new Bag(); useClass(); save(); renderAll()});
 Object.entries(VIEWS).forEach(([k,ids])=>
   document.getElementById(ids[1]).addEventListener('click',()=>setView2(k)));
 
@@ -3269,6 +3462,18 @@ function renderMega(){
     + (known<total?' 나머지는 보정 없이 원본 스탯으로 계산합니다.':'');
 }
 
+function renderFoeSets(){
+  const sw=document.getElementById('foeSetsSw'); if(!sw) return;
+  sw.querySelectorAll('button').forEach(b=>
+    b.setAttribute('aria-pressed', String(!!foeSets[b.dataset.fs])));
+  const on=['1','2'].filter(k=>foeSets[k]);
+  const n=FOEPOOL.filter(foeOn).length;
+  document.getElementById('foeSetsNote').innerHTML =
+    (on.length===2 ? '1·2탄이 함께 나옵니다' : on[0]+'탄만 나옵니다')
+    + ` · 서브 후보 ${n}장 (레귤러는 탄과 무관하게 늘 포함)`
+    + (on.length===1 ? ' · 마지막 하나는 끌 수 없습니다' : '')
+    + '<br><b>상대 후보만 거릅니다 — 내가 가진 1탄 태그는 그대로 쓰고 추천에도 그대로 나옵니다.</b>';
+}
 function renderChance(){
   const rb=document.getElementById('chanceReset');
   if(rb) rb.textContent='기본값 ('+Object.values(CHANCE_DEFAULTS).join(' / ')+')';
@@ -3295,18 +3500,20 @@ function renderChance(){
 }
 
 function renderAll(){
-  renderBosses();renderFoes();renderReadout();renderRotation();renderSupport();renderRank();renderRoster();renderDex();renderMyQR();renderBackend();renderChance();renderDmax();renderMega();renderGuide();renderDetail();renderDock();
+  renderTagClass();renderFoeSets();renderBosses();renderFoes();renderReadout();renderRotation();renderSupport();renderRank();renderRoster();renderDex();renderMyQR();renderBackend();renderChance();renderDmax();renderMega();renderGuide();renderDetail();renderDock();
   document.getElementById('vCct').innerHTML=
-    `<span>전투 ${owned.size}/${POOL.length}</span><span>수집 ${dex.size}/${dexTotal()}</span>`;
+    `<span>전투${tagClass} ${owned.size}/${classPool().length}</span><span>수집 ${dex.size}/${dexTotal()}</span>`;
   const bh=document.getElementById('b23ct');
   if(bh){                                  // BEST-25 는 25종 각 1장 — 중복 없음
-    const need=BEST25.size;
-    const have=[...BEST25.keys()].filter(id=>owned.has(id)).length;
-    bh.innerHTML=`<b>BEST-25</b> 핵심 태그 <b style="color:${have===need?'var(--ok)':'var(--star)'}">${have}/${need}</b>`
-      +' · 1탄 ★5 보스를 뺀 35보스 기준으로 뽑은 우선 확보 목록입니다'; }
+    const BS=bestSet(), need=BS.size;
+    const have=[...BS.keys()].filter(id=>owned.has(id)).length;
+    bh.innerHTML=`<b>BEST-${tagClass}25</b> 핵심 태그 <b style="color:${have===need?'var(--ok)':'var(--star)'}">${have}/${need}</b>`
+      +` · 53보스 전체 기준 · <b>${CLASSES[tagClass].label}(${CLASSES[tagClass].sub})</b> 용입니다`
+      + (tagClass==='B' ? ' — ★4 는 위력 미상이라 두 장만 들었습니다' : ''); }
 }
 const pickBoss=()=>{                       // 탄·등급을 바꾸면 그 그룹의 첫 보스로
-  const f=BOSSES.find(b=>b.s===setView&&b.r===bossRank);
+  const f=bossRank==='R' ? BOSSES.find(b=>b.r==='R')
+                         : BOSSES.find(b=>b.s===setView&&b.r===bossRank);
   if(f) setBoss(f.id);                     // 보스가 바뀌면 서브도 비운다
   save(); renderAll();
 };
@@ -3314,6 +3521,7 @@ document.getElementById('sw1').addEventListener('click',()=>{setView='1'; pickBo
 document.getElementById('sw2').addEventListener('click',()=>{setView='2'; pickBoss()});
 document.getElementById('sr6').addEventListener('click',()=>{bossRank='6'; pickBoss()});
 document.getElementById('sr5').addEventListener('click',()=>{bossRank='5'; pickBoss()});
+document.getElementById('srR').addEventListener('click',()=>{bossRank='R'; pickBoss()});
 document.getElementById('dexFromOwn').addEventListener('click',()=>{
   // owned → dex 단방향 복사. dex 는 전투 계산에 영향을 주지 않는다.
   ['1','2'].forEach(s=>DEXRANK.forEach(r=>dexList(s,r).forEach(it=>{
