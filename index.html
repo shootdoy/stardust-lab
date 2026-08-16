@@ -7,7 +7,7 @@
 <meta name="description" content="포켓몬 태그스타 스타더스트 1탄·2탄 ★6·★5 보스 공략. 보유 태그로 3턴 로테이션과 서포트 티켓을 추천합니다.">
 <meta name="theme-color" content="#120B2E">
 <meta name="color-scheme" content="dark">
-<meta name="version" content="3.13.1">
+<meta name="version" content="3.24.0">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -919,7 +919,8 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
          여기서 바꾸면 컬렉션 화면도 따라 바뀐다 (v3.8.0 · 잭 지정). -->
     <div class="setsw" role="group" aria-label="쓸 전투 태그" id="matchClassSw">
       <button data-tc="A" aria-pressed="true">전투태그A <small>★5·★6</small></button>
-      <button data-tc="B" aria-pressed="false">전투태그B <small>★4·★5</small></button>
+      <button data-tc="B" aria-pressed="false">전투태그B <small>★5</small></button>
+      <button data-tc="C" aria-pressed="false">전투태그C <small>★4</small></button>
     </div>
     <p class="tab-note" id="matchClassNote"></p>
     <div class="seg" id="foeSeg" role="group" aria-label="표시 단계" hidden>
@@ -1079,7 +1080,8 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
     </div>
     <div class="setsw" role="group" aria-label="전투 태그 분류" id="tagClassSw">
       <button data-tc="A" aria-pressed="true">전투태그A <small>★5·★6</small></button>
-      <button data-tc="B" aria-pressed="false">전투태그B <small>★4·★5</small></button>
+      <button data-tc="B" aria-pressed="false">전투태그B <small>★5</small></button>
+      <button data-tc="C" aria-pressed="false">전투태그C <small>★4</small></button>
     </div>
     <p class="tab-note" id="tagClassNote"></p>
     <p class="b23n" id="b23ct"></p>
@@ -1129,8 +1131,9 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
 후보는 ★6 · ★5 · 레귤러 · 스페셜 · 보스는 ★6 · ★5<br>
   스탯·기술은 공식·팬페이지 표기값 (1탄 25 · 2탄 25 · 공통 6)<br>
   받는 피해는 보스 표기 기술 기준
-  <span class="ver" id="ver">
-    v3.13.1 · 2026-08-14</span>
+  <!-- ⚠ **여기에 버전·날짜를 적지 말 것** — 상수(VLABEL)를 베껴 적었더니
+       BUILT 만 고쳤을 때 화면이 옛 날짜를 계속 보여 줬다 (v3.24.0 · 잭 지적). -->
+  <span class="ver" id="ver"></span>
 </footer>
 </div>
 
@@ -1688,8 +1691,8 @@ const TAGIMG={
 const tagArt=b=>TAGIMG[b.s+'-'+b.r+'-'+b.n]||null;
 
 const RANK_N=10;          // 순위에 보여줄 개수
-const VERSION='3.13.1';
-const BUILT='2026-08-14';
+const VERSION='3.24.0';
+const BUILT='2026-08-17';
 
 /* ══ 자산을 CSS 로 한 번만 심는다 (DOM 에 base64 중복 방지) ══ */
 const AK={}, TK={}, GK={}, SK={};
@@ -1716,12 +1719,19 @@ const artCls=c=>AK[c.s+'-'+c.r+'-'+c.n]||'';
    나머지 11장은 격파 수를 못 늘리고 피해만 더한다.
    메가·다이맥스 보정 반영본. 데이터나 규칙을 바꾸면 `dev/best25.js` 를 다시 돌릴 것. ══ */
 const BESTA25=new Bag([['1-5-거대코뿌리',1],['1-5-윈디',1],['1-5-플라이곤',1],['1-6-리자몽',1],['1-6-마기라스',1],['1-6-메타그로스',1],['1-6-자시안',1],['2-5-갈가부기',1],['2-5-님피아',1],['2-5-리피아',1],['2-5-마휘핑',1],['2-5-알로라 나인테일',1],['2-5-엠페르트',1],['2-5-초염몽',1],['2-5-토대부기',1],['2-6-가이오가',1],['2-6-그란돈',1],['2-6-레시라무',1],['2-6-잠만보',1],['2-6-제크로무',1],['2-6-짜랑고우거',1],['2-6-코라이돈',1],['2-6-큐레무',1],['공통-S-따라큐',1],['공통-S-피카츄 (현장이벤트)',1]]);
-/* ══ BEST-B25 — **전투태그B(★4·★5)** 용. ★6 만 빼고 A 판과 같은 **53보스** 기준 (v3.6.0).
-   **14장에서 2턴 격파 39/53 으로 포화한다** (70장 전부여도 39/53 · A 는 43/53).
-   ⚠ **★4 는 25장 중 두 장뿐이다** (포푸니라 20위 · 가디안 21위 · 한계이득 213·187).
-   ★4 기술 위력이 대부분 미상이라 기본 100 으로 계산된 탓일 수 있다 —
-   **위력이 실측되면 이 목록부터 다시 뽑을 것.** 재계산은 `dev/best-b25.js`. ══ */
-const BESTB25=new Bag([['1-4-포푸니라',1],['1-5-거대코뿌리',1],['1-5-글레이시아',1],['1-5-에이스번',1],['1-5-윈디',1],['1-5-플라이곤',1],['1-5-피죤투',1],['2-4-가디안',1],['2-5-갈가부기',1],['2-5-님피아',1],['2-5-단지래플',1],['2-5-루카리오',1],['2-5-리피아',1],['2-5-마기라스',1],['2-5-마휘핑',1],['2-5-메타그로스',1],['2-5-알로라 나인테일',1],['2-5-에브이',1],['2-5-엠페르트',1],['2-5-초염몽',1],['2-5-토대부기',1],['공통-R-루카리오',1],['공통-S-따라큐',1],['공통-S-피카츄 (밴드증정)',1],['공통-S-피카츄 (현장이벤트)',1]]);
+/* ══ BEST-B — **전투태그B(★5 전용)** 용. 53보스 기준 (v3.21.0 에 ★5 전용으로 재계산).
+   ⚠ **20장이다. 25장이 아니다.** 후보가 ★5 30장뿐이라 **21위부터 한계이득이 0** 이다 —
+   더 담아도 격파 수도 피해도 안 는다. 화면 배지·안내는 `bestSet().size` 를 쓴다.
+   **14장(루카리오)에서 2턴 격파 37/53 으로 포화**하고, 그 뒤 6장은 피해만 조금 보탠다.
+   재계산은 `dev/best-b25.js`. ══ */
+const BESTB25=new Bag([['1-5-거대코뿌리',1],['2-5-마기라스',1],['1-5-윈디',1],['2-5-초염몽',1],['1-5-글레이시아',1],['2-5-알로라 나인테일',1],['2-5-토대부기',1],['2-5-메타그로스',1],['2-5-갈가부기',1],['1-5-플라이곤',1],['2-5-님피아',1],['2-5-리피아',1],['2-5-엠페르트',1],['2-5-루카리오',1],['2-5-단지래플',1],['1-5-에이스번',1],['2-5-마휘핑',1],['1-5-피죤투',1],['1-5-피카츄',1],['2-5-에브이',1]]);
+/* ══ BEST-C — **전투태그C(★4 전용)** 용. 후보 34장 · 보스 53개 (v3.22.0).
+   ⚠ **10장이다.** 10장에서 2턴 격파 15/53 · 피해 44384(34장 전부의 86%) 에 이른다.
+   16번째 격파는 **25장을 모아야** 얻어져 우선 확보 목록으로는 실익이 없다.
+   ⚠⚠ **★4 는 기술 30종 중 28종이 위력 미상**이라 기본 100 으로 계산된 결과다 —
+   A·B 판만큼 믿지 말 것. **위력이 실측되면 이 목록부터 다시 뽑는다.**
+   재계산은 `dev/best-c25.js`. ══ */
+const BESTC=new Bag([['1-4-만마드',1],['2-4-토대부기',1],['2-4-글레이시아',1],['1-4-모스노우',1],['1-4-리피아',1],['1-4-고릴타',1],['1-4-백솜모카',1],['1-4-인텔리레온',1],['1-4-포푸니라',1],['2-4-마스카나',1]]);
 
 /* ══ 메가진화 — 에너지(=스탯)가 오르고, 폼에 따라 타입이 바뀌기도 한다.
    실측된 것만 채운다. 비어 있으면 보정 없이 원본 스탯으로 계산한다. ══ */
@@ -1799,9 +1809,11 @@ let bossId='2-6-가이오가', setView='2', bossRank='6', rosterSet='1';
    ⚠ **게임이 성급을 막는 것이 아니다. 플레이어는 어떤 성급이든 낼 수 있다** (2026-08-14 잭 확인).
    태그를 다 들고 다닐 수 없어서 **덱을 성급대로 갈라 꾸리는 것**이고, 그 묶음이 이 분류다.
      A = 전투태그A ★5·★6
-     B = 전투태그B ★4·★5
-   **★3·★4 묶음은 나중에 만든다** (잭) — 만들 때 `CLASSES` 에 한 줄 더하고
-   `BESTC25` 를 `dev/best-c25.js` 로 뽑으면 된다. `classPool()` 은 그대로 쓴다.
+     B = 전투태그B ★5 전용
+     C = 전투태그C ★4 전용
+   ⚠ **분류를 늘릴 때 손댈 곳**: ① `CLASSES` ② 두 스위치 마크업(컬렉션·매치)
+   ③ 핵심 목록 상수와 `bestSet()` ④ `dev/best-?25.js` ⑤ `sync.js`.
+   `classPool()`·`ownedSets`·저장은 분류 키를 그대로 따라가므로 손댈 것이 없다.
    **A 와 B 는 완전히 분리된 리스트다** (v3.2.0 · 잭 지정). ★5 는 양쪽에 다 «뜨지만»
    보유는 따로다 — A 에서 켠 ★5 가 B 에서 켜지지 않는다. 기계가 둘이고 덱을 따로 꾸리기 때문.
    레귤러·스페셜은 성급이 아니라 «공통» 이라 양쪽에 다 보여 준다(보유는 역시 따로).
@@ -1813,7 +1825,8 @@ let bossId='2-6-가이오가', setView='2', bossRank='6', rosterSet='1';
 let tagClass='A';
 const CLASSES={
   A:{label:'전투태그A', sub:'★5·★6', ranks:['6','5','R','S']},
-  B:{label:'전투태그B', sub:'★4·★5', ranks:['5','4','R','S']}
+  B:{label:'전투태그B', sub:'★5', ranks:['5']},  // v3.21.0 · 잭 지정 — ★4·레귤러·스페셜을 뺐다
+  C:{label:'전투태그C', sub:'★4', ranks:['4']}   // v3.22.0 · 잭 지정
 };
 const classRanks=()=>CLASSES[tagClass].ranks;
 /* 앱 초기값은 «아무것도 안 켜짐» 이다. 임의의 태그를 미리 켜두면
@@ -1830,10 +1843,13 @@ const FIXTURE_OWNED=()=>new Bag([
 ]);
 /* 분류마다 따로 쥔다. `owned` 는 **지금 보고 있는 분류의 가방**을 가리키는 별칭이라
    분류를 바꿀 때마다 다시 묶어 준다 (`useClass`). 모든 코드가 `owned` 를 그대로 쓰면 된다. */
-let ownedSets={A:DEFAULT_OWNED(), B:new Bag()};
+let ownedSets={A:DEFAULT_OWNED(), B:new Bag(), C:new Bag()};
 let owned=ownedSets.A;
 const useClass=()=>{ owned=ownedSets[tagClass]; };
-/* 그 분류가 받는 성급만 남긴다 — 잘못 실린 카드가 추천을 흔들지 않게. */
+/* 그 분류가 받는 성급만 남긴다 — 잘못 실린 카드가 추천을 흔들지 않게.
+   ⚠ **분류의 성급 범위를 좁히면 그 밖의 보유가 조용히 사라진다.**
+   v3.21.0 에서 B 를 «★4·★5» → «★5» 로 좁히며 B 에 넣어 둔 ★4·레귤러·스페셜이 지워졌다.
+   범위를 좁힐 때는 **잭에게 먼저 알릴 것** — 되돌릴 방법이 없다. */
 const classIds=cl=>new Set(MYPOOL.filter(p=>CLASSES[cl].ranks.includes(p.r)).map(p=>p.id));
 const trimClass=(bag,cl)=>{ const ok=classIds(cl);
   /* Bag 은 Map 이라 그냥 펼치면 [id,장수] 쌍이 나온다. **`ids()` 를 쓸 것** —
@@ -1881,10 +1897,10 @@ let backend='memory';
 function loadOwned(saved,arr){
   const pick=(list,cl)=>trimClass(toBag((list||[]).filter(x=>{
     const id=Array.isArray(x)?x[0]:x; return MYBY.has(id)})), cl);
-  if(saved && (saved.ownedA||saved.ownedB)){
-    ownedSets={A:pick(saved.ownedA,'A'), B:pick(saved.ownedB,'B')};
+  if(saved && (saved.ownedA||saved.ownedB||saved.ownedC)){
+    ownedSets={A:pick(saved.ownedA,'A'), B:pick(saved.ownedB,'B'), C:pick(saved.ownedC,'C')};
   } else if(Array.isArray(arr)){
-    ownedSets={A:pick(arr,'A'), B:pick(arr,'B')};   // 옛 형식 이관
+    ownedSets={A:pick(arr,'A'), B:pick(arr,'B'), C:pick(arr,'C')};   // 옛 형식 이관
   } else return false;
   useClass(); return true;
 }
@@ -1941,7 +1957,7 @@ async function load(){
 }
 let sT;
 function save(){clearTimeout(sT);sT=setTimeout(async()=>{
-  const p=JSON.stringify({ownedA:[...ownedSets.A],ownedB:[...ownedSets.B],chance,guideHidden,detail,rankSort,bossRank,dmaxLv,megaTier,mode,foes,foeSets,tagClass,dex:[...dex]});
+  const p=JSON.stringify({ownedA:[...ownedSets.A],ownedB:[...ownedSets.B],ownedC:[...ownedSets.C],chance,guideHidden,detail,rankSort,bossRank,dmaxLv,megaTier,mode,foes,foeSets,tagClass,dex:[...dex]});
   if(backend==='claude'){try{await window.storage.set(KEY,p);return}catch(e){}}
   if(backend==='claude'||backend==='local'){try{localStorage.setItem(KEY,p);backend='local';return}catch(e){}}
   backend='memory'; renderBackend();
@@ -2063,7 +2079,7 @@ const MYPOOL=[...POOL, ...SUBS.filter(c=>c.r==='4')];
 /* 지금 분류가 받는 카드만. **기계에 못 넣는 카드를 추천하지 않으려는 것** (v3.2.0). */
 const classPool=()=>MYPOOL.filter(p=>CLASSES[tagClass].ranks.includes(p.r));
 /* 분류에 맞는 핵심 목록. **배지·안내가 둘 다 이걸 쓴다** — 한쪽만 바꾸면 어긋난다. */
-const bestSet=()=>tagClass==='A'?BESTA25:BESTB25;
+const bestSet=()=>({A:BESTA25,B:BESTB25,C:BESTC})[tagClass]||BESTA25;
 const MYBY=new Map(MYPOOL.map(c=>[c.id,c]));
 // 이 배틀에서 나를 때릴 수 있는 상대 전부. 지역배틀 + 서브 지정일 때만 3장이 된다.
 const foeAll=boss=>{
@@ -2251,7 +2267,7 @@ const chip=(c,o={})=>{
     ${o.pressed==null?'':`aria-pressed="${o.pressed}"`} data-id="${c.id}">
     <span class="b23w">${
       (dexBest&&dexBest.has(c.id)?'<span class="b23 rec">추천</span>':'')
-      +(bestSet().has(c.id)?`<span class="b23">${tagClass}25</span>`:'')}</span>
+      +(bestSet().has(c.id)?`<span class="b23">${tagClass}${bestSet().size}</span>`:'')}</span>
     <span class="cn">${c.n}</span>
     <span class="cm"><span class="cr">★${c.r}</span>${c.t.map(x=>
       `<i class="ci ${TK[x]}" title="${x}"></i>`).join('')}
@@ -2305,13 +2321,28 @@ function renderDock(){
    기믹(메가·Z·다이맥스)은 배틀당 1회뿐이라 **서브에는 쓰지 않는다** — 대상에 남겨야 한다.
    같은 값이면 **대상 화력이 낮은 태그**를 고른다. 센 카드를 서브에 소모하지 않기 위해서다. */
 const foeHitOne=(c,f)=>Math.max(0,...f.mv.map(m=>bossHit(c,f,m)));   // 그 장에게 한 대 맞을 때 비율
+/* **여파** — 활성인 상대를 때리면 **대기 중인 보스와 다른 서브도 맞는다** (2026-08-14 잭 관찰).
+   대기 피해는 «절대 HP 포인트 · f 의 완만한 함수» 라는 실측 곡선을 그대로 쓴다
+   (`dev/damage.js` 대기 피격 곡선 · 표본 12건 · 피해pt ≈ 5.17·f^0.39 · RMS 9.2%).
+   ⚠ **그 곡선은 «내 대기 태그가 보스에게 맞을 때» 로 적합한 것**이다. 때리는 쪽이 바뀌어도
+   같은 규칙인지는 **아직 실측하지 않았다** — 순서를 가르는 데만 쓰고 수치를 믿지 말 것.
+   f 4배에 피해 1.7배라 차이가 크지 않다는 점도 함께 볼 것. */
+const WAIT_K=5.17, WAIT_P=0.39;
+const splashPt=f=> f>0 ? WAIT_K*Math.pow(f,WAIT_P) : 0;
 /* 한 상대에게 낼 만한 카드를 **카드마다 최선의 기술 하나씩** 골라 좋은 순으로 준다.
    v1.99.0 전까지는 최선 한 장만 돌려줬는데, 세 열이 서로 겹치는지 볼 수 없어
    **같은 카드가 두 열에 추천되는 일**이 있었다 (잭 지적). 이제 목록을 주고 배정은 밖에서 한다. */
-function foeCands(foe,boss,isBoss){
+/* `waiters` — 이 한 방을 칠 때 **대기 중인 상대 카드들** (보스 + 아직 남은 다른 서브).
+   ⚠ **여파는 대기 중인 카드마다 따로 계산한다** (v3.18.0 · 잭 지적).
+   v3.17.0 은 활성 상대에게 낸 피해를 대기 전원에게 그대로 복사했는데, 그러면
+   **상성도 방어도 활성 상대 것**이라 틀린다 — 보스와 다른 서브가 같은 값을 받았다.
+   `dev/damage.js` 의 대기 표본을 보면 `f` 는 «맞는 그 카드» 기준으로 구한다
+   (그 카드의 방어·특방과 그 카드에 대한 상성). 그대로 따른다.
+   ⚠ 다른 서브가 그 시점에 살아 있는지는 **순서를 알아야** 아는데 이 화면은 «순서 없음» 이다 —
+   **가장 이른 턴(둘 다 살아 있음)을 가정한다.** 실제로는 이보다 작을 수 있다. */
+function foeCands(foe,boss,isBoss,waiters){
   const mine=classPool().filter(p=>owned.has(p.id)&&p.id!==boss.id);
   if(!mine.length||!foe) return [];
-  const keepOf=c=>Math.max(0,...c.mv.filter(m=>!m.tagx).map(m=>evalMove(c,boss,m,false).dmg));
   const rows=[];
   mine.forEach(c=>{
     const list = isBoss ? c.mv : c.mv.filter(m=>!m.tagx);   // 서브에는 기믹 기술을 안 쓴다
@@ -2320,7 +2351,12 @@ function foeCands(foe,boss,isBoss){
       const r=evalMove(c,foe,m,false);
       /* evalMove 결과를 통째로 넘긴다 — 가로 슬롯이 위력·공격·방어까지 쓴다 */
       const row={...r, c, m, ko:r.dmg*KHP>=foe.hp, spd:c.sp-foe.sp,
-                 inc:foeHitOne(c,foe), keep:keepOf(c)};
+                 inc:foeHitOne(c,foe),
+                 /* 대기 중인 카드마다 «그 카드 기준» 으로 다시 계산한다.
+                    **보스를 칠 때도 대기 중인 서브가 맞는다** — 열을 가리지 않는다 (v3.20.0 · 잭 지정) */
+                 sps: (waiters||[]).map(w=>({
+                       n:w.n, pt:splashPt(evalMove(c,w,m,false).dmg) }))};
+      row.splash = row.sps.reduce((a,x)=>a+x.pt,0);   // 합산 여파
       row.tier = isBoss ? 'boss' : (row.ko&&row.spd>0 ? 0 : row.ko ? 1 : 2);
       if(!best||cmpCand(row,best,isBoss)<0) best=row;
     });
@@ -2329,11 +2365,20 @@ function foeCands(foe,boss,isBoss){
   return rows.sort((a,b)=>cmpCand(a,b,isBoss));
 }
 /* 대상은 그냥 최대 화력. 서브는 «무피해 → 한 대 맞고 처치 → 버티기» 순이고,
-   무피해면 약한 카드부터(센 카드를 아낀다), 아니면 덜 맞는 쪽부터. */
+   같은 등급 안에서는 **여파가 큰 쪽**(등급 0) · **덜 맞는 쪽**(등급 1·2) 이다.
+
+   ⚠ **«센 카드를 아낀다» 는 규칙은 걷어냈다** (v3.15.0 · 잭 지적).
+   지역배틀은 **내 세 장을 한꺼번에 올리고 상대 세 장에 하나씩 맞붙인다** —
+   보스 대항 태그도 그때 같이 정해진다. 즉 **세 장이 전부 어딘가에 쓰이므로
+   «아껴 둘» 자리가 없다.** v3.13.1 까지 쓰던 `keep`(그 카드의 대상 화력) 기준은
+   턴이 순서대로 흐르는 로테이션의 사고를 잘못 옮겨 온 것이었다.
+   **다시 넣지 말 것** — 넣으면 보스에 좋은 카드를 서브에서 빼는데,
+   보스 칸은 이미 `assignPlans` 가 «대상 화력 최대» 로 함께 풀고 있어 이중으로 센다. */
 function cmpCand(a,b,isBoss){
-  if(isBoss) return b.dmg-a.dmg;
+  if(isBoss) return (b.dmg-a.dmg)||(b.splash-a.splash);   // 화력이 같으면 여파로 가른다
   return (a.tier-b.tier)
-      || (a.tier===0 ? a.keep-b.keep : (a.inc-b.inc)||(a.keep-b.keep));
+      || (a.tier===0 ? (b.splash-a.splash)||(b.dmg-a.dmg)
+                     : (a.inc-b.inc)||(b.splash-a.splash));
 }
 
 /* 세 열에 **서로 다른 카드**를 배정한다 (v1.99.0 · 잭 지적).
@@ -2346,14 +2391,19 @@ function cmpCand(a,b,isBoss){
    서브를 무피해로 넘기면 그 장이 배틀에서 빠져 남은 턴이 통째로 벌린다.
    열마다 상위 14장만 후보로 봐서 최악 2744 조합이면 끝난다. */
 function assignPlans(cols, foeOf, boss){
-  const lists = cols.map(at=>{ const f=foeOf(at); return f? foeCands(f,boss,at==='B').slice(0,14) : null; });
+  /* 내가 한 장을 칠 때 대기 중인 상대 = 채워진 칸의 나머지 (보스 포함) */
+  const lists = cols.map(at=>{ const f=foeOf(at); if(!f) return null;
+    const waiters = cols.map(foeOf).filter(x=>x && x!==f);
+    return foeCands(f,boss,at==='B',waiters).slice(0,14); });
   const idx = cols.map((at,i)=> lists[i]&&lists[i].length ? 0 : -1);
   let bestSel=null, bestKey=null;
   const key=sel=>{
-    let tier=0, inc=0, dmg=0;
+    let tier=0, inc=0, dmg=0, sp=0;
     cols.forEach((at,i)=>{ const r=sel[i]; if(!r) return;
+      sp+=r.splash||0;                       // 여파는 보스 열도 센다 (v3.20.0)
       if(at==='B') dmg=r.dmg; else { tier+=r.tier; inc+=r.inc; } });
-    return [tier,-dmg,inc];
+    /* 서브 등급 → 대상 화력 → **서브들이 보스에 남기는 여파** → 서브 피격 */
+    return [tier,-dmg,-sp,inc];
   };
   const better=(a,b)=>{ for(let i=0;i<a.length;i++){ if(a[i]!==b[i]) return a[i]<b[i]; } return false; };
   const n=cols.length;
@@ -2479,8 +2529,12 @@ function renderFoes(){
     if(!p) return `<div class="fl-cell empty${isB?' mid':''}">${head}${art(null)}<span class="fl-r">보유 태그 없음</span></div>`;
     const sp = p.spd>0?`선공 +${p.spd}`: p.spd===0?'동속':`후공 ${p.spd}`;
     const tag = verdictTag(p,isB,f);
-    /* 피격은 «무피해» 일 때만 감춘다 — `isB` 로 감추지 말 것 (v1.93.0). */
-    const hit = p.tier===0 ? '' : `·피격 ${p.inc<0.005?'&lt;1':Math.round(p.inc*100)}%`;
+    /* **피격은 늘 적는다** (v3.19.0 · 잭 지적). v1.93.0~3.18.0 은 «무피해» 면 감췄는데,
+       무피해는 «선공 + 원턴킬» 이 둘 다 성립할 때의 이야기다 —
+       **선공은 확률이 섞이고, 저성급 상대는 격파 판정 자체가 실측 범위 밖(«무피해?»)** 이다.
+       빗나갔을 때 얼마나 맞는지가 바로 그때 필요한 숫자라 감추면 안 된다.
+       `isB` 로 감추지 말 것도 그대로 유효하다 (v1.93.0). */
+    const hit = `·피격 ${p.inc<0.005?'&lt;1':Math.round(p.inc*100)}%`;
     return `<div class="fl-cell${isB?' mid':''} ${artCls(p.c)}">${head}${art(p.c)}`
       +`<span class="fl-n wt fl-tp">${tp(p.m.t)}<span class="nm">${p.c.n}</span>`
       +`${p.c.g?`<i class="gi fl-gi ${GK[p.c.g]}${p.m.tagx?' use':''}" title="${p.c.g}${p.m.tagx?' 사용':' 보유 · 이 매치에서는 안 씀'}"></i>`:''}</span>`
@@ -2495,7 +2549,8 @@ function renderFoes(){
      `.slot-body` 는 `[data-d]` 규칙이 이미 «상성/상세» 로 여닫아 준다. */
   const planSlot=(at)=>{
     const isB=at==='B', f=foeOf(at);
-    const lab = isB?'대상':'서브 '+(at===0?1:2);
+    /* 가운데 칸은 보스다 — «대상» 은 무엇의 대상인지 안 읽힌다 (v3.16.0 · 잭 지정) */
+    const lab = isB?'보스':'서브 '+(at===0?1:2);
     const shell=(inner)=>`<div class="slot mslot${isB?' mid':''}">
       <div class="head"><span class="thumb rthumb"><span class="turn${isB?'':' sp'}">${lab}</span>
         <span class="qm">?</span></span>
@@ -2535,7 +2590,11 @@ function renderFoes(){
         <span class="mult"><span class="k">받는</span><b class="${dc(p.d)}">×${p.d}</b>${p.d===0?'<span style="color:var(--ok)">무효</span>':''}</span>
         ${p.move?`<span class="mult t2"><span class="k">위력</span><b>${p.pw}</b></span>`:''}
         <span class="mult t2"><span class="k">스피드</span><b>${c.sp}</b><span>${sp}</span></span>
-        ${p.tier===0?'':`<span class="mult t2"><span class="k">피격</span><b>${p.inc<0.005?'&lt;1':Math.round(p.inc*100)}%</b></span>`}
+        <span class="mult t2"><span class="k">피격</span>
+          <b>${p.inc<0.005?'&lt;1':Math.round(p.inc*100)}%</b>
+          ${p.tier===0?'<span>격파 실패 · 후공 때만</span>':''}</span>
+        ${(p.sps||[]).length?`<span class="mult t2"><span class="k">여파</span><b>${Math.round(p.splash||0)}</b>
+          <span>${p.sps.map(x=>x.n+' '+Math.round(x.pt)).join(' · ')}</span></span>`:''}
         ${p.move?`<span class="mult wide t2"><span class="k">공격</span><span class="v"><b>${p.raw}<span style="opacity:.6">+${p.bonus}</span>=${p.atk}</b> <span style="opacity:.6">/ ${p.move.k==='물리'?'방어':'특수방어'} ${p.def}</span></span></span>`:''}
       </div></div>
     </div>`;
@@ -3294,12 +3353,19 @@ function renderTagClass(){
   const C=CLASSES[tagClass];
   const list=MYPOOL.filter(p=>(p.s===rosterSet||p.s==='공통')&&C.ranks.includes(p.r));
   const on=list.filter(p=>owned.has(p.id)).length;
-  const other=tagClass==='A'?'B':'A';
+  /* 안내는 **분류 이름을 박아 쓰지 않는다** — A·B 만 있던 시절 문구가 C 에도 그대로 떴다
+     (v3.23.0 · 잭 지적). 겹치는 성급도 `CLASSES` 에서 그때그때 구한다. */
+  const others=Object.keys(CLASSES).filter(k=>k!==tagClass);
+  const dup=others.flatMap(k=>CLASSES[k].ranks.filter(r=>C.ranks.includes(r))
+    .map(r=>({r, k}))).filter((v,i,a)=>a.findIndex(x=>x.r===v.r)===i);
   document.getElementById('tagClassNote').innerHTML =
     `<b>${C.label}</b> ${C.sub} · 이 분류에서 <b>${on}</b> / ${list.length}장 보유`
-    + ` <span class="qm">|</span> ${CLASSES[other].label} ${ownedSets[other].size}장`
-    + `<br><b>A 와 B 는 따로 저장됩니다.</b> ★5 는 양쪽에 다 뜨지만 보유는 별개예요 —`
-    + ` A 에서 켠 ★5 가 B 에서 켜지지는 않습니다. 추천도 지금 분류가 받는 성급만 씁니다.`;
+    + others.map(k=>` <span class="qm">|</span> ${CLASSES[k].label} ${ownedSets[k].size}장`).join('')
+    + `<br><b>분류마다 따로 저장됩니다.</b> 추천도 지금 분류가 받는 성급만 씁니다.`
+    + (dup.length
+        ? ` ${dup.map(d=>rlab(d.r)).join('·')}는 <b>${dup.map(d=>CLASSES[d.k].label).join('·')}</b>에도`
+          + ` 뜨지만 <b>보유는 별개</b>예요 — 한쪽에서 켜도 다른 쪽에 안 켜집니다.`
+        : ` 이 분류의 성급은 다른 분류와 겹치지 않습니다.`);
 }
 function setColTab(v){
   colTab=v;
@@ -3351,12 +3417,13 @@ document.querySelectorAll('.seg button').forEach(b=>
   b.addEventListener('click',()=>{detail=Number(b.dataset.lv); save(); renderDetail()}));
 const verEl=document.getElementById('ver');
 const VLABEL='v'+VERSION+' · '+BUILT;
+{ const v=document.getElementById('ver'); if(v) v.textContent=VLABEL; }
 // 초기화 확인은 보정 탭의 인라인 UI 로 받는다 (샌드박스 iframe 이 confirm 을 막으므로).
 function wipe(){
   try{ localStorage.removeItem(KEY) }catch(e){}
   try{ window.storage && window.storage.delete && window.storage.delete(KEY) }catch(e){}
   // save() 가 저장하는 모든 항목을 되돌린다 — 하나라도 빠지면 다음 save 때 옛 값이 되살아난다
-  ownedSets={A:DEFAULT_OWNED(), B:new Bag()}; useClass(); chance={...CHANCE_DEFAULTS};
+  ownedSets={A:DEFAULT_OWNED(), B:new Bag(), C:new Bag()}; useClass(); chance={...CHANCE_DEFAULTS};
   guideHidden=false; detail=0; rankSort='score'; bossRank='6';
   dmaxLv=5; megaTier='대성공'; mode='지역'; foes=[null,null]; foeSets={'1':true,'2':true};
   tagClass='A'; dex=new Bag();
@@ -3578,9 +3645,10 @@ function renderAll(){
   if(bh){                                  // BEST-25 는 25종 각 1장 — 중복 없음
     const BS=bestSet(), need=BS.size;
     const have=[...BS.keys()].filter(id=>owned.has(id)).length;
-    bh.innerHTML=`<b>BEST-${tagClass}25</b> 핵심 태그 <b style="color:${have===need?'var(--ok)':'var(--star)'}">${have}/${need}</b>`
+    bh.innerHTML=`<b>BEST-${tagClass}${need}</b> 핵심 태그 <b style="color:${have===need?'var(--ok)':'var(--star)'}">${have}/${need}</b>`
       +` · 53보스 전체 기준 · <b>${CLASSES[tagClass].label}(${CLASSES[tagClass].sub})</b> 용입니다`
-      + (tagClass==='B' ? ' — ★4 는 위력 미상이라 두 장만 들었습니다' : ''); }
+      + (tagClass==='B' ? ' — 후보가 ★5 30장뿐이라 21위부터는 보탬이 없습니다'
+       : tagClass==='C' ? ' — ★4 는 기술 위력이 대부분 미표기라 순위를 크게 믿지 마세요' : ''); }
 }
 const pickBoss=()=>{                       // 탄·등급을 바꾸면 그 그룹의 첫 보스로
   const f=bossRank==='R' ? BOSSES.find(b=>b.r==='R')
