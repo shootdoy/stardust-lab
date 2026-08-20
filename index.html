@@ -7,7 +7,7 @@
 <meta name="description" content="포켓몬 태그스타 스타더스트 1탄·2탄 ★6·★5 보스 공략. 보유 태그로 3턴 로테이션과 서포트 티켓을 추천합니다.">
 <meta name="theme-color" content="#120B2E">
 <meta name="color-scheme" content="dark">
-<meta name="version" content="3.29.0">
+<meta name="version" content="3.39.0">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -822,6 +822,79 @@ summary:focus-visible{outline:2.5px solid var(--cyan);outline-offset:-3px}
 .priv li{margin-bottom:5px}
 .priv b{color:var(--ink)}
 .empty{font-size:13px;color:var(--ink-dim);text-align:center;padding:22px 10px;line-height:1.7}
+
+/* ── 실측 기록 (v3.31.0) ─────────────────────────────────────────
+   기존 언어를 그대로 쓴다: setsw(토글) · card · mini · pickmodal(픽커).
+   새로 만든 건 슬롯 격자와 목록 줄뿐이다. */
+.hslots{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+/* v3.31.3 잭 지정 배치 — 1행: L·R·선물 / 3행: 서브1·보스·서브2 (게임 화면 순서) */
+.hrow1{display:grid;grid-template-columns:2fr 3fr;gap:8px;margin-bottom:9px;align-items:stretch}
+.hrow1 .hposrow{margin-bottom:0}
+.hrow1 .hslot{min-height:0}
+.hslots3{grid-template-columns:1fr 1.15fr 1fr}
+.hslots3 .hslot{padding:9px 8px}
+.hslots3 .hslot .hs-v{font-size:13.5px}
+.hposrow.hlr button{opacity:.35;pointer-events:none}  /* 스페셜 = LR 자동, 위치 선택 잠금 */
+/* v3.32.0 동시 진행 — 반대편에 쓰다 만 판이 있으면 점을 켠다 */
+#hPos button{position:relative}
+#hPos button.hasdraft::after{content:'';position:absolute;top:6px;right:8px;width:7px;height:7px;
+  border-radius:50%;background:var(--star)}
+.hrow .htxt{border:0;background:transparent;color:var(--ink);text-align:left;cursor:pointer;padding:0}
+.hrow .hts{color:var(--ink-dim);font-size:11px;margin-left:7px}
+.hrow.hediting{background:rgba(255,200,49,.08);border-radius:8px}
+.hrow.hediting .hno{color:var(--star)}
+/* 판 종류 3개는 **한 줄 고정** (v3.31.4 · 잭 지정 — v3.31.2 의 flex-wrap 철회).
+   라벨이 길어 글자 크기를 낮추고 여백을 줄여서 맞춘다. 두 줄로 되돌리지 말 것. */
+#hMode{flex-wrap:nowrap}
+#hMode button{white-space:nowrap;padding:9px 2px;font-size:11.5px;letter-spacing:-.02em;min-width:0}
+@media(max-width:380px){#hMode button{font-size:10.5px}}
+.hslot{display:flex;flex-direction:column;align-items:flex-start;gap:3px;padding:9px 12px;
+  border:1px solid var(--rim);border-radius:10px;background:transparent;color:var(--ink);
+  font:inherit;text-align:left;min-height:52px}
+.hslot .hs-l{font-size:11px;color:var(--ink-dim);letter-spacing:.04em}
+.hslot .hs-v{font-size:15px;line-height:1.2;word-break:keep-all}
+.hslot.hs-boss{border-color:var(--star)}
+.hslot.hs-off{opacity:.35;pointer-events:none}     /* 스페셜·다맥에선 보스만 받는다 */
+.hslot .hs-v b{color:var(--star);font-weight:600;margin-left:3px}
+.hact{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px}
+/* 저장 줄은 가운데 (v3.36.2 · 잭 지정) — 안내 문구는 버튼 아래 줄로 내려 가운데 정렬을 지킨다 */
+.hact-center{flex-direction:column;justify-content:center;gap:7px}
+.hact-center .hmain{min-width:150px}
+.hact-center .tab-note{text-align:center;margin:0}
+.hmain{border:1px solid var(--star);background:rgba(255,200,49,.12);color:var(--star);
+  font:inherit;font-size:14px;padding:9px 18px;border-radius:10px}
+.hdanger{color:var(--bad);border-color:rgba(255,90,90,.4)}
+/* 기록 분석 (v3.33.0) — 이름표+값 두 칸 줄. 끝물·건조 경고는 별색으로 앞에 세운다. */
+.hstat{display:flex;flex-direction:column;gap:1px}
+.hst{display:flex;gap:10px;padding:7px 2px;border-bottom:1px solid rgba(255,255,255,.06);align-items:baseline}
+.hst:last-child{border-bottom:0}
+.hst-k{flex:0 0 78px;font-size:11.5px;color:var(--ink-dim);letter-spacing:.02em}
+.hst-v{flex:1;font-size:13px;line-height:1.55}
+.hstwarn{margin:2px 0 10px;padding:9px 11px;border-radius:10px;font-size:12.5px;line-height:1.65;
+  border:1px solid var(--star);background:rgba(255,200,49,.1);color:var(--ink)}
+.hstwarn b{color:var(--star)}
+/* 플레이 화면에 끼는 기록 블록 (v3.35.0) — 게임 진행 흐름을 끊지 않게 얇게 둔다 */
+.hplayrec{border-color:rgba(255,200,49,.35);padding:11px 12px}
+.hplayrec .hrow1{margin-bottom:0}
+.hplayrec .setsw{margin-bottom:0}
+.hplayrec .hact{margin-top:9px}
+/* 게임기 버전 (v3.37.0) — 메이저·마이너·패치는 ± 로, 빌드는 직접 친다 */
+.verline{margin:0 0 12px;font-family:var(--mono);font-size:15px;letter-spacing:.02em}
+.verline b{color:var(--star)}
+.verrow{display:flex;align-items:center;gap:9px;padding:6px 0}
+.verrow .ver-k{font-size:12px;color:var(--ink-dim);min-width:44px}
+.verrow .ver-n{font-family:var(--mono);font-size:15px;min-width:34px;text-align:center}
+.verrow .mini{min-width:38px;font-size:15px;line-height:1;padding:6px 0;text-align:center}
+.verbuild{flex:1;max-width:120px;border:1px solid var(--rim);border-radius:8px;
+  background:rgba(0,0,0,.25);color:var(--ink);font-family:var(--mono);font-size:14px;padding:7px 10px}
+.hrow{display:flex;align-items:baseline;gap:8px;padding:7px 2px;border-bottom:1px solid rgba(255,255,255,.06)}
+.hrow:last-child{border-bottom:0}
+.hrow .hno{font-family:var(--mono);font-size:11px;color:var(--ink-dim);min-width:26px;text-align:right}
+.hrow .htxt{flex:1;font-family:var(--mono);font-size:12.5px;line-height:1.55;word-break:break-all}
+.hrow .hdel{border:0;background:transparent;color:var(--ink-dim);font-size:13px;padding:2px 6px}
+/* 픽커는 foeModal 의 CSS(foegrid 등)를 그대로 쓴다 (v3.31.5) — 자체 목록 스타일은 뺐다.
+   남긴 것 하나: 도감에 없는 이름을 받는 «그대로 쓰기» 점선 버튼. */
+.foegrid button.hnew{border-style:dashed}
 .backend{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-bottom:10px;
   padding:8px 13px;border-radius:999px;border:1px solid var(--rim);background:rgba(18,11,46,.5)}
 .backend b{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.04em}
@@ -864,6 +937,9 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
 <div class="viewsw" role="group" aria-label="화면 전환">
   <button id="vB" aria-pressed="true">플레이</button>
   <button id="vC" aria-pressed="false">컬렉션 <span class="ct" id="vCct"></span></button>
+  <!-- 실측 기록 (v3.31.0 · 잭 요청 «히스토리 데이터 입력») — 현장에서 판마다
+       위치·선물·상대·겟을 남긴다. 채팅에 직접 타이핑하던 것을 대체한다. -->
+  <button id="vH" aria-pressed="false">기록 <span class="ct" id="vHct"></span></button>
   <!-- 이 탭은 룰렛 보정 말고도 다이맥스 레벨·메가 성공도·초기화까지 들고 있어서
        v2.7.0 에 «설정» 으로 바꿨다 (잭 지정). 값 뱃지(vXct)는 «설정 30/45/30/70» 이
        읽히지 않으므로 섹션 안내줄로 옮겼다 — 지우지는 않았다(renderChance 가 쓴다). -->
@@ -871,6 +947,22 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
 </div>
 
 <div id="viewBattle" data-d="0">
+  <!-- 플레이 기록 (v3.35.0 · 잭 지정) — 게임 진행 순서대로 끼운다.
+       선물은 판 시작에 제일 먼저 받으므로 맨 위, 겟 결과와 저장은 배틀이 끝난 뒤라 매치 아래.
+       두 블록은 기록 탭과 **같은 드래프트**(hCur)를 쓴다 — 어느 쪽에서 넣어도 같은 판이다. -->
+  <section id="sPlayRecTop" hidden>
+    <div class="card hplayrec">
+      <div class="hrow1">
+        <!-- 플레이는 한쪽에서만 한다 (v3.36.1 · 잭 지정) — 여기 L/R 은 드래프트 전환이
+             아니라 **«내가 앉은 자리» 값**이다. 한 번 고르면 계속 그 자리로 남는다. -->
+        <div class="setsw hposrow hposg hposval" role="group" aria-label="플레이 위치">
+          <button data-p="L" aria-pressed="true">L</button>
+          <button data-p="R" aria-pressed="false">R</button>
+        </div>
+        <button class="hslot" data-k="g"><span class="hs-l">선물</span><span class="hs-v" id="hs2-g">—</span></button>
+      </div>
+    </div>
+  </section>
   <section id="sTID">
     <div class="sec-head"><h2>트레이너 ID</h2><span class="hint">게임 시작 때 스캔</span>
       <button class="mini" id="qrFileLab">사진에서 등록</button>
@@ -947,6 +1039,19 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
           <span class="tag-rule">예상 피해 = 위력 × 공격÷보스방어 × 타입배율 · HP 감소량이 아닙니다. 같은 보스 안에서만 비교하세요</span>
       <span class="tag-rule">탈진 · 1턴 태그는 3턴에 재사용 가능</span>
       <span class="tag-rule">기믹 · 메가진화, Z기술, 다이맥스 각 배틀당 1회</span>
+    </div>
+  </section>
+
+  <section id="sPlayRecBot" hidden>
+    <div class="card hplayrec">
+      <div class="setsw hgotg" role="group" aria-label="포획 결과">
+        <button data-g="1" aria-pressed="false">겟-성공</button>
+        <button data-g="0" aria-pressed="true">겟-실패</button>
+      </div>
+      <div class="hact hact-center">
+        <button class="hmain" id="hPlaySave">저장</button>
+        <span class="tab-note" id="hPlayNote"></span>
+      </div>
     </div>
   </section>
 
@@ -1027,19 +1132,46 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
       </div>
       <button class="mini" id="chanceReset" style="margin-top:14px"></button>
 
-      <div class="wipebox">
-        <button class="mini" id="wipeBtn">처음 상태로 초기화…</button>
-        <div class="wipe-ask" id="wipeAsk" hidden>
-          <b>정말 초기화할까요?</b> 컬렉션 · 보정 · 도감 · 표시 설정이 전부 지워집니다.
-          <div class="wipe-b">
-            <button id="wipeYes">지운다</button>
-            <button id="wipeNo">취소</button>
-          </div>
-        </div>
-      </div>
     </div>
   </section>
-
+  <section>
+    <div class="sec-head"><h2>플레이 기록</h2>
+      <span class="hint">플레이 화면에서 판을 바로 남깁니다 · <b>기본 꺼짐</b></span></div>
+    <div class="card">
+      <div class="setsw" role="group" aria-label="플레이 기록 사용" id="playRecSw">
+        <button data-pr="0" aria-pressed="true">끄기</button>
+        <button data-pr="1" aria-pressed="false">켜기</button>
+      </div>
+      <p class="tab-note">켜면 플레이 화면 맨 위에 <b>L·R·선물</b>, 상대별 매치 아래에
+        <b>겟 결과와 저장</b>이 붙습니다. 보스와 서브는 플레이 화면에서 고른 것이 그대로 들어가고,
+        저장한 판은 <b>기록</b> 탭에 «플레이»로 쌓입니다.</p>
+    </div>
+  </section>
+  <section>
+    <div class="sec-head"><h2>게임기 버전</h2>
+      <span class="hint">기계 화면에 적힌 버전 · 기록에 함께 남습니다</span></div>
+    <div class="card">
+      <p class="verline"><b id="verNow">1.0.4.39608.ko.</b></p>
+      <div class="verrow" data-v="maj"><span class="ver-k">메이저</span>
+        <button class="mini" data-d="-1" aria-label="메이저 내리기">−</button>
+        <b class="ver-n" id="verMaj">1</b>
+        <button class="mini" data-d="1" aria-label="메이저 올리기">+</button></div>
+      <div class="verrow" data-v="min"><span class="ver-k">마이너</span>
+        <button class="mini" data-d="-1" aria-label="마이너 내리기">−</button>
+        <b class="ver-n" id="verMin">0</b>
+        <button class="mini" data-d="1" aria-label="마이너 올리기">+</button></div>
+      <div class="verrow" data-v="pat"><span class="ver-k">패치</span>
+        <button class="mini" data-d="-1" aria-label="패치 내리기">−</button>
+        <b class="ver-n" id="verPat">4</b>
+        <button class="mini" data-d="1" aria-label="패치 올리기">+</button></div>
+      <div class="verrow"><span class="ver-k">빌드</span>
+        <input class="verbuild" id="verBuild" type="text" inputmode="numeric"
+               autocomplete="off" aria-label="빌드 번호" value="39608">
+        <span class="ver-k">.ko.</span></div>
+      <p class="tab-note">기계가 업데이트되면 여기서 바꾸세요. 저장하는 판마다 이 버전이 함께
+        남아, 나중에 <b>버전이 바뀌기 전후를 갈라</b> 볼 수 있습니다.</p>
+    </div>
+  </section>
   <!-- 개인정보·쿠키 (v3.13.0 · 잭 지정). 애드센스와 GA4 가 쿠키를 쓰므로 밝혀 둔다.
        ⚠ **측정 ID 를 바꾸거나 집계를 끄면 이 글도 함께 고칠 것** — 안 맞으면 안 적느니만 못하다. -->
   <section id="sPriv">
@@ -1068,6 +1200,101 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
         브라우저의 사이트 데이터를 지우면 됩니다. 통계·광고 쿠키는 브라우저 설정에서 지웁니다.</p>
     </div>
   </section>
+  <!-- 전체 초기화 (v3.37.3 · 잭 지정) — **설정 맨 아래 자체 섹션**이다.
+       v3.37.2 까지는 룰렛 보정 카드 안에 있었는데, 섹션 순서를 바꾸면서 화면 가운데로
+       올라와 파괴적 동작이 눈에 먼저 띄었다. 안쪽 id 는 그대로라 기존 핸들러가 붙는다.
+       **다시 다른 섹션 안으로 넣지 말 것** — 순서를 바꿀 때마다 같은 문제가 난다. -->
+  <section id="sWipe">
+    <div class="card">
+      <div class="wipebox" style="margin-top:0;padding-top:0;border-top:0">
+        <button class="mini" id="wipeBtn">처음 상태로 초기화…</button>
+        <div class="wipe-ask" id="wipeAsk" hidden>
+          <b>정말 초기화할까요?</b> 컬렉션 · 보정 · 도감 · 표시 설정이 전부 지워집니다.
+          <div class="wipe-b">
+            <button id="wipeYes">지운다</button>
+            <button id="wipeNo">취소</button>
+          </div>
+        </div>
+        <p class="tab-note" style="margin-top:10px">기록 탭의 판 기록은 <b>여기서 지워지지
+          않습니다</b> — 기록은 그쪽 화면의 «기록 전체 삭제»로만 지웁니다.</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- 실측 기록 (v3.31.0). 판 형식은 잭의 신형식 «위치 · 선물 · 서브1 · 보스 · 서브2 [겟]».
+     저장은 이 브라우저(localStorage)에만 하고 wipe() 대상에서 **일부러 뺐다** —
+     현장 데이터는 보정값과 달리 다시 만들 수 없어서, 전체 초기화에 딸려 지워지면 안 된다.
+     지우는 길은 이 화면의 «기록 전체 삭제» 하나뿐이다. -->
+<div id="viewHist" hidden>
+  <section>
+    <div class="sec-head"><h2>전투 입력</h2><span class="hint">칸을 눌러 태그를 고르세요 · L 과 R 은 따로 적어 두었다가 오갈 수 있습니다</span></div>
+    <div class="card">
+      <!-- 줄 배치 (v3.31.3 · 잭 지정): 현장 진행 순서를 그대로 따른다 —
+           ①위치+선물(판 시작에 아는 것) ②판 종류 ③상대 화면 순서(서브1·보스·서브2)
+           ④결과 ⑤저장. 스페셜태그배틀을 고르면 위치는 LR 로 자동 — LR 버튼은 없앴다. -->
+      <div class="hrow1" id="hRow1">
+        <div class="setsw hposrow hposg" role="group" aria-label="플레이 위치" id="hPos">
+          <button data-p="L" aria-pressed="true">L</button>
+          <button data-p="R" aria-pressed="false">R</button>
+        </div>
+        <button class="hslot" data-k="g"><span class="hs-l">선물</span><span class="hs-v" id="hs-g">—</span></button>
+      </div>
+      <div class="setsw" role="group" aria-label="기록 출처" id="hSrc">
+        <button data-src="play" aria-pressed="false">플레이</button>
+        <button data-src="watch" aria-pressed="true">관전</button>
+      </div>
+      <div class="setsw" role="group" aria-label="판 종류" id="hMode">
+        <button data-m="지역" aria-pressed="true">지역배틀</button>
+        <button data-m="다맥" aria-pressed="false">다이맥스포켓몬</button>
+        <button data-m="스페셜" aria-pressed="false">스페셜태그배틀</button>
+      </div>
+      <div class="hslots hslots3" id="hSlots">
+        <button class="hslot" data-k="s1"><span class="hs-l">서브1</span><span class="hs-v" id="hs-s1">—</span></button>
+        <button class="hslot hs-boss" data-k="b"><span class="hs-l">보스</span><span class="hs-v" id="hs-b">—</span></button>
+        <button class="hslot" data-k="s2"><span class="hs-l">서브2</span><span class="hs-v" id="hs-s2">—</span></button>
+      </div>
+      <div class="setsw hgotg" role="group" aria-label="포획 결과" id="hGot">
+        <button data-g="1" aria-pressed="false">겟-성공</button>
+        <button data-g="0" aria-pressed="true">겟-실패</button>
+      </div>
+      <div class="hact">
+        <button class="mini" id="hFromPlay">플레이 화면에서 가져오기</button>
+      </div>
+      <div class="hact hact-center">
+        <button class="hmain" id="hSaveBtn">저장</button>
+        <button class="mini" id="hEditCancel" hidden>수정 취소</button>
+        <span class="tab-note" id="hNote"></span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>기록 통계</h2><span class="hint">저장된 판으로 계산 · 현장 판단용</span></div>
+    <div class="card">
+      <div id="hStat"></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>기록 목록</h2><span class="hint" id="hCt"></span></div>
+    <div class="card">
+      <div class="hact">
+        <button class="mini" id="hCopy">전체 복사</button>
+        <button class="mini hdanger" id="hWipeBtn">기록 전체 삭제…</button>
+      </div>
+      <div class="wipe-ask" id="hWipeAsk" hidden>
+        <span>기록 <b id="hWipeN"></b>판을 지웁니다. 되돌릴 수 없습니다.</span>
+        <div class="wipe-b">
+          <button class="mini hdanger" id="hWipeYes">지운다</button>
+          <button class="mini" id="hWipeNo">취소</button>
+        </div>
+      </div>
+      <div id="hList"></div>
+    </div>
+  </section>
+
 </div>
 
 <div id="viewCollection" hidden>
@@ -1153,6 +1380,38 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
 <!-- 서브 선택 팝업 (v1.82.0 · 잭 지정). 종전에는 상대 그리드 아래 인라인 패널이었는데
      칸을 누르면 목록이 화면 밖으로 밀려나 보이지 않는 일이 있었다. 아래에서 올라오는
      시트라 엄지가 닿는다. 안쪽 id 는 인라인 시절 그대로라 기존 핸들러가 그대로 붙는다. -->
+<!-- 태그 픽커 (v3.31.5 · v3.35.1 에 최상위로 이동) — foeModal 과 **같은 컴포넌트 골격** (잭 지정):
+     pickhead · foesearch · pickhint · 성급 setsw · foegrid · «바깥을 눌러 닫기».
+     도감에 없는 이름(홍나숭 사례)은 검색 시 점선 «그대로 쓰기» 버튼으로 받는다.
+   **이 블록은 반드시 뷰 밖(최상위)에 둔다** — v3.35.0 에서 viewHist 안에 두었더니
+   플레이 화면의 선물 칸을 눌렀을 때 숨은 기록 뷰 속에서 열려 화면에 안 보였다.
+   foeModal 도 같은 이유로 최상위에 있다. **다시 뷰 안으로 옮기지 말 것.** -->
+<div class="pickmodal" id="hModal" hidden>
+  <div class="pickbox" role="dialog" aria-modal="true" aria-labelledby="hPickH">
+    <div class="pickhead">
+      <b id="hPickH">태그 선택</b>
+      <button class="qrx" id="hPickX" aria-label="닫기">✕</button>
+    </div>
+    <input class="foesearch" id="hQ" type="search" inputmode="search" autocomplete="off"
+           placeholder="이름으로 검색 (초성도 됨)" aria-label="태그 이름 검색">
+    <p class="pickhint" id="hPickHint" hidden></p>
+    <div class="setsw" role="group" aria-label="태그 성급" id="hRank">
+      <button data-r="6" aria-pressed="false">★6</button>
+      <button data-r="5" aria-pressed="true">★5</button>
+      <button data-r="4" aria-pressed="false">★4</button>
+      <button data-r="3" aria-pressed="false">★3</button>
+      <button data-r="2" aria-pressed="false">★2</button>
+      <button data-r="R" aria-pressed="false">레귤러</button>
+    </div>
+    <div class="setsw" role="group" aria-label="태그 탄" id="hSet">
+      <button data-s="1" aria-pressed="true">1탄</button>
+      <button data-s="2" aria-pressed="false">2탄</button>
+    </div>
+    <div class="foegrid" id="hGrid"></div>
+    <p class="qrnote"><span class="qrdim">바깥을 눌러 닫기 · 목록은 설정의 상대 탄을 따름</span></p>
+  </div>
+</div>
+
 <div class="pickmodal" id="foeModal" hidden>
   <div class="pickbox" role="dialog" aria-modal="true" aria-labelledby="foePickH">
     <div class="pickhead">
@@ -1691,8 +1950,8 @@ const TAGIMG={
 const tagArt=b=>TAGIMG[b.s+'-'+b.r+'-'+b.n]||null;
 
 const RANK_N=10;          // 순위에 보여줄 개수
-const VERSION='3.29.0';
-const BUILT='2026-08-17';
+const VERSION='3.39.0';
+const BUILT='2026-08-20';
 
 /* ══ 자산을 CSS 로 한 번만 심는다 (DOM 에 base64 중복 방지) ══ */
 const AK={}, TK={}, GK={}, SK={};
@@ -1739,7 +1998,8 @@ const MEGA={
   // e = 대성공 에너지, e2 = 성공 에너지(미측정이면 생략), t = 바뀌는 타입
   '1-6-리자몽':{e:144,t:['불꽃','드래곤'],n:'메가리자몽X'},  // 대성공 124 → 144, 비행 → 드래곤
   '1-5-피죤투':{e:118,n:'메가피죤투'},                       // 대성공 100 → 118 (2026-08-17 잭 실측)
-  '1-6-거북왕':{e:144,n:'메가거북왕'}                        // 대성공 124 → 144 (2026-08-17 잭 실측)
+  '1-6-거북왕':{e:144,n:'메가거북왕'},                       // 대성공 124 → 144 (2026-08-17 잭 실측)
+  '2-6-가디안':{e:146,n:'메가가디안'}                        // 대성공 124 → 146 (2026-08-17 잭 실측)
   /* ⚠ 리자몽·거북왕 둘 다 원본 에너지가 124 라 헷갈리기 쉽다. **id 로 구분할 것.**
      타입 변화는 거북왕에서 관측되지 않아 비워 뒀다 (리자몽은 비행→드래곤). */
 };
@@ -1928,6 +2188,8 @@ async function load(){
     if(saved&&saved.megaTier) megaTier=saved.megaTier;
     if(saved&&saved.mode&&MODES[saved.mode]) mode=saved.mode;
     if(saved&&Array.isArray(saved.foes)) foes=[0,1].map(i=>SUBBY.has(saved.foes[i])?saved.foes[i]:null);
+    if(saved&&saved.playRec) playRec=true;
+    if(saved&&saved.gver) gver={...GVER_DEFAULT,...saved.gver};
     if(saved&&Array.isArray(saved.dex)) dex=toBag(saved.dex);
     backend='claude';
     if(loadOwned(saved,arr)) loaded=true;
@@ -1953,6 +2215,8 @@ async function load(){
       if(saved&&saved.megaTier) megaTier=saved.megaTier;
       if(saved&&saved.mode&&MODES[saved.mode]) mode=saved.mode;
     if(saved&&Array.isArray(saved.foes)) foes=[0,1].map(i=>SUBBY.has(saved.foes[i])?saved.foes[i]:null);
+      if(saved&&saved.playRec) playRec=true;
+      if(saved&&saved.gver) gver={...GVER_DEFAULT,...saved.gver};
       if(saved&&Array.isArray(saved.dex)) dex=toBag(saved.dex);
         if(loadOwned(saved,arr)) loaded=true; }
   }catch(e){ backend='memory' }
@@ -1961,7 +2225,7 @@ async function load(){
 }
 let sT;
 function save(){clearTimeout(sT);sT=setTimeout(async()=>{
-  const p=JSON.stringify({ownedA:[...ownedSets.A],ownedB:[...ownedSets.B],ownedC:[...ownedSets.C],chance,guideHidden,detail,rankSort,bossRank,dmaxLv,megaTier,mode,foes,foeSets,tagClass,dex:[...dex]});
+  const p=JSON.stringify({ownedA:[...ownedSets.A],ownedB:[...ownedSets.B],ownedC:[...ownedSets.C],chance,guideHidden,detail,rankSort,bossRank,dmaxLv,megaTier,mode,foes,foeSets,tagClass,dex:[...dex],playRec,gver});
   if(backend==='claude'){try{await window.storage.set(KEY,p);return}catch(e){}}
   if(backend==='claude'||backend==='local'){try{localStorage.setItem(KEY,p);backend='local';return}catch(e){}}
   backend='memory'; renderBackend();
@@ -2068,6 +2332,12 @@ const MODES={
   '스페셜':{n:'스페셜태그배틀',  hp:1.15, note:'2인 협동. 보스 실제 HP는 카드의 <b>약 ×2</b>인데, 파트너가 절반쯤 맡는다고 보고 <b>내 몫 ×1.15</b>로 계산합니다. 파트너가 약하면 이보다 오래 걸립니다.'}
 };
 let mode='지역';
+let playRec=false;      // 플레이 화면 인라인 기록 (v3.35.0 · 기본 꺼짐 · 잭 지정)
+/* 게임기(기계) 버전 — 기계 화면에 적힌 값. 기본은 잭이 확인한 1.0.4.39608.ko. (v3.37.0).
+   앱 자신의 VERSION 과 헷갈리지 말 것 — 이쪽은 «기계» 버전이고 기록에 함께 남는다. */
+const GVER_DEFAULT={maj:1,min:0,pat:4,build:'39608'};
+let gver={...GVER_DEFAULT};
+const gverStr=()=>gver.maj+'.'+gver.min+'.'+gver.pat+'.'+(gver.build||'0')+'.ko.';
 /* 지역배틀 상대 파티 — [왼쪽 서브, 오른쪽 서브]. 가운데(대상)는 `bossId` 가 맡는다.
    순서는 계산에 쓰지 않는다 (잭 확인 — 파티 구성일 뿐 턴 순서가 아니다).
    지역배틀에서만 쓰며 비워둘 수 있다. */
@@ -3421,7 +3691,7 @@ function setColTab(v){
 }
 
 let view='battle';
-const VIEWS={battle:['viewBattle','vB'],collection:['viewCollection','vC'],chance:['viewChance','vX']};
+const VIEWS={battle:['viewBattle','vB'],collection:['viewCollection','vC'],hist:['viewHist','vH'],chance:['viewChance','vX']};
 function setView2(v){
   view=v;
   Object.entries(VIEWS).forEach(([k,ids])=>{
@@ -3466,7 +3736,7 @@ function wipe(){
   ownedSets={A:DEFAULT_OWNED(), B:new Bag(), C:new Bag()}; useClass(); chance={...CHANCE_DEFAULTS};
   guideHidden=false; detail=0; rankSort='score'; bossRank='6';
   dmaxLv=5; megaTier='대성공'; mode='지역'; foes=[null,null]; foeSets={'1':true,'2':true};
-  tagClass='A'; dex=new Bag();
+  tagClass='A'; dex=new Bag(); playRec=false; gver={...GVER_DEFAULT};
   renderAll();
 }
 const wipeBtn=document.getElementById('wipeBtn'),
@@ -3600,6 +3870,503 @@ document.getElementById('clearOwn').addEventListener('click',()=>{
   ownedSets[tagClass]=new Bag(); useClass(); save(); renderAll()});
 Object.entries(VIEWS).forEach(([k,ids])=>
   document.getElementById(ids[1]).addEventListener('click',()=>setView2(k)));
+
+/* ───────────────────── 실측 기록 (v3.31.0) ─────────────────────
+   현장에서 판마다 «위치 · 선물 · 서브1 · 보스 · 서브2 · 겟» 을 남긴다.
+   형식은 잭의 신형식(2026-08-19 확립)과 같아, «전체 복사» 결과를 채팅·분석에
+   그대로 붙일 수 있다. 저장 키는 HKEY 하나이고 save()/wipe() 와 **무관하다** —
+   현장 데이터는 다시 만들 수 없어서 전체 초기화에 딸려 지워지면 안 된다. */
+const HKEY=KEY+':hist';
+let hist=[];
+try{ const r=localStorage.getItem(HKEY); if(r) hist=JSON.parse(r)||[]; }catch(e){}
+function hStore(){ try{ localStorage.setItem(HKEY, JSON.stringify(hist)); }catch(e){} }
+
+/* 이름 목록 — 도감(POOL)과 서브(SUBS)에서 {이름·성급·탄} 을 모은다.
+   **설정의 상대 탄(foeSets)을 따른다** (v3.31.1 · 잭 지정) — 꺼진 탄의 태그는
+   현장에서 나올 수 없으니 목록에서 뺀다. 공통탄은 늘 남는다.
+   v3.31.6 부터 탄을 보존한다 — 픽커의 1탄/2탄 스위치(foeModal 과 동일)가 쓴다.
+   도감에 없는 이름(홍나숭이 그랬다)도 현장에선 나오므로 픽커가 자유 입력을 함께 받는다. */
+function hCat(){
+  const out=[], seen=new Set();
+  const add=(n,r,s)=>{
+    if(s!=='공통' && typeof foeSets!=='undefined' && foeSets[s]===false) return;
+    const k=n+'|'+r+'|'+s;
+    if(seen.has(k)) return;
+    seen.add(k); out.push({n:String(n), r:String(r), s:String(s)});
+  };
+  POOL.forEach(p=>add(p.n,p.r,p.s)); SUBS.forEach(x=>add(x.n,x.r,x.s));
+  return out;
+}
+const HRORD='65432R';
+const hEsc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* v3.32.0 (잭 지정) — L 과 R 은 **동시에** 진행되는 일이 많다.
+   그래서 위치마다 «작성 중» 드래프트를 따로 쥐고, L/R 버튼은 값이 아니라
+   **드래프트 전환기**다. 드래프트는 localStorage 에도 적어 두어(HDKEY)
+   현장에서 앱이 새로고침돼도 살아남는다. LR 드래프트는 스페셜 전용이다. */
+const HDKEY=HKEY+':draft';
+/* src: 'play' = 내가 한 판(플레이 화면에서 가져옴) · 'watch' = 남의 판을 옆에서 본 것(관전).
+   기본은 관전이다 — 기록 탭에서 손으로 넣는 판은 대개 남의 판이기 때문이다 (v3.34.0 · 잭 지정). */
+const hFresh=(p)=>({m:p==='LR'?'스페셜':'지역',p,src:'watch',g:null,s1:null,b:null,s2:null,got:false});
+let hDrafts={L:hFresh('L'),R:hFresh('R'),LR:hFresh('LR')};
+let hActiveP='L', hBackP='L';
+let hEditIdx=null, hEditBuf=null;            // 목록에서 불러와 고치는 중이면 인덱스·버퍼
+let hCur=hDrafts.L;                           // 항상 «지금 화면이 편집 중인 판» 을 가리킨다
+try{
+  const d=localStorage.getItem(HDKEY);
+  if(d){ const o=JSON.parse(d)||{};
+    if(o.drafts) hDrafts=Object.assign({L:hFresh('L'),R:hFresh('R'),LR:hFresh('LR')},o.drafts);
+    if(o.active && hDrafts[o.active]) hActiveP=o.active;
+    hCur=hDrafts[hActiveP];
+  }
+}catch(e){}
+function hDraftStore(){ try{ localStorage.setItem(HDKEY, JSON.stringify({drafts:hDrafts,active:hActiveP})); }catch(e){} }
+const hHasContent=d=> !!(d && (d.g||d.s1||d.b||d.s2||d.got));
+let hSlot=null, hWipeT=null;
+
+const hFmt=t=> t ? t.n+(t.r||'') : '?';
+function hLine(e){
+  const got=e.got?' 겟':'';
+  const src=e.src==='play'?' [플레이]':' [관전]';
+  if(e.m==='스페셜') return e.p+' 스페셜태그배틀 '+hFmt(e.b)+got+src;
+  if(e.m==='다맥')   return e.p+' 다이맥스 '+hFmt(e.b)+got+src;
+  return e.p+' '+hFmt(e.g)+' '+hFmt(e.s1)+' '+hFmt(e.b)+' '+hFmt(e.s2)+got+src;
+}
+
+function renderHCur(){
+  document.querySelectorAll('#hMode button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===hCur.m));
+  document.querySelectorAll('.hposg button').forEach(b=>{
+    b.setAttribute('aria-pressed',b.dataset.p===hCur.p);
+    /* 다른 자리에 작성 중인 판이 있으면 점을 켠다 — 동시 진행의 «저쪽도 쓰다 말았음» 표시 */
+    b.classList.toggle('hasdraft', hEditIdx==null && !b.closest('.hposval')
+      && b.dataset.p!==hCur.p && hHasContent(hDrafts[b.dataset.p]));
+  });
+  const pos=document.getElementById('hPos');
+  if(pos) pos.classList.toggle('hlr', hCur.p==='LR');   // 스페셜 = LR 자동, 줄 잠금 표시
+  document.querySelectorAll('.hgotg button').forEach(b=>b.setAttribute('aria-pressed',(b.dataset.g==='1')===hCur.got));
+  document.querySelectorAll('#hSrc button').forEach(b=>
+    b.setAttribute('aria-pressed', b.dataset.src===(hCur.src||'watch')));
+  const sv=document.getElementById('hSaveBtn'), cc=document.getElementById('hEditCancel');
+  if(sv) sv.textContent = hEditIdx==null ? '저장' : (hEditIdx+1)+'판 수정 저장';
+  if(cc) cc.hidden = hEditIdx==null;
+  const local=hCur.m==='지역';
+  document.querySelectorAll('.hslot').forEach(el=>{
+    el.classList.toggle('hs-off', !local && el.dataset.k!=='b');
+  });
+  [['g','hs-g'],['s1','hs-s1'],['b','hs-b'],['s2','hs-s2'],['g','hs2-g']].forEach(([k,id])=>{
+    const el=document.getElementById(id); if(!el) return;
+    const t=hCur[k];
+    el.innerHTML = t ? hEsc(t.n)+(t.r?'<b>★'+hEsc(t.r)+'</b>':'') : '—';
+  });
+  /* 플레이 화면 인라인 블록 — 설정에서 켰을 때만, 그리고 수정 중일 땐 감춘다
+     (기록 탭에서 옛 판을 고치는 중에 플레이 화면 저장까지 열려 있으면 헷갈린다) */
+  const showPR = playRec && hEditIdx==null;
+  ['sPlayRecTop','sPlayRecBot'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.hidden=!showPR;
+  });
+  /* 기록 기능을 끄면 **기록 탭 자체를 감춘다** (v3.39.0 · 잭 지정 · 기본 꺼짐).
+     보고 있던 중에 꺼졌으면 플레이 화면으로 돌려보낸다 — 빈 화면에 갇히지 않게.
+     ⚠ 탭만 감출 뿐 **저장된 기록은 그대로 남는다** (HKEY 는 건드리지 않는다). */
+  const vh=document.getElementById('vH');
+  if(vh){
+    vh.hidden=!playRec;
+    if(!playRec && typeof view!=='undefined' && view==='hist') setView2('battle');
+  }
+  document.querySelectorAll('#playRecSw button').forEach(b=>
+    b.setAttribute('aria-pressed', (b.dataset.pr==='1')===playRec));
+}
+function renderHList(){
+  renderHStat();                     // 목록이 바뀌면 분석도 함께 다시 센다
+  const box=document.getElementById('hList'), ct=document.getElementById('hCt'),
+        badge=document.getElementById('vHct');
+  if(ct) ct.textContent = hist.length ? hist.length+'판 · 오래된 판이 위' : '';
+  if(badge) badge.textContent = hist.length||'';
+  if(!box) return;
+  if(!hist.length){ box.innerHTML='<p class="empty">아직 기록이 없습니다.<br>위에서 판을 저장하거나 일괄 입력을 쓰세요.</p>'; return; }
+  box.innerHTML=hist.map((e,i)=>
+    `<div class="hrow${i===hEditIdx?' hediting':''}"><span class="hno">${i+1}</span>`+
+    `<button class="htxt" data-i="${i}" aria-label="${i+1}판 수정">${hEsc(hLine(e))}`+
+      (e.ts?`<small class="hts">${hEsc(hClock(e.ts))}</small>`:'')+`</button>`+
+    `<button class="hdel" data-i="${i}" aria-label="${i+1}판 삭제">✕</button></div>`).join('');
+}
+
+/* 판 저장 — 보스는 필수. 지역이면 저장 후 L↔R 을 자동으로 뒤집는다 (교대 플레이 전제).
+   선물·서브는 못 봤으면 비워 두면 되고, 내보내기에서 «?» 로 나간다. */
+let hEmptyArm=0;
+document.getElementById('hSaveBtn').addEventListener('click',()=>{
+  const note=document.getElementById('hNote');
+  /* 보스도 못 볼 수 있다 (v3.32.1 · 잭 지정) — 연속된 판을 사실대로 남기는 것이
+     목적이므로 **비움도 저장한다** (내보내기에서 «?»). 다만 «모든 칸이 빈 판» 은
+     실수 저장을 막기 위해 두 번 탭으로 받는다 (alert 금지 규칙 — 인라인 확인). */
+  const empty = !hCur.b && !hCur.g && !hCur.s1 && !hCur.s2 && !hCur.got;
+  if(empty && hEditIdx==null){
+    if(Date.now()-hEmptyArm>4000){
+      hEmptyArm=Date.now();
+      note.textContent='빈 판입니다 — 그래도 남기려면 한 번 더 누르세요';
+      return;
+    }
+  }
+  hEmptyArm=0;
+  const e={m:hCur.m,p:hCur.p,src:hCur.src||'watch',got:hCur.got,ts:hCur.ts||Date.now(),
+           gver:hCur.gver||gverStr(),          // 판마다 기계 버전을 남긴다 (v3.37.0)
+           g:hCur.g,s1:hCur.s1,b:hCur.b,s2:hCur.s2};
+  if(e.m!=='지역'){ e.g=e.s1=e.s2=null; }
+  if(hEditIdx!=null){
+    /* 목록에서 불러온 판을 고쳐 저장 — 제자리에 반영하고 편집 모드를 닫는다 */
+    hist[hEditIdx]=e; hStore(); renderHList();
+    note.textContent=(hEditIdx+1)+'판 수정됨';
+    hEditExit();
+    return;
+  }
+  hist.push(e); hStore(); renderHList();
+  note.textContent=hist.length+'판째 저장됨';
+  /* 저장한 드래프트만 비운다. 자동 L↔R 교대는 뺐다 (v3.32.0 · 잭 지정 — 동시 진행) —
+     대신 반대편에 쓰다 만 판이 있으면 그쪽으로 넘어간다. LR 드래프트는 원래 자리로. */
+  hDrafts[hActiveP]=hFresh(hActiveP);
+  if(hActiveP==='LR'){ hActiveP=hBackP||'L'; }
+  else { const o=hActiveP==='L'?'R':'L'; if(hHasContent(hDrafts[o])) hActiveP=o; }
+  hCur=hDrafts[hActiveP];
+  hDraftStore(); renderHCur();
+});
+/* 수정 모드 — 목록의 판을 눌러 진입한다. 작성 중이던 L/R 드래프트는 건드리지 않고
+   별도 버퍼(hEditBuf)에서 고친다. 취소하면 원래 드래프트 화면으로 돌아온다. */
+function hEditStart(i){
+  hEditIdx=i;
+  hEditBuf=JSON.parse(JSON.stringify(hist[i]));
+  hCur=hEditBuf;
+  document.getElementById('hNote').textContent=(i+1)+'판 수정 중 — 저장하면 반영됩니다';
+  renderHCur();
+  window.scrollTo({top:0,behavior:'instant'});
+}
+function hEditExit(){
+  hEditIdx=null; hEditBuf=null;
+  hCur=hDrafts[hActiveP];
+  renderHCur();
+}
+document.getElementById('hEditCancel').addEventListener('click',()=>{
+  document.getElementById('hNote').textContent='수정 취소됨';
+  hEditExit();
+});
+document.querySelectorAll('#hMode button').forEach(b=>b.addEventListener('click',()=>{
+  const m=b.dataset.m;
+  if(hEditIdx!=null){
+    /* 수정 중에는 드래프트 전환 없이 그 판의 종류·위치만 고친다 */
+    hCur.m=m;
+    if(m==='스페셜'){ if(hCur.p!=='LR'){ hCur._backP=hCur.p; hCur.p='LR'; } }
+    else if(hCur.p==='LR'){ hCur.p=hCur._backP||'L'; }
+    renderHCur(); return;
+  }
+  if(m==='스페셜'){
+    if(hActiveP!=='LR'){ hBackP=hActiveP; hActiveP='LR'; hCur=hDrafts.LR; }
+    hCur.m='스페셜';
+  } else {
+    if(hActiveP==='LR'){ hActiveP=hBackP||'L'; hCur=hDrafts[hActiveP]; }
+    hCur.m=m;
+  }
+  hDraftStore(); renderHCur();
+}));
+document.querySelectorAll('.hposg button').forEach(b=>b.addEventListener('click',()=>{
+  /* 값만 바꾸는 자리 두 곳: ① 옛 판을 수정하는 중 ② 플레이 화면(.hposval) —
+     플레이는 한쪽에서만 하므로 L/R 드래프트를 따로 둘 이유가 없다 (v3.36.1 · 잭 지정). */
+  if(hEditIdx!=null || b.closest('.hposval')){
+    hCur.p=b.dataset.p; renderHCur(); if(hEditIdx==null) hDraftStore(); return;
+  }
+  /* 기록 탭에서는 드래프트 전환 — L 을 쓰다 R 로 넘어가도 L 은 그대로 남는다 (관전 동시 진행) */
+  hActiveP=b.dataset.p; hCur=hDrafts[hActiveP];
+  hDraftStore(); renderHCur();
+}));
+document.querySelectorAll('.hgotg button').forEach(b=>b.addEventListener('click',()=>{hCur.got=b.dataset.g==='1';renderHCur();if(hEditIdx==null)hDraftStore()}));
+document.querySelectorAll('#hSrc button').forEach(b=>b.addEventListener('click',()=>{
+  hCur.src=b.dataset.src; renderHCur(); if(hEditIdx==null) hDraftStore();
+}));
+/* 플레이 화면에서 가져오기 (v3.34.0 · 잭 지정) — 내가 플레이할 때는 이미 «플레이» 탭에서
+   보스와 서브를 고른 뒤다. 그것을 다시 치지 않도록 그대로 끌어온다.
+   선물·겟은 화면에 없는 값이라 건드리지 않는다 (직접 넣는다). 출처는 «플레이» 로 바뀐다. */
+function hPullPlay(note){
+  const boss=BOSSES.find(x=>x.id===bossId);
+  if(!boss){ if(note) note.textContent='플레이 탭에서 대상을 먼저 고르세요.'; return false; }
+  /* 플레이 화면의 mode 값('지역'·'다맥'·'스페셜')은 기록의 판 종류와 같은 낱말이다.
+     스페셜이면 기록도 LR 드래프트로 옮긴다 — «스페셜 = LR» 규칙을 깨지 않기 위해. */
+  if(hEditIdx==null){
+    if(mode==='스페셜' && hActiveP!=='LR'){ hBackP=hActiveP; hActiveP='LR'; hCur=hDrafts.LR; }
+    else if(mode!=='스페셜' && hActiveP==='LR'){ hActiveP=hBackP||'L'; hCur=hDrafts[hActiveP]; }
+  }
+  hCur.m=mode;
+  hCur.src='play';
+  hCur.b={n:boss.n, r:String(boss.r)};
+  const put=(k,at)=>{ const f=foes[at]&&SUBBY.get(foes[at]); if(f) hCur[k]={n:f.n, r:String(f.r)}; };
+  if(mode==='지역'){ put('s1',0); put('s2',1); }
+  const cnt=mode==='지역'?[foes[0],foes[1]].filter(Boolean).length:0;
+  if(note) note.textContent='플레이 화면에서 가져왔습니다 — 보스'+(cnt?' · 서브 '+cnt+'장':'')+' · 선물과 결과는 직접 넣으세요';
+  renderHCur(); if(hEditIdx==null) hDraftStore();
+  return true;
+}
+document.getElementById('hFromPlay').addEventListener('click',()=>
+  hPullPlay(document.getElementById('hNote')));
+/* 플레이 화면의 «저장» — 보스·서브는 화면에서 자동으로 끌어오고, 선물·겟은 위아래 블록에
+   넣은 값을 쓴다. 즉 플레이 중에는 «선물 고르기 → 배틀 → 겟 결과 → 저장» 만 하면 된다. */
+document.getElementById('hPlaySave').addEventListener('click',()=>{
+  const note=document.getElementById('hPlayNote');
+  if(!hPullPlay(note)) return;
+  document.getElementById('hSaveBtn').click();
+  note.textContent=hist.length+'판째 저장됨 — 기록 탭에서 볼 수 있습니다';
+});
+document.querySelectorAll('#playRecSw button').forEach(b=>b.addEventListener('click',()=>{
+  playRec=b.dataset.pr==='1'; save(); renderHCur();
+}));
+/* 게임기 버전 (v3.37.0) — ± 로 메이저·마이너·패치, 빌드는 직접 입력.
+   판을 저장할 때 이 문자열이 판마다 함께 남는다 (`e.gver`). */
+function renderGver(){
+  const set=(id,v)=>{const el=document.getElementById(id); if(el) el.textContent=v;};
+  set('verMaj',gver.maj); set('verMin',gver.min); set('verPat',gver.pat);
+  set('verNow',gverStr());
+  const b=document.getElementById('verBuild');
+  if(b && b.value!==gver.build) b.value=gver.build;
+}
+document.querySelectorAll('.verrow[data-v] button').forEach(btn=>btn.addEventListener('click',()=>{
+  const k=btn.closest('.verrow').dataset.v, d=Number(btn.dataset.d);
+  gver[k]=Math.max(0,Math.min(99,(Number(gver[k])||0)+d));
+  save(); renderGver();
+}));
+(()=>{ const el=document.getElementById('verBuild'); if(!el) return;
+  el.addEventListener('input',()=>{
+    const v=String(el.value||'').replace(/[^0-9]/g,'').slice(0,7);
+    if(el.value!==v) el.value=v;
+    gver.build=v; save(); renderGver();
+  });
+})();
+renderGver();
+
+/* 픽커 — foeModal 과 같은 시트. 초성 검색(foeMatch)을 그대로 쓴다.
+   정확히 일치하는 도감 이름이 없으면 «그대로 쓰기» 줄이 성급 후보와 함께 뜬다. */
+const hQ=document.getElementById('hQ');
+/* 픽커 v3.31.5 — **상대 서브 픽커와 같은 컴포넌트 문법** (잭 지정):
+   성급 거르개 한 줄 + 이름만 적힌 foegrid + «이어 고르기»(고르면 남은 칸으로 넘어감)
+   + 바깥 눌러 닫기. 검색 중에는 거르개를 감추고 성급을 이름 옆에 함께 적는다 —
+   전부 foeModal 의 규칙 그대로다. 다른 점 하나: 도감에 없는 이름을 받는
+   «그대로 쓰기» 점선 버튼이 검색 시 맨 앞에 뜬다. */
+let hRank='5', hSet='1';
+const hSlotName={g:'선물',s1:'서브1',b:'보스',s2:'서브2'};
+/* 이어 고르기 묶음 (v3.36.0 · 잭 지정) — **선물은 이어 고르기에서 뺀다.**
+   선물은 판 시작에 받고 상대 3장은 그 뒤에 뜨므로 사이에 텀이 있다.
+   선물을 고르면 거기서 닫히고, 상대는 서브1 → 보스 → 서브2 로 이어 받는다. */
+const hOrder=()=> hSlot==='g' ? ['g'] : (hCur.m==='지역' ? ['s1','b','s2'] : ['b']);
+function hSetTitle(){
+  const o=hOrder(), i=o.indexOf(hSlot);
+  const step = o.length>1 ? ` <span class="pickstep">${i+1} / ${o.length}</span>` : '';
+  document.getElementById('hPickH').innerHTML=hEsc(hSlotName[hSlot])+' 선택'+step;
+}
+function hOpenPick(k){
+  hSlot=k;
+  document.getElementById('hModal').hidden=false;
+  hQ.value=''; hSetTitle(); renderHPick(); hQ.focus();
+}
+document.querySelectorAll('.hslot').forEach(el=>el.addEventListener('click',()=>hOpenPick(el.dataset.k)));
+function hClosePick(){ document.getElementById('hModal').hidden=true; hSlot=null; }
+document.getElementById('hPickX').addEventListener('click',hClosePick);
+document.getElementById('hModal').addEventListener('click',ev=>{
+  if(ev.target===document.getElementById('hModal')) hClosePick();   // 바깥을 눌러 닫기
+});
+hQ.addEventListener('input',renderHPick);
+document.querySelectorAll('#hRank button').forEach(b=>
+  b.addEventListener('click',()=>{ hRank=b.dataset.r; renderHPick(); }));
+document.querySelectorAll('#hSet button').forEach(b=>
+  b.addEventListener('click',()=>{ hSet=b.dataset.s; renderHPick(); }));
+function hPickTag(n,r){
+  if(!hSlot) return;
+  hCur[hSlot]={n,r:r||''}; renderHCur();
+  if(hEditIdx==null) hDraftStore();            // 작성 중 드래프트는 새로고침에도 살아남는다
+  const next=hOrder().find(k=>!hCur[k]);       // 이어 고르기 — 남은 빈 칸으로
+  if(next){ hSlot=next; hQ.value=''; hSetTitle(); renderHPick(); }
+  else hClosePick();
+}
+function renderHPick(){
+  const q=hQ.value.trim(), g=document.getElementById('hGrid');
+  document.querySelectorAll('#hRank button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.r===hRank));
+  const searching=!!q;
+  /* 검색 중에는 거르개를 감춘다 — 안 감추면 «눌러도 목록이 안 바뀐다» 로 보인다 (foeModal 규칙) */
+  document.getElementById('hRank').hidden=searching;
+  /* 탄 스위치도 foeModal 규칙 그대로: 검색 중·레귤러(공통이라 탄 없음)·켜진 탄이
+     하나뿐이면 통째로 감춘다. 설정에서 끈 탄의 버튼은 감춘다. */
+  const onSets=(typeof foeSets==='undefined')?['1','2']:['1','2'].filter(k=>foeSets[k]!==false);
+  if(!onSets.includes(hSet)) hSet=onSets[0]||'1';
+  const hs=document.getElementById('hSet');
+  hs.hidden = searching || hRank==='R' || onSets.length<2;
+  document.querySelectorAll('#hSet button').forEach(b=>{
+    b.hidden = !onSets.includes(b.dataset.s);
+    b.setAttribute('aria-pressed', b.dataset.s===hSet);
+  });
+  const cat=hCat(), list=[];
+  if(searching){
+    for(const t of cat) if(foeMatch(t.n,q)) list.push(t);
+    list.sort((a,b)=>HRORD.indexOf(a.r)-HRORD.indexOf(b.r)||a.n.localeCompare(b.n,'ko'));
+  } else {
+    for(const t of cat) if(t.r===hRank && (hRank==='R'||t.s===hSet)) list.push(t);
+    list.sort((a,b)=>a.n.localeCompare(b.n,'ko'));
+  }
+  const hint=document.getElementById('hPickHint');
+  hint.hidden=false;
+  hint.textContent = searching
+    ? `«${q}» 검색 — 성급 상관없이 ${list.length}장`
+    : (hSlot==='g' ? '선물 한 장만 넣습니다 — 상대는 배틀이 뜨면 서브1 부터 이어 받습니다'
+      : hOrder().length>1 ? '고르면 남은 칸으로 넘어갑니다 · 한 장만 넣으려면 바깥을 눌러 닫으세요'
+                          : '이 판 종류는 보스만 기록합니다');
+  g.innerHTML='';
+  if(searching && !list.some(t=>t.n===q) && q){
+    /* 도감에 없는 이름 — 현장에선 나온다 (홍나숭 사례). 성급은 아는 만큼만. */
+    [[hRank,'그대로 ★'+hRank],['','성급 모름']].forEach(([r,lab])=>{
+      const b=document.createElement('button');
+      b.className='hnew';
+      b.innerHTML=`${hEsc(q)}<small>${lab}</small>`;
+      b.addEventListener('click',()=>hPickTag(q,r));
+      g.appendChild(b);
+    });
+  }
+  if(searching && !list.length && !q) g.innerHTML='';
+  list.forEach(t=>{
+    const b=document.createElement('button');
+    b.innerHTML = searching
+      ? `${hEsc(t.n)}<small>${rlab(t.r)} · ${t.s==='공통'?'공통':t.s+'탄'}</small>`
+      : hEsc(t.n);
+    if(hCur[hSlot] && hCur[hSlot].n===t.n && hCur[hSlot].r===t.r){
+      b.className='on'; b.setAttribute('aria-pressed','true');
+    }
+    b.addEventListener('click',()=>hPickTag(t.n,t.r));
+    g.appendChild(b);
+  });
+}
+
+/* 기록 분석 (v3.33.0 · 잭 지정 — 일괄 입력 자리를 대체) — 저장된 판으로 현장 판단에
+   쓸 수치만 계산한다. 근거는 CLAUDE.md «건조 구간 진입 감지» · «★6 겟 전략» ·
+   «10줄 구조 모델» 절이다. **여기 수치를 새 발견의 근거로 쓰지 말 것** —
+   화면은 잭 기계 표본이 아니라 «지금 이 기계» 만 본다. */
+const hIs6=t=>!!t&&t.r==='6';
+function hAnalyze(){
+  const n=hist.length;
+  if(!n) return null;
+  const local=hist.filter(e=>e.m==='지역');
+  const six=hist.filter(e=>hIs6(e.b));
+  const gotAll=hist.filter(e=>e.got);
+  /* 지금 건조 — 마지막 ★6 보스 이후 몇 판인가. 6판을 넘겼으면 곧 나온다
+     (간격이 무작위보다 규칙적 · 실측 평균 1.5판). */
+  let dry=0;
+  for(let i=n-1;i>=0;i--){ if(hIs6(hist[i].b)) break; dry++; }
+  /* 상대 풀 폭 — 최근 판의 서브·보스 종수. 끝물이면 좁아진다 (영상: 21슬롯 8종). */
+  const recent=local.slice(-6);
+  const slots=[]; recent.forEach(e=>[e.s1,e.b,e.s2].forEach(t=>{if(t)slots.push(t.n)}));
+  const kinds=new Set(slots).size;
+  /* ★2 서브 — 끝물에는 하위 성급이 상대 풀에서 빠진다. */
+  const subs=[]; local.forEach(e=>[e.s1,e.s2].forEach(t=>{if(t&&t.r)subs.push(t.r)}));
+  const r2=subs.filter(r=>r==='2').length;
+  const strong=subs.filter(r=>r==='4'||r==='5').length;
+  /* ★6 선물 — pool 잔량 배출 신호. 나오면 태그부족까지 이어서 할 값이 있다. */
+  const gift6=hist.filter(e=>hIs6(e.g)).length;
+  const lastGift6=hIs6(hist[n-1]&&hist[n-1].g);
+  /* 전이 사슬 — 서브로 본 태그가 뒤 판에서 선물로 나온 사례 (시드=실물 카드 증거). */
+  let chain=0;
+  hist.forEach((e,i)=>{
+    if(!e.g) return;
+    for(let j=Math.max(0,i-8);j<i;j++){
+      const p=hist[j];
+      if([p.s1,p.s2,p.b].some(t=>t&&t.n===e.g.n&&t.r===e.g.r)){ chain++; break; }
+    }
+  });
+  const gvers=[...new Set(hist.map(e=>e.gver).filter(Boolean))];
+  return {n,gvers,play:hist.filter(e=>e.src==='play').length,
+    L:hist.filter(e=>e.p==='L').length,R:hist.filter(e=>e.p==='R').length,
+    sp:hist.filter(e=>e.m==='스페셜').length,
+    six:six.length, six6got:six.filter(e=>e.got).length, got:gotAll.length,
+    dry, kinds, slots:slots.length, subs:subs.length, r2, strong, gift6, lastGift6, chain};
+}
+function renderHStat(){
+  const box=document.getElementById('hStat'); if(!box) return;
+  const a=hAnalyze();
+  if(!a){ box.innerHTML='<p class="empty">판을 저장하면 여기에 분석이 나옵니다.</p>'; return; }
+  const pct=(x,y)=>y?Math.round(x/y*100)+'%':'—';
+  const rows=[];
+  rows.push(['판 수', a.n+'판 · L '+a.L+' / R '+a.R+(a.sp?' · 스페셜 '+a.sp:'')]);
+  rows.push(['출처', '플레이 '+a.play+' · 관전 '+(a.n-a.play)]);
+  if(a.gvers.length) rows.push(['게임기 버전', a.gvers.join(' · ')
+    +(a.gvers.length>1?' — 버전이 바뀐 판이 섞여 있습니다':'')]);
+  rows.push(['★6 보스', a.six+'회 ('+pct(a.six,a.n)+') · 겟 '+a.six6got+' · 전체 겟 '+a.got]);
+  rows.push(['★6 미출현', a.dry+'판째'+(a.dry>=6?' — 곧 나올 구간입니다 (자리를 지키세요)'
+    : a.dry>=3?' — 건조 한복판일 수 있습니다':'')]);
+  if(a.slots) rows.push(['상대 풀 폭', a.kinds+'종 / 최근 '+a.slots+'슬롯'
+    +(a.slots>=9&&a.kinds<=a.slots*0.45?' — 좁습니다. 재고 끝물 신호':'')]);
+  if(a.subs) rows.push(['서브 성급', '★2 '+pct(a.r2,a.subs)+' · ★4~5 '+pct(a.strong,a.subs)
+    +(a.subs>=8&&a.r2===0?' — ★2 가 사라졌습니다 (끝물 신호)':'')]);
+  if(a.chain) rows.push(['전이 사슬', a.chain+'건 — 서브로 본 태그가 뒤에 선물로 나온 횟수']);
+  let h='<div class="hstat">'+rows.map(([k,v])=>
+    `<div class="hst"><span class="hst-k">${hEsc(k)}</span><span class="hst-v">${hEsc(v)}</span></div>`).join('')+'</div>';
+  if(a.gift6) h=`<p class="hstwarn"><b>★6 선물 ${a.gift6}건</b> — pool 잔량이 나오는 중입니다.`
+    +`${a.lastGift6?' 방금도 ★6 이었습니다.':''} 태그부족으로 멈출 때까지 이어서 하면 잔량을 받습니다.</p>`+h;
+  box.innerHTML=h;
+}
+
+/* 목록 — 한 판 삭제는 즉시, 전체 삭제는 인라인 확인 (alert/confirm 금지 규칙). */
+document.getElementById('hList').addEventListener('click',ev=>{
+  const d=ev.target.closest('.hdel');
+  if(d){
+    const i=Number(d.dataset.i);
+    hist.splice(i,1); hStore();
+    if(hEditIdx!=null){                        // 고치던 판이 지워지거나 앞이 줄면 정리
+      if(i===hEditIdx) hEditExit();
+      else if(i<hEditIdx) hEditIdx--;
+    }
+    renderHList(); renderHCur(); return;
+  }
+  const t=ev.target.closest('.htxt');
+  if(t) hEditStart(Number(t.dataset.i));       // 줄을 누르면 그 판을 불러와 고친다
+});
+/* 내보내기 (v3.38.0 · 잭 지정) — 날짜와 기기 버전은 **바뀔 때만 «# » 헤더 한 줄**로 넣는다.
+   판마다 붙이면 줄이 번잡하고, 둘 다 며칠에 한 번 바뀌는 값이라 헤더가 읽기 쉽다.
+   시각(ts)·버전(gver)은 저장할 때 이미 자동으로 들어간다 — 손으로 넣는 값이 아니다. */
+const hDay=ts=>{const d=new Date(ts); return (d.getMonth()+1)+'/'+d.getDate()};
+const hClock=ts=>{const d=new Date(ts);
+  return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')};
+function hExport(){
+  const out=[]; let day='', ver='';
+  hist.forEach(e=>{
+    const d=e.ts?hDay(e.ts):'', v=e.gver||'';
+    if((d&&d!==day)||(v&&v!==ver)){
+      out.push('# '+[d||day, v||ver].filter(Boolean).join(' · '));
+      day=d||day; ver=v||ver;
+    }
+    out.push(hLine(e));
+  });
+  return out.join('\n');
+}
+document.getElementById('hCopy').addEventListener('click',()=>{
+  const txt=hExport(), note=document.getElementById('hCt');
+  const done=()=>{ if(note) note.textContent=hist.length+'판 복사됨'; };
+  if(typeof navigator!=='undefined'&&navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(done,()=>hCopyFallback(txt,done));
+  } else hCopyFallback(txt,done);
+});
+function hCopyFallback(txt,done){
+  /* 검증 스텁 DOM 에는 select/execCommand/remove 가 없다 — 전부 안전하게 감싼다. */
+  try{
+    const ta=document.createElement('textarea');
+    ta.value=txt; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta);
+    if(ta.select) ta.select();
+    if(document.execCommand) document.execCommand('copy');
+    if(ta.remove) ta.remove();
+    done();
+  }catch(e){}
+}
+const hWipeBtn=document.getElementById('hWipeBtn'), hWipeAsk=document.getElementById('hWipeAsk');
+function hWipeHide(){ hWipeAsk.hidden=true; hWipeBtn.hidden=false; clearTimeout(hWipeT); }
+hWipeBtn.addEventListener('click',()=>{
+  document.getElementById('hWipeN').textContent=hist.length;
+  hWipeAsk.hidden=false; hWipeBtn.hidden=true;
+  hWipeT=setTimeout(hWipeHide,8000);
+});
+document.getElementById('hWipeNo').addEventListener('click',hWipeHide);
+document.getElementById('hWipeYes').addEventListener('click',()=>{
+  hist=[]; hStore(); renderHList(); hWipeHide();
+});
+renderHCur(); renderHList();
 
 function renderDetail(){
   const v=document.getElementById('viewBattle'); if(!v)return;
