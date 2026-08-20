@@ -7,7 +7,7 @@
 <meta name="description" content="포켓몬 태그스타 스타더스트 1탄·2탄 ★6·★5 보스 공략. 보유 태그로 3턴 로테이션과 서포트 티켓을 추천합니다.">
 <meta name="theme-color" content="#120B2E">
 <meta name="color-scheme" content="dark">
-<meta name="version" content="3.39.0">
+<meta name="version" content="3.40.1">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1950,7 +1950,7 @@ const TAGIMG={
 const tagArt=b=>TAGIMG[b.s+'-'+b.r+'-'+b.n]||null;
 
 const RANK_N=10;          // 순위에 보여줄 개수
-const VERSION='3.39.0';
+const VERSION='3.40.1';
 const BUILT='2026-08-20';
 
 /* ══ 자산을 CSS 로 한 번만 심는다 (DOM 에 base64 중복 방지) ══ */
@@ -3010,6 +3010,10 @@ function renderFoes(){
 function setBoss(id){
   if(bossId===id) return false;
   bossId=id; foes=[null,null]; foePickAt=-1; foeChain=false;
+  /* 쓰임새 신호 (v3.40.1) — 보스를 실제로 «바꿀» 때만 보낸다 (같은 보스 재탭은 위에서 걸러진다).
+     ⚠ 보스 이름은 보내지 않는다 — 어떤 보스가 인기인지는 알고 싶지만, 개인정보 안내에
+     «무엇을 보내는지» 를 늘려 적어야 할 만큼의 값은 아니다. 필요해지면 그때 안내부터 고칠 것. */
+  track('boss_pick');
   save(); return true;
 }
 function renderBosses(){
@@ -3811,7 +3815,21 @@ try{ (window.adsbygoogle=window.adsbygoogle||[]).push({}) }catch(e){}
   window.gtag=function(){window.dataLayer.push(arguments)};
   window.gtag('js',new Date());
   window.gtag('config',GA);
+  /* ══ 방문 누락 보정 (v3.40.0 · 잭 지적) ══
+     GA4 는 «페이지 로드» 때 한 번 신호를 보낸다. 그런데 이 앱은 현장에서 탭·홈 화면 앱을
+     **띄워 둔 채 오간다** — 며칠을 써도 로드는 한 번뿐이라 방문이 1회로 잡혔다.
+     그래서 앱이 다시 앞으로 나올 때, 30분(GA4 기본 세션 만료) 넘게 숨어 있었으면
+     page_view 를 한 번 더 보낸다. ⚠ 캐시는 원인이 아니었다 — gtag 는 캐시된 페이지에서도
+     그대로 실행된다. 이 보정을 «캐시 때문» 으로 다시 설명하지 말 것. */
+  var seen=Date.now();
+  document.addEventListener('visibilitychange',function(){
+    if(document.hidden){ seen=Date.now(); return; }
+    if(Date.now()-seen>30*60*1000){ seen=Date.now(); window.gtag('event','page_view'); }
+  });
 })();
+/* 쓰임새 신호 — 방문자 수만으로는 «열어만 보는지 실제로 쓰는지» 를 못 가른다.
+   판 저장에만 건다 (가장 손이 많이 가는 동작). gtag 가 없으면(로컬·차단) 조용히 넘어간다. */
+function track(name){ try{ if(window.gtag) window.gtag('event',name); }catch(e){} }
 document.addEventListener('visibilitychange',()=>{ if(!document.hidden) checkUpdate() });
 
 document.querySelectorAll('.dock button').forEach(b=>
@@ -4018,7 +4036,7 @@ document.getElementById('hSaveBtn').addEventListener('click',()=>{
     hEditExit();
     return;
   }
-  hist.push(e); hStore(); renderHList();
+  hist.push(e); hStore(); renderHList(); track('rec_save');
   note.textContent=hist.length+'판째 저장됨';
   /* 저장한 드래프트만 비운다. 자동 L↔R 교대는 뺐다 (v3.32.0 · 잭 지정 — 동시 진행) —
      대신 반대편에 쓰다 만 판이 있으면 그쪽으로 넘어간다. LR 드래프트는 원래 자리로. */
