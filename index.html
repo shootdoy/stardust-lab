@@ -7,7 +7,7 @@
 <meta name="description" content="포켓몬 태그스타 스타더스트 1탄·2탄 ★6·★5 보스 공략. 보유 태그로 3턴 로테이션과 서포트 티켓을 추천합니다.">
 <meta name="theme-color" content="#120B2E">
 <meta name="color-scheme" content="dark">
-<meta name="version" content="3.47.0">
+<meta name="version" content="3.48.1">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -2018,7 +2018,7 @@ const TAGIMG={
 const tagArt=b=>TAGIMG[b.s+'-'+b.r+'-'+b.n]||null;
 
 const RANK_N=10;          // 순위에 보여줄 개수
-const VERSION='3.47.0';
+const VERSION='3.48.1';
 const BUILT='2026-08-20';
 
 /* ══ 자산을 CSS 로 한 번만 심는다 (DOM 에 base64 중복 방지) ══ */
@@ -2301,12 +2301,19 @@ async function load(){
   dexPrune();
 }
 let sT;
-function save(){clearTimeout(sT);sT=setTimeout(async()=>{
-  const p=JSON.stringify({ownedA:[...ownedSets.A],ownedB:[...ownedSets.B],ownedC:[...ownedSets.C],chance,guideHidden,detail,rankSort,bossRank,dmaxLv,megaTier,mode,foes,foeSets,tagClass,dex:[...dex],playRec,gver});
+const savePayload=()=>JSON.stringify({ownedA:[...ownedSets.A],ownedB:[...ownedSets.B],ownedC:[...ownedSets.C],chance,guideHidden,detail,rankSort,bossRank,dmaxLv,megaTier,mode,foes,foeSets,tagClass,dex:[...dex],playRec,gver});
+async function saveWrite(){
+  const p=savePayload();
   if(backend==='claude'){try{await window.storage.set(KEY,p);return}catch(e){}}
   if(backend==='claude'||backend==='local'){try{localStorage.setItem(KEY,p);backend='local';return}catch(e){}}
   backend='memory'; renderBackend();
-},400)}
+}
+function save(){clearTimeout(sT);sT=setTimeout(saveWrite,400)}
+/* 저장은 400ms 미뤄 모아 쓴다 — 연타로 켜고 끌 때 쓰기를 아끼려는 것이다.
+   그런데 **설정을 바꾸고 바로 앱을 닫거나 새로고침하면 그 400ms 를 못 채우고 유실**된다
+   (v3.48.0 · 잭 지적 «플레이 기록 설정이 안 남는다»). 화면이 숨겨질 때 즉시 밀어 쓴다.
+   ⚠ 이 flush 를 지우지 말 것 — 모바일에서는 앱을 바로 내리는 일이 흔하다. */
+function saveFlush(){ if(sT){ clearTimeout(sT); sT=null; saveWrite(); } }
 const BT={claude:['저장 켜짐','Claude 계정에 저장 — 다른 기기에서도 유지'],
  local:['저장 켜짐','이 브라우저에 저장 — 방문 기록을 지우면 초기화'],
  memory:['저장 꺼짐','새로고침하면 초기화됩니다']};
@@ -4042,7 +4049,12 @@ try{ (window.adsbygoogle=window.adsbygoogle||[]).push({}) }catch(e){}
 /* 쓰임새 신호 — 방문자 수만으로는 «열어만 보는지 실제로 쓰는지» 를 못 가른다.
    판 저장에만 건다 (가장 손이 많이 가는 동작). gtag 가 없으면(로컬·차단) 조용히 넘어간다. */
 function track(name){ try{ if(window.gtag) window.gtag('event',name); }catch(e){} }
-document.addEventListener('visibilitychange',()=>{ if(!document.hidden) checkUpdate() });
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden) saveFlush();          // 미뤄 둔 저장을 놓치지 않는다
+  else checkUpdate();
+});
+/* pagehide 는 iOS 에서 «탭 닫기·앱 전환» 을 잡는다. 검증 샌드박스에는 window 가 없을 수 있어 감싼다. */
+try{ if(typeof window!=='undefined'&&window.addEventListener) window.addEventListener('pagehide',saveFlush); }catch(e){}
 
 document.querySelectorAll('.dock button').forEach(b=>
   b.addEventListener('click',()=>goSection(b.dataset.go)));
@@ -4315,22 +4327,6 @@ document.getElementById('hEditCancel').addEventListener('click',()=>{
 });
 document.querySelectorAll('#hMode button').forEach(b=>b.addEventListener('click',()=>{
   const m=b.dataset.m;
-  /* 스페셜은 한 배틀이지만 **양쪽이 각각 판을 하고 각각 선물을 받는다** —
-     기계 재고도 두 장이 빠진다. 그래서 L·R **두 줄**로 남긴다 (v3.47.0 · 잭 지정).
-     겟은 «내가 앉은 자리» 쪽에만 적는다 — 반대편 결과는 대개 모른다. */
-  if(e.m==='스페셜' && hEditIdx==null){
-    const mine=(hCur.p==='R')?'R':'L', other=(mine==='L')?'R':'L';
-    const mk=(side,gift,got)=>Object.assign({},e,{p:side,g:gift,g2:null,got});
-    const rows=[ mk(mine, mine==='L'?hCur.g:hCur.g2, hCur.got),
-                 mk(other, other==='L'?hCur.g:hCur.g2, false) ];
-    rows.sort((a,b)=>a.p==='L'?-1:1);          // 줄 순서는 늘 L 먼저
-    hist.push(...rows); hStore(); renderHList(); track('rec_save');
-    note.textContent='스페셜 2줄 저장됨 (L·R)';
-    hDrafts[hActiveP]=hFresh(hActiveP);
-    if(hActiveP==='LR'){ hActiveP=hBackP||'L'; }
-    hCur=hDrafts[hActiveP]; hDraftStore(); renderHCur();
-    return;
-  }
   if(hEditIdx!=null){
     /* 수정 중에는 드래프트 전환 없이 그 판의 종류·위치만 고친다 */
     hCur.m=m;
@@ -4396,7 +4392,7 @@ document.getElementById('hPlaySave').addEventListener('click',()=>{
   note.textContent=hist.length+'판째 저장됨 — 기록 탭에서 볼 수 있습니다';
 });
 document.querySelectorAll('#playRecSw button').forEach(b=>b.addEventListener('click',()=>{
-  playRec=b.dataset.pr==='1'; save(); renderHCur();
+  playRec=b.dataset.pr==='1'; save(); saveFlush(); renderHCur();   // 설정은 즉시 굳힌다
 }));
 /* 게임기 버전 (v3.37.0) — ± 로 메이저·마이너·패치, 빌드는 직접 입력.
    판을 저장할 때 이 문자열이 판마다 함께 남는다 (`e.gver`). */
@@ -4596,23 +4592,7 @@ document.getElementById('hList').addEventListener('click',ev=>{
   if(d){
     const i=Number(d.dataset.i);
     hist.splice(i,1); hStore();
-    /* 스페셜은 한 배틀이지만 **양쪽이 각각 판을 하고 각각 선물을 받는다** —
-     기계 재고도 두 장이 빠진다. 그래서 L·R **두 줄**로 남긴다 (v3.47.0 · 잭 지정).
-     겟은 «내가 앉은 자리» 쪽에만 적는다 — 반대편 결과는 대개 모른다. */
-  if(e.m==='스페셜' && hEditIdx==null){
-    const mine=(hCur.p==='R')?'R':'L', other=(mine==='L')?'R':'L';
-    const mk=(side,gift,got)=>Object.assign({},e,{p:side,g:gift,g2:null,got});
-    const rows=[ mk(mine, mine==='L'?hCur.g:hCur.g2, hCur.got),
-                 mk(other, other==='L'?hCur.g:hCur.g2, false) ];
-    rows.sort((a,b)=>a.p==='L'?-1:1);          // 줄 순서는 늘 L 먼저
-    hist.push(...rows); hStore(); renderHList(); track('rec_save');
-    note.textContent='스페셜 2줄 저장됨 (L·R)';
-    hDrafts[hActiveP]=hFresh(hActiveP);
-    if(hActiveP==='LR'){ hActiveP=hBackP||'L'; }
-    hCur=hDrafts[hActiveP]; hDraftStore(); renderHCur();
-    return;
-  }
-  if(hEditIdx!=null){                        // 고치던 판이 지워지거나 앞이 줄면 정리
+    if(hEditIdx!=null){                      // 고치던 판이 지워지거나 앞이 줄면 정리
       if(i===hEditIdx) hEditExit();
       else if(i<hEditIdx) hEditIdx--;
     }
