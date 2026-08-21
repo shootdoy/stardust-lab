@@ -69,17 +69,18 @@ git rev-parse --abbrev-ref HEAD
 CI 가 없으므로 **여기가 유일한 관문이다.**
 
 ```bash
-node dev/check.js                                              # 다섯 검사 (2.8초)
+node dev/check.js                                              # 다섯 검사 (2초 안팎)
 grep -n 'name="version"\|const VERSION=\|const BUILT=' index.html
+grep -n '^- 버전:' CLAUDE.md          # ← sync.js 가 문서와 코드를 대조한다
 wc -c index.html                                               # sync.js 예산 900KB
 ```
 
 | 볼 것 | 기준 |
 |---|---|
 | `check.js` | 다섯 검사 전부 통과 (exit 0) |
-| `VERSION` 세 곳 | `<meta name="version">` · `const VERSION` · `const BUILT` 가 같은 값 |
+| `VERSION` **네 곳** | `<meta name="version">` · `const VERSION` · `const BUILT` · **`CLAUDE.md` 의 «- 버전:»** 이 같은 값 |
 | `BUILT` | **오늘 날짜.** sync.js 는 «있는지» 만 보고 날짜는 못 본다 |
-| 파일 크기 | 900KB 아래 (v3.48.1 실측 785KB · 803,668바이트) |
+| 파일 크기 | 900KB 아래 (v3.48.2 실측 785KB · 803,706바이트) |
 
 ⚠ `grep` 에 네 번째로 잡히는 `t.match(/const VERSION='([^']+)'/)` 는 `checkUpdate` 의
 감지 코드다. **버전 값이 아니다.**
@@ -115,7 +116,7 @@ git diff origin/main..HEAD | grep -inE 'jack\.a|kakaoent\.com|api[_-]?key|secret
 
 ## 검증
 - `dev/check.js` 다섯 검사 통과
-- VERSION 3.49.0 · BUILT 2026-08-22 (세 곳 일치)
+- VERSION 3.49.0 · BUILT 2026-08-22 (네 곳 일치)
 - index.html 782KB (예산 900KB)
 
 ## 배포 영향
@@ -203,7 +204,7 @@ v3.17.0 은 활성 피해를 대기 전원에게 복사했다 — 상성·방어
 
 ## 검증
 - `dev/check.js` 다섯 검사 통과
-- VERSION 3.49.0 · BUILT 2026-08-22 (세 곳 일치)
+- VERSION 3.49.0 · BUILT 2026-08-22 (네 곳 일치)
 - index.html 783KB (예산 900KB)
 
 ## 배포 영향

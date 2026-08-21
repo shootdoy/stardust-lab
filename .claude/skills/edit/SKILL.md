@@ -129,14 +129,25 @@ v1.42~1.46 유실이 그렇게 났다. «있어야 하는 것» 과 «없어야 
 회귀까지 잡힌다 (예: `KHP=0.191` 있음 + `KHP=0.206` 없음).
 ⚠ **추가한 뒤 일부러 망가뜨려 잡히는지 확인할 것** — 통과만 하는 검사는 검사가 아니다.
 
-**② `VERSION`·`BUILT` 세 곳.** 어떤 값으로 올릴지는 잭이 정한다 — **묻고 나서** 고친다.
+**② 버전은 «세 곳» 이 아니라 «네 곳» 이다.** 어떤 값으로 올릴지는 잭이 정한다 —
+**묻고 나서** 고친다.
 
 ```bash
 grep -n 'name="version"\|const VERSION=\|const BUILT=' index.html
+grep -n '^- 버전:' CLAUDE.md
 ```
 
-- 고칠 곳은 `<meta name="version">` · `const VERSION` · `const BUILT`(**오늘 날짜**) 셋
-- ⚠ 네 번째로 잡히는 `t.match(/const VERSION='([^']+)'/)` 는 **`checkUpdate` 의 감지
+| 고칠 곳 | |
+|---|---|
+| `<meta name="version">` | `index.html` 머리 |
+| `const VERSION` | 스크립트 |
+| `const BUILT` | **오늘 날짜** |
+| **`- 버전: **vX.Y.Z** (날짜)`** | **`CLAUDE.md`** — `sync.js` 가 문서와 코드를 **대조한다** |
+
+- ⚠⚠ **`CLAUDE.md` 를 빼먹으면 `sync` 가 «코드 안에서 버전이 어긋난다» 로 막는다.**
+  2026-08-22 v3.48.2 에서 실제로 두 번 걸렸다 — `meta=3.48.1 상수=3.48.2 문서=3.48.1` 처럼
+  **어디가 안 맞는지 훅이 찍어 주므로** 그 줄을 그대로 읽고 맞추면 된다
+- ⚠ `grep` 에 네 번째로 잡히는 `t.match(/const VERSION='([^']+)'/)` 는 **`checkUpdate` 의 감지
   코드다. 건드리지 말 것**
 - ⚠ 푸터 `<span class="ver">` 는 비워 둔다 — `VLABEL` 이 채운다. 값을 베껴 적으면 갈라진다
 - `sync.js` 는 `BUILT` 가 «있는지» 만 본다. **날짜가 맞는지는 사람이 챙긴다**
