@@ -1,6 +1,6 @@
 // 기준 컬렉션(1탄 ★6 10장)으로 20보스 추천을 한 번에 확인
 const fs=require('fs'),vm=require('vm');
-const s=fs.readFileSync('../stardust-lab.html','utf8');
+const s=fs.readFileSync('../index.html','utf8');
 const js=s.split('<script>')[1].split('</script>')[0];
 const head=js.split('const KEY=')[0];
 const ev=js.split('/* ══ 평가 ══ */')[1].split('/* ══ 렌더 ══ */')[0];

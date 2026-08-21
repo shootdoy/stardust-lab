@@ -23,7 +23,7 @@
 import io, os, re, sys, math, base64, argparse
 from PIL import Image
 
-HTML = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'stardust-lab.html')
+HTML = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'index.html')
 LOWRE = re.compile(r'^\d-[1-4]-')
 
 

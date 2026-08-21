@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""artgen.py — 태그 아트 이미지를 TAGIMG 항목으로 바꿔 stardust-lab.html 에 넣는다.
+"""artgen.py — 태그 아트 이미지를 TAGIMG 항목으로 바꿔 index.html 에 넣는다.
  
 규격은 **카드 생김새를 따른다** (잭 지정 2026-08-13):
   ★6·★5·공통 = 가로 카드 → webp 144x81
@@ -23,7 +23,7 @@
 import sys, os, re, io, base64, argparse
  
 HERE = os.path.dirname(os.path.abspath(__file__))
-HTML = os.path.join(HERE, '..', 'stardust-lab.html')
+HTML = os.path.join(HERE, '..', 'index.html')
 LAND = (144, 81)          # ★6·★5·공통 — 가로 카드 (기존 자산 규격 중 큰 쪽)
 PORT = (108, 192)         # ★4 이하  — 세로 카드
  
@@ -129,7 +129,7 @@ def main():
     out = src[:j] + lines + src[j:]
     with io.open(HTML, 'w', encoding='utf-8') as f:
         f.write(out)
-    print('\nstardust-lab.html 에 %d장 넣었다. 버전 올리고 dev 검증 5종을 돌릴 것.' % len(add))
+    print('\nindex.html 에 %d장 넣었다. 버전 올리고 dev 검증 5종을 돌릴 것.' % len(add))
  
 if __name__ == '__main__':
     main()

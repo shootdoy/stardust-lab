@@ -18,7 +18,7 @@ import numpy as np
 from PIL import Image
  
 HERE = os.path.dirname(os.path.abspath(__file__))
-HTML = os.path.join(HERE, '..', 'stardust-lab.html')
+HTML = os.path.join(HERE, '..', 'index.html')
 KEEP = os.path.join(HERE, '..', 'art_in')
 sys.path.insert(0, HERE)
 from artcrop import crop_art, enc, MAXB, OUT   # 같은 구간·같은 규격을 쓴다

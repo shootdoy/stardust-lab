@@ -5,7 +5,7 @@
  *  검증 3종은 문법과 동작만 보므로 «변경이 안 들어간 것» 은 못 잡는다. 이 검사가 그걸 본다.
  */
 const fs=require('fs');
-const html=fs.readFileSync(__dirname+'/../stardust-lab.html','utf8');
+const html=fs.readFileSync(__dirname+'/../index.html','utf8');
 const doc =fs.readFileSync(__dirname+'/../CLAUDE.md','utf8');
 const fix =fs.readFileSync(__dirname+'/fixture.js','utf8');
 const fix2=fs.readFileSync(__dirname+'/interact.js','utf8');
@@ -579,7 +579,7 @@ let bad=bad0;
    그래서 한시 예산은 **900KB** 로 둔다 (부풀기 감시용이지 미리보기 기준이 아니다).
    원래 예산 480KB 는 **아트 56장 시절 숫자라 지금은 성립하지 않는다** — 되돌릴 값이 아니라
    다시 정해야 할 값이다. 재압축 도구는 `dev/recompress.py`. */
-const KB=fs.statSync(__dirname+'/../stardust-lab.html').size/1024;
+const KB=fs.statSync(__dirname+'/../index.html').size/1024;
 console.log(`용량  ${KB.toFixed(0)}KB / 한시 예산 900KB (미리보기 복구는 포기 · 부풀기 감시용)`);
 if(KB>900){ console.log('  ★ 예산 초과 — 아트 재압축 또는 감량 필요'); bad++; }
 else console.log('  OK');

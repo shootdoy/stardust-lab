@@ -1,7 +1,7 @@
 // BEST-A25 재계산 — **전투태그A(★5·★6)** 용. B(★4·★5) 목록은 아직 없다 — 전 후보 56장 정확 탐욕 (50보스 전체 · 중복 없음)
 // 규칙(찬스 기본값·KHP 등)이 바뀌면 이걸 돌려 const BESTA25 를 갱신한다.
 const fs=require('fs'),vm=require('vm');
-const s=fs.readFileSync('../stardust-lab.html','utf8');
+const s=fs.readFileSync('../index.html','utf8');
 const js=s.split('<script>')[1].split('</script>')[0];
 const head=js.split('const KEY=')[0];
 const ev=js.split('/* ══ 평가 ══ */')[1].split('/* ══ 렌더 ══ */')[0];

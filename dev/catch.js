@@ -26,7 +26,7 @@ const BALL = /^(몬스터|슈퍼|하이퍼)(볼|벌|졸)/;   // 볼 이름 오�
 /* 보스 성급은 앱 데이터에서 끌어온다. 이름이 두 성급에 걸치면 '?' —
    ⚠ **아무 쪽으로 찍어 넣지 말 것.** 메타그로스·루카리오·마기라스·잠만보가 그렇다. */
 function rankTable() {
-  const html = fs.readFileSync(path.join(__dirname, '..', 'stardust-lab.html'), 'utf8');
+  const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
   const js = html.split('<script>')[1].split('</script>')[0];
   const sb = { console: { log() {} }, Math, JSON, Object, Array, Map, Set, String, Number,
     /* 앱 코드가 스타일을 붙이려 하므로 최소한의 document 를 흉내 낸다 */
