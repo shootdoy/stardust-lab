@@ -5,7 +5,6 @@ __pycache__/
 .claude/settings.local.json
 
 # 작업 지침·연구 노트·실측 원자료 — 저장소에 두지 않는다 (2026-08-22 잭 지정)
-CLAUDE.md
-CLAUDE.md.bak-premerge
+CLAUDE*
 docs/
 data/
