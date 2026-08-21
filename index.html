@@ -7,7 +7,7 @@
 <meta name="description" content="포켓몬 태그스타 스타더스트 1탄·2탄 ★6·★5 보스 공략. 보유 태그로 3턴 로테이션과 서포트 티켓을 추천합니다.">
 <meta name="theme-color" content="#120B2E">
 <meta name="color-scheme" content="dark">
-<meta name="version" content="3.48.3">
+<meta name="version" content="3.48.4">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -2018,7 +2018,7 @@ const TAGIMG={
 const tagArt=b=>TAGIMG[b.s+'-'+b.r+'-'+b.n]||null;
 
 const RANK_N=10;          // 순위에 보여줄 개수
-const VERSION='3.48.3';
+const VERSION='3.48.4';
 const BUILT='2026-08-22';
 
 /* ══ 자산을 CSS 로 한 번만 심는다 (DOM 에 base64 중복 방지) ══ */
@@ -4745,8 +4745,14 @@ function renderChance(){
     `${chance['일반']}/${chance['메가진화']}/${chance['다이맥스']}/${chance['Z기술']}`;
 }
 
+/* ⚠⚠ `renderHCur()` 를 이 목록에서 빼지 말 것 (v3.48.4 · 잭 지적 «기록 탭이 또 안 나온다»).
+   기록 탭(`#vH`)을 여닫는 코드는 `renderHCur()` 안에만 있고, 그 함수는 파스 시점에 한 번
+   (`playRec` 이 아직 false 일 때) 그리고 사용자 조작 때만 불렸다. `load()` 가 playRec 을
+   true 로 복원해도 **아무도 다시 그려 주지 않아** 탭이 감춰진 채로 남았다 —
+   토글을 누르면 나타나고 새로고침하면 사라지는 증상이 이것이다.
+   저장·복원은 처음부터 정상이었다 (저장값 playRec:true 를 잭이 콘솔로 확인). */
 function renderAll(){
-  renderTagClass();renderFoeSets();renderBosses();renderFoes();renderReadout();renderRotation();renderSupport();renderRank();renderRoster();renderDex();renderMyQR();renderTidSet();renderBackend();renderChance();renderDmax();renderMega();renderGuide();renderDetail();renderDock();
+  renderTagClass();renderFoeSets();renderBosses();renderFoes();renderReadout();renderRotation();renderSupport();renderRank();renderRoster();renderDex();renderMyQR();renderTidSet();renderBackend();renderChance();renderDmax();renderMega();renderGuide();renderDetail();renderDock();renderHCur();
   document.getElementById('vCct').innerHTML=
     `<span>전투${tagClass} ${owned.size}/${classPool().length}</span><span>수집 ${dex.size}/${dexTotal()}</span>`;
   const bh=document.getElementById('b23ct');

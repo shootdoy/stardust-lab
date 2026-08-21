@@ -525,6 +525,10 @@ const checks=[
   ['스페셜도 한쪽 선물만 내보냄',     html, true,  "e.p+' '+hFmt(e.g)+' 스페셜태그배틀 '"],
   // v3.48.0 — 저장 유실 방지
   ['flush 함수',                      html, true,  'function saveFlush('],
+  /* v3.48.4 — 기록 탭을 여닫는 코드는 renderHCur 안에만 있다. renderAll 이 그것을
+     부르지 않아, load() 가 playRec 을 복원해도 탭이 감춰진 채 남았다. */
+  ['renderAll 이 기록 UI 도 갱신',    html, true,  'renderDock();renderHCur();'],
+  ['옛 renderAll 체인 제거',          html, false, 'renderDetail();renderDock();\n'],
   /* v3.48.3 — 저장이 «조용히» 실패하던 구멍. savePayload 가 try 밖이라 예외가 나면
      saveWrite 가 거부되는데 아무도 잡지 않았고, backend 는 local 그대로여서 화면이
      «저장 켜짐» 이라 말하면서 아무것도 저장되지 않았다. 넷을 짝으로 감시한다. */
