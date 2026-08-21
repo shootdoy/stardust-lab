@@ -7,7 +7,7 @@
 <meta name="description" content="포켓몬 태그스타 스타더스트 1탄·2탄 ★6·★5 보스 공략. 보유 태그로 3턴 로테이션과 서포트 티켓을 추천합니다.">
 <meta name="theme-color" content="#120B2E">
 <meta name="color-scheme" content="dark">
-<meta name="version" content="3.40.1">
+<meta name="version" content="3.42.2">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -878,6 +878,40 @@ summary:focus-visible{outline:2.5px solid var(--cyan);outline-offset:-3px}
 .hplayrec .hrow1{margin-bottom:0}
 .hplayrec .setsw{margin-bottom:0}
 .hplayrec .hact{margin-top:9px}
+/* 트레이너 ID 5칸 (v3.41.0) */
+.tidsw{flex-wrap:wrap;margin-bottom:10px}
+.tidsw button{flex:1 1 60px;font-size:12px;padding:8px 4px}
+.tidrow{display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.tidrow:last-child{border-bottom:0}
+.tidrow .tk{font-size:12px;color:var(--ink-dim);min-width:38px}
+.tidrow .tq{width:34px;height:34px;border-radius:6px;border:1px solid var(--rim);flex:0 0 auto;
+  background:#fff center/contain no-repeat}
+.tidrow .tq.none{background:transparent;opacity:.45}
+.tidrow input{flex:1;min-width:0;border:1px solid var(--rim);border-radius:8px;background:rgba(0,0,0,.25);
+  color:var(--ink);font-family:var(--body);font-size:16px;padding:6px 9px}
+.tidrow .mini{padding:6px 9px;font-size:11.5px}
+.tidrow .topen{flex:1;display:flex;align-items:center;gap:9px;border:0;background:transparent;
+  color:var(--ink);font:inherit;text-align:left;padding:0;cursor:pointer;min-width:0}
+.tidrow .topen .tn{font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tidrow .topen .tc{font-size:11px;color:var(--ink-dim)}
+/* 스타 포켓몬 리스트 (v3.42.0) — 기계 화면처럼 슈퍼스타/스타를 갈라 격자로 */
+.tdxh{font-size:12.5px;color:var(--ink-dim);margin:12px 2px 6px;display:flex;align-items:center;gap:7px}
+.tdxh b{color:var(--ink);font-size:13.5px}
+.tdxg{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:6px}
+.tdxc{position:relative;aspect-ratio:1;border:1px solid var(--rim);border-radius:9px;padding:0;
+  background:rgba(0,0,0,.22);overflow:hidden;cursor:pointer}
+.tdxc .im{position:absolute;inset:0;background:var(--art) center top/cover no-repeat}
+.tdxc .qm{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-family:var(--display);font-size:22px;color:var(--ink-dim)}
+.tdxc .nm{position:absolute;left:0;right:0;bottom:0;font-size:9.5px;line-height:1.3;padding:2px 3px;
+  background:rgba(18,11,46,.82);color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tdxc .bl{position:absolute;right:3px;top:3px;width:15px;height:15px;border-radius:50%;
+  border:1.5px solid #222;background:linear-gradient(#EE3B3B 0 47%,#fff 47% 100%);
+  box-shadow:0 0 0 1px rgba(0,0,0,.35)}
+.tdxc .bl::after{content:'';position:absolute;left:50%;top:50%;width:5px;height:5px;margin:-2.5px 0 0 -2.5px;
+  border-radius:50%;background:#fff;border:1.5px solid #222}
+.tdxc[data-st="0"] .im{display:none}
+.tdxc[data-st="0"] .nm{color:var(--ink-dim)}
 /* 게임기 버전 (v3.37.0) — 메이저·마이너·패치는 ± 로, 빌드는 직접 친다 */
 .verline{margin:0 0 12px;font-family:var(--mono);font-size:15px;letter-spacing:.02em}
 .verline b{color:var(--star)}
@@ -885,8 +919,11 @@ summary:focus-visible{outline:2.5px solid var(--cyan);outline-offset:-3px}
 .verrow .ver-k{font-size:12px;color:var(--ink-dim);min-width:44px}
 .verrow .ver-n{font-family:var(--mono);font-size:15px;min-width:34px;text-align:center}
 .verrow .mini{min-width:38px;font-size:15px;line-height:1;padding:6px 0;text-align:center}
+/* ⚠ 입력창 글자 크기는 **16px 아래로 내리지 말 것** (v2.9.1 규칙 · v3.42.2 에서 재발).
+   iOS 사파리는 16px 미만 입력창에 포커스가 가면 화면을 자동으로 확대하고 되돌리지 않는다.
+   별명(.tidrow input)·빌드(.verbuild) 둘 다 이 규칙을 어겼었다. */
 .verbuild{flex:1;max-width:120px;border:1px solid var(--rim);border-radius:8px;
-  background:rgba(0,0,0,.25);color:var(--ink);font-family:var(--mono);font-size:14px;padding:7px 10px}
+  background:rgba(0,0,0,.25);color:var(--ink);font-family:var(--mono);font-size:16px;padding:7px 10px}
 .hrow{display:flex;align-items:baseline;gap:8px;padding:7px 2px;border-bottom:1px solid rgba(255,255,255,.06)}
 .hrow:last-child{border-bottom:0}
 .hrow .hno{font-family:var(--mono);font-size:11px;color:var(--ink-dim);min-width:26px;text-align:right}
@@ -970,6 +1007,8 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
         style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none">
     </div>
     <div class="card">
+      <!-- 칸이 둘 이상 등록됐을 때만 뜬다 — 하나뿐이면 고를 것이 없어 자리만 차지한다 -->
+      <div class="setsw tidsw" role="group" aria-label="트레이너 ID 선택" id="tidPick" hidden></div>
       <div class="myqr" id="myqr"></div>
       <p class="tab-note" id="myqrNote"></p>
     </div>
@@ -1148,6 +1187,15 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
     </div>
   </section>
   <section>
+    <div class="sec-head"><h2>트레이너 ID</h2>
+      <span class="hint">메인 1 · 서브 4 · 플레이 화면에서 골라 씁니다</span></div>
+    <div class="card">
+      <div id="tidSet"></div>
+      <p class="tab-note">새 ID 는 <b>pokemontagstar.co.kr</b> 에서 만듭니다.
+        QR 사진만 이 기기에 저장되고, 어느 ID 에 무엇이 들어 있는지는 앱이 알지 못합니다.</p>
+    </div>
+  </section>
+  <section>
     <div class="sec-head"><h2>게임기 버전</h2>
       <span class="hint">기계 화면에 적힌 버전 · 기록에 함께 남습니다</span></div>
     <div class="card">
@@ -1200,10 +1248,6 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
         브라우저의 사이트 데이터를 지우면 됩니다. 통계·광고 쿠키는 브라우저 설정에서 지웁니다.</p>
     </div>
   </section>
-  <!-- 전체 초기화 (v3.37.3 · 잭 지정) — **설정 맨 아래 자체 섹션**이다.
-       v3.37.2 까지는 룰렛 보정 카드 안에 있었는데, 섹션 순서를 바꾸면서 화면 가운데로
-       올라와 파괴적 동작이 눈에 먼저 띄었다. 안쪽 id 는 그대로라 기존 핸들러가 붙는다.
-       **다시 다른 섹션 안으로 넣지 말 것** — 순서를 바꿀 때마다 같은 문제가 난다. -->
   <section id="sWipe">
     <div class="card">
       <div class="wipebox" style="margin-top:0;padding-top:0;border-top:0">
@@ -1386,6 +1430,25 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
    **이 블록은 반드시 뷰 밖(최상위)에 둔다** — v3.35.0 에서 viewHist 안에 두었더니
    플레이 화면의 선물 칸을 눌렀을 때 숨은 기록 뷰 속에서 열려 화면에 안 보였다.
    foeModal 도 같은 이유로 최상위에 있다. **다시 뷰 안으로 옮기지 말 것.** -->
+<!-- 트레이너 ID 별 «스타 포켓몬 리스트» (v3.42.0 · 잭 지정) — 기계 화면과 같은 구성.
+     칸을 탭할 때마다 **미출현 → 출현 → 포획** 으로 돌고, ID 마다 따로 저장된다.
+     교환 이벤트의 «미보유 우대» 가설을 재려면 «이 ID 가 무엇을 가졌나» 를 알아야 한다.
+     ⚠ **뷰 밖 최상위에 둘 것** (v3.35.1 교훈 — 뷰 안에 두면 다른 화면에서 안 보인다). -->
+<div class="pickmodal" id="tdxModal" hidden>
+  <div class="pickbox" role="dialog" aria-modal="true" aria-labelledby="tdxHead">
+    <div class="pickhead">
+      <b id="tdxHead">스타 포켓몬 리스트</b>
+      <button class="qrx" id="tdxX" aria-label="닫기">✕</button>
+    </div>
+    <div class="setsw" role="group" aria-label="탄" id="tdxSet">
+      <button data-s="1" aria-pressed="true">1탄</button>
+      <button data-s="2" aria-pressed="false">2탄</button>
+    </div>
+    <div id="tdxBody"></div>
+    <p class="qrnote"><span class="qrdim">탭할 때마다 미출현 → 출현 → 포획 으로 바뀝니다</span></p>
+  </div>
+</div>
+
 <div class="pickmodal" id="hModal" hidden>
   <div class="pickbox" role="dialog" aria-modal="true" aria-labelledby="hPickH">
     <div class="pickhead">
@@ -1950,7 +2013,7 @@ const TAGIMG={
 const tagArt=b=>TAGIMG[b.s+'-'+b.r+'-'+b.n]||null;
 
 const RANK_N=10;          // 순위에 보여줄 개수
-const VERSION='3.40.1';
+const VERSION='3.42.2';
 const BUILT='2026-08-20';
 
 /* ══ 자산을 CSS 로 한 번만 심는다 (DOM 에 base64 중복 방지) ══ */
@@ -2140,7 +2203,16 @@ const foeOn=c=> c.s==='공통' || foeSets[c.s]!==false;
 let colTab='battle';           // 컬렉션 서브탭: battle | dex
 let dex=new Bag();             // 수집 장수 (추천 계산과 무관)
 let dexBest=null;              // 수집 기준 추천-25 결과 (Bag|null)
-let myqr=null;                 // 트레이너 ID QR 의 dataURL — 이 기기에만 저장
+/* 트레이너 ID 5칸 (v3.41.0 · 잭 지정) — 메인 1 + 서브 4.
+   교환 이벤트가 «도감에 없는 태그» 를 줄 때 메시지가 다르다는 정보가 있어,
+   도감이 얕은 서브 ID 를 따로 두고 비교하려는 것이다 (미보유 우대 가설 검증).
+   ⚠ 여기 저장하는 것은 **QR 사진뿐**이고 도감 내용이 아니다 — 앱은 어느 ID 에
+   무엇이 들어 있는지 알 수 없다. 판 기록의 `tid` 로 «어느 ID 로 했는지» 만 남긴다. */
+const TIDS=[{k:'main',lab:'메인'},{k:'sub1',lab:'서브1'},{k:'sub2',lab:'서브2'},
+            {k:'sub3',lab:'서브3'},{k:'sub4',lab:'서브4'}];
+let tidBag={};                 // {main:{d,n}, sub1:{...}} — d 는 QR 이미지 · n 은 별명
+let tidCur='main';             // 플레이 화면에서 고른 칸 (기본 메인)
+let myqr=null;                 // 지금 고른 칸의 QR 이미지 (기존 코드가 쓰는 이름 · 파생값)
 let dexCalcBusy=false;         // 계산 중에는 owned 를 임시로 쓴다. 클릭을 막을 것
 
 const KEY='tagstar:owned';
@@ -3365,23 +3437,33 @@ function qrProcess(img){
   if(url.slice(0,15)!=='data:image/webp') url=o.toDataURL('image/png');
   return url;
 }
+function tidSync(){ myqr = (tidBag[tidCur] && tidBag[tidCur].d) || null; }
 async function qrSave(){
   try{
-    const j=JSON.stringify(myqr);   // null 이면 지운 것과 같다
+    const j=JSON.stringify({v:2,cur:tidCur,bag:tidBag});
     if(backend==='claude'){ const r=await window.storage.set(QKEY,j); return !!r; }
     if(backend==='local'){ localStorage.setItem(QKEY,j); return true; }
   }catch(e){ return false; }
   return backend==='memory';        // 저장 없이 이번 세션만 유지
 }
 async function qrLoad(){
+  let raw=null;
   try{
-    if(backend==='claude'){ const r=await window.storage.get(QKEY); myqr=JSON.parse(r.value)||null; return; }
-    if(backend==='local'){ const r=localStorage.getItem(QKEY); if(r) myqr=JSON.parse(r)||null; }
-  }catch(e){ myqr=null; }
-  // 예전 형식 이관 — 배열[{n,d}] · {d,id} → dataURL 문자열
-  if(Array.isArray(myqr)) myqr = myqr.length ? (myqr[0].d||null) : null;
-  else if(myqr && typeof myqr==='object') myqr = myqr.d||null;
-  if(typeof myqr!=='string') myqr=null;
+    if(backend==='claude'){ const r=await window.storage.get(QKEY); raw=JSON.parse(r.value); }
+    else if(backend==='local'){ const r=localStorage.getItem(QKEY); if(r) raw=JSON.parse(r); }
+  }catch(e){ raw=null; }
+  tidBag={}; tidCur='main';
+  if(raw && raw.v===2){
+    tidBag = (raw.bag&&typeof raw.bag==='object') ? raw.bag : {};
+    if(raw.cur && TIDS.some(t=>t.k===raw.cur)) tidCur=raw.cur;
+  } else if(raw){
+    /* 예전 형식 이관 — 문자열 · 배열[{n,d}] · {d,id} 를 전부 «메인» 칸으로 옮긴다.
+       **이관을 지우지 말 것** — 기존 사용자의 트레이너 ID 가 통째로 사라진다. */
+    let d = Array.isArray(raw) ? (raw.length ? (raw[0].d||null) : null)
+          : (typeof raw==='object' ? (raw.d||null) : raw);
+    if(typeof d==='string' && d) tidBag.main={d,n:''};
+  }
+  tidSync();
 }
 function tidCard(){
   const inner = myqr
@@ -3390,7 +3472,132 @@ function tidCard(){
   return `<button class="tidc" style="--tidbg:url(${TIDBG})"
     aria-label="트레이너 ID 카드">${inner}</button>`;
 }
+let qrTarget=null;    // 설정에서 «등록» 을 누른 칸 (한 번 쓰고 비운다)
+const tidLab=k=>{
+  const t=TIDS.find(x=>x.k===k)||{lab:k};
+  const n=tidBag[k]&&tidBag[k].n;
+  return n ? n : t.lab;
+};
+/* ── 트레이너 ID 별 «스타 포켓몬 리스트» (v3.42.0) ──
+   기계 화면과 같은 구성: 슈퍼 스타(★6) · 스타(★5) 를 갈라 격자로 보여 준다.
+   상태 3단계: 0 미출현(«?») → 1 출현(그림) → 2 포획(그림+몬스터볼). 탭할 때마다 돈다.
+   ID 마다 따로 저장된다 (`tidBag[k].dex`) — «이 ID 가 무엇을 가졌나» 를 알아야
+   교환 이벤트의 «미보유 우대» 가설을 잴 수 있다.
+   ⚠ 앱의 «컬렉션 → 수집 도감»(`dex`) 과는 **다른 것**이다. 그쪽은 기기 하나의 소장 기록이고
+   이쪽은 ID 별 출현/포획 이력이다. 합치지 말 것. */
+let tdxKey=null, tdxSet='1';
+const tdxList=(set,r)=>POOL.filter(p=>p.s===set&&p.r===r);
+const tdxCellKey=p=>p.s+'-'+p.r+'-'+p.n;
+function tidDexCount(k){
+  const d=(tidBag[k]&&tidBag[k].dex)||{};
+  const v=Object.values(d);
+  return {seen:v.filter(x=>x>=1).length, got:v.filter(x=>x===2).length};
+}
+function openTidDex(k){
+  tdxKey=k; tdxSet=rosterSet||'1';
+  document.getElementById('tdxModal').hidden=false;
+  renderTidDex();
+}
+function closeTidDex(){
+  const m=document.getElementById('tdxModal'); if(m) m.hidden=true;
+  tdxKey=null; renderTidSet();
+}
+function renderTidDex(){
+  const body=document.getElementById('tdxBody'); if(!body||!tdxKey)return;
+  document.getElementById('tdxHead').textContent=tidLab(tdxKey)+' · 스타 포켓몬 리스트';
+  document.querySelectorAll('#tdxSet button').forEach(b=>
+    b.setAttribute('aria-pressed', b.dataset.s===tdxSet));
+  const store=(tidBag[tdxKey]&&tidBag[tdxKey].dex)||{};
+  body.innerHTML='';
+  [['6','슈퍼 스타 포켓몬'],['5','스타 포켓몬']].forEach(([r,lab])=>{
+    const list=tdxList(tdxSet,r);
+    if(!list.length) return;
+    const seen=list.filter(p=>(store[tdxCellKey(p)]||0)>=1).length;
+    body.appendChild(el(`<div class="tdxh"><b>${lab}</b><span>${seen} / ${list.length}</span></div>`));
+    const g=document.createElement('div'); g.className='tdxg';
+    list.forEach(p=>{
+      /* 아트는 **CSS 클래스(artCls)로 심어 둔 `var(--art)`** 를 쓴다 (v3.42.1 정정).
+         TAGIMG 값은 base64 «원문» 이라 url() 에 그대로 넣으면 안 나온다 —
+         DOM 에 base64 를 중복으로 박지 않으려는 기존 설계다. **직접 넣지 말 것.** */
+      const key=tdxCellKey(p), st=store[key]||0, ac=artCls(p);
+      const c=el(`<button class="tdxc" data-st="${st}" aria-label="${hEsc(p.n)}">`
+        +(ac?`<span class="im ${ac}"></span>`:'')
+        +(st===0?`<span class="qm">?</span>`:'')
+        +(st===2?`<span class="bl"></span>`:'')
+        +`<span class="nm">${hEsc(p.n)}</span></button>`);
+      c.addEventListener('click',async()=>{
+        const nx=((store[key]||0)+1)%3;
+        const bag=Object.assign({d:null,n:''},tidBag[tdxKey]);
+        bag.dex=Object.assign({},bag.dex);
+        if(nx===0) delete bag.dex[key]; else bag.dex[key]=nx;
+        tidBag[tdxKey]=bag;
+        await qrSave(); renderTidDex();
+      });
+      g.appendChild(c);
+    });
+    body.appendChild(g);
+  });
+}
+document.getElementById('tdxX').addEventListener('click',closeTidDex);
+document.getElementById('tdxModal').addEventListener('click',ev=>{
+  if(ev.target===document.getElementById('tdxModal')) closeTidDex();
+});
+document.querySelectorAll('#tdxSet button').forEach(b=>
+  b.addEventListener('click',()=>{ tdxSet=b.dataset.s; renderTidDex(); }));
+
+/* 설정의 5칸 목록 — 별명 고치기 · 등록/교체 · 삭제 */
+function renderTidSet(){
+  const host=document.getElementById('tidSet'); if(!host)return;
+  host.innerHTML='';
+  TIDS.forEach(t=>{
+    const has=!!(tidBag[t.k]&&tidBag[t.k].d);
+    const row=document.createElement('div'); row.className='tidrow';
+    const dcnt=tidDexCount(t.k);
+    row.innerHTML=`<span class="tk">${hEsc(t.lab)}</span>`
+      +`<button class="topen" data-a="dex" aria-label="${hEsc(t.lab)} 스타 포켓몬 리스트">`
+      +`  <span class="tq${has?'':' none'}"${has?` style="background-image:url(${tidBag[t.k].d})"`:''}></span>`
+      +`  <span><span class="tn">${hEsc(tidLab(t.k))}</span><br>`
+      +`  <span class="tc">${dcnt.seen?`출현 ${dcnt.seen} · 포획 ${dcnt.got}`:'리스트 보기'}</span></span>`
+      +`</button>`
+      +`<input type="text" maxlength="12" placeholder="별명" aria-label="${hEsc(t.lab)} 별명"
+         value="${hEsc((tidBag[t.k]&&tidBag[t.k].n)||'')}">`
+      +`<button class="mini" data-a="reg">${has?'교체':'등록'}</button>`
+      +(has?`<button class="mini hdanger" data-a="del">삭제</button>`:'');
+    row.querySelector('input').addEventListener('input',async ev=>{
+      const v=ev.target.value.slice(0,12);
+      tidBag[t.k]=Object.assign({d:null,n:''},tidBag[t.k],{n:v});
+      await qrSave(); renderTidPick();
+    });
+    row.querySelectorAll('button').forEach(b=>b.addEventListener('click',async()=>{
+      if(b.dataset.a==='dex'){ openTidDex(t.k); return; }
+      if(b.dataset.a==='reg'){ qrTarget=t.k; qrPick(); return; }
+      delete tidBag[t.k];
+      if(tidCur===t.k) tidCur='main';
+      await qrSave(); tidSync(); renderTidSet(); renderTidPick(); renderMyQR();
+    }));
+    host.appendChild(row);
+  });
+}
+/* 플레이 화면의 선택 줄 — 등록된 칸이 둘 이상일 때만 보인다 */
+function renderTidPick(){
+  const box=document.getElementById('tidPick'); if(!box)return;
+  const keys=TIDS.map(t=>t.k).filter(k=>tidBag[k]&&tidBag[k].d);
+  box.hidden = keys.length<2;
+  if(box.hidden){ box.innerHTML=''; return; }
+  box.innerHTML='';
+  keys.forEach(k=>{
+    const b=document.createElement('button');
+    b.textContent=tidLab(k);
+    b.setAttribute('aria-pressed', k===tidCur);
+    b.addEventListener('click',async()=>{
+      tidCur=k; tidSync(); await qrSave();
+      renderTidPick(); renderMyQR();
+    });
+    box.appendChild(b);
+  });
+}
 function renderMyQR(){
+  renderTidPick();
   const host=document.getElementById('myqr'); if(!host)return;
   host.innerHTML='';
   const lab=document.getElementById('qrFileLab');
@@ -3402,7 +3609,7 @@ function renderMyQR(){
   host.appendChild(c);
   const n=document.getElementById('myqrNote');
   if(n) n.textContent = myqr
-    ? `약 ${Math.round(myqr.length/1024)}KB · 이 기기에만 저장됩니다`
+    ? `${tidLab(tidCur)} · 약 ${Math.round(myqr.length/1024)}KB · 이 기기에만 저장됩니다`
     : 'QR 이 화면을 꽉 채우도록 찍으면 잘 읽힙니다 · 이 기기에만 저장됩니다';
 }
 function openMyQR(){
@@ -4027,6 +4234,7 @@ document.getElementById('hSaveBtn').addEventListener('click',()=>{
   hEmptyArm=0;
   const e={m:hCur.m,p:hCur.p,src:hCur.src||'watch',got:hCur.got,ts:hCur.ts||Date.now(),
            gver:hCur.gver||gverStr(),          // 판마다 기계 버전을 남긴다 (v3.37.0)
+           tid:hCur.tid||tidCur,               // 어느 트레이너 ID 로 했는지 (v3.41.0)
            g:hCur.g,s1:hCur.s1,b:hCur.b,s2:hCur.s2};
   if(e.m!=='지역'){ e.g=e.s1=e.s2=null; }
   if(hEditIdx!=null){
@@ -4290,7 +4498,9 @@ function hAnalyze(){
     }
   });
   const gvers=[...new Set(hist.map(e=>e.gver).filter(Boolean))];
-  return {n,gvers,play:hist.filter(e=>e.src==='play').length,
+  const tc={}; hist.forEach(e=>{ if(e.tid) tc[e.tid]=(tc[e.tid]||0)+1; });
+  const tids=Object.entries(tc).sort((a,b)=>b[1]-a[1]);
+  return {n,gvers,tids,play:hist.filter(e=>e.src==='play').length,
     L:hist.filter(e=>e.p==='L').length,R:hist.filter(e=>e.p==='R').length,
     sp:hist.filter(e=>e.m==='스페셜').length,
     six:six.length, six6got:six.filter(e=>e.got).length, got:gotAll.length,
@@ -4304,6 +4514,7 @@ function renderHStat(){
   const rows=[];
   rows.push(['판 수', a.n+'판 · L '+a.L+' / R '+a.R+(a.sp?' · 스페셜 '+a.sp:'')]);
   rows.push(['출처', '플레이 '+a.play+' · 관전 '+(a.n-a.play)]);
+  if(a.tids.length>1) rows.push(['트레이너 ID', a.tids.map(([k,c])=>tidLab(k)+' '+c).join(' · ')]);
   if(a.gvers.length) rows.push(['게임기 버전', a.gvers.join(' · ')
     +(a.gvers.length>1?' — 버전이 바뀐 판이 섞여 있습니다':'')]);
   rows.push(['★6 보스', a.six+'회 ('+pct(a.six,a.n)+') · 겟 '+a.six6got+' · 전체 겟 '+a.got]);
@@ -4463,7 +4674,7 @@ function renderChance(){
 }
 
 function renderAll(){
-  renderTagClass();renderFoeSets();renderBosses();renderFoes();renderReadout();renderRotation();renderSupport();renderRank();renderRoster();renderDex();renderMyQR();renderBackend();renderChance();renderDmax();renderMega();renderGuide();renderDetail();renderDock();
+  renderTagClass();renderFoeSets();renderBosses();renderFoes();renderReadout();renderRotation();renderSupport();renderRank();renderRoster();renderDex();renderMyQR();renderTidSet();renderBackend();renderChance();renderDmax();renderMega();renderGuide();renderDetail();renderDock();
   document.getElementById('vCct').innerHTML=
     `<span>전투${tagClass} ${owned.size}/${classPool().length}</span><span>수집 ${dex.size}/${dexTotal()}</span>`;
   const bh=document.getElementById('b23ct');
@@ -4558,12 +4769,19 @@ document.getElementById('qrFile').addEventListener('change',ev=>{
       let url;
       try{ url=qrProcess(img); }
       catch(e){ qrNote('사진을 처리하지 못했습니다: '+(e&&e.message||e)); return; }
-      const prev=myqr;
-      myqr=url;                                  // 트레이너 ID 는 한 장만 둔다
+      /* 어느 칸에 넣을지 — 설정에서 «등록» 을 누른 칸(qrTarget)이 있으면 거기,
+         없으면 지금 플레이에서 고른 칸. 처음이면 tidCur 이 'main' 이라 **메인이 기본**이다. */
+      const slot=qrTarget||tidCur; qrTarget=null;
+      const prev=tidBag[slot]?{...tidBag[slot]}:null;
+      tidBag[slot]={d:url, n:(prev&&prev.n)||''};
       qrNote(`저장하는 중… ${Math.round(url.length/1024)}KB`);
       const ok=await qrSave();
-      if(!ok){ myqr=prev; renderMyQR(); qrNote('저장하지 못했습니다. 저장 공간이 부족할 수 있습니다.'); return; }
-      renderMyQR();
+      if(!ok){
+        if(prev) tidBag[slot]=prev; else delete tidBag[slot];
+        tidSync(); renderMyQR(); renderTidSet();
+        qrNote('저장하지 못했습니다. 저장 공간이 부족할 수 있습니다.'); return;
+      }
+      tidSync(); renderMyQR(); renderTidSet();
     };
     img.src=fr.result;
   };
