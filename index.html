@@ -7,7 +7,7 @@
 <meta name="description" content="포켓몬 태그스타 스타더스트 1탄·2탄 ★6·★5 보스 공략. 보유 태그로 3턴 로테이션과 서포트 티켓을 추천합니다.">
 <meta name="theme-color" content="#120B2E">
 <meta name="color-scheme" content="dark">
-<meta name="version" content="3.43.0">
+<meta name="version" content="3.46.0">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -996,7 +996,8 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
           <button data-p="L" aria-pressed="true">L</button>
           <button data-p="R" aria-pressed="false">R</button>
         </div>
-        <button class="hslot" data-k="g"><span class="hs-l">선물</span><span class="hs-v" id="hs2-g">—</span></button>
+        <button class="hslot" data-k="g"><span class="hs-l" data-gl>선물</span><span class="hs-v" id="hs2-g">—</span></button>
+        <button class="hslot hs-g2" data-k="g2" hidden><span class="hs-l">선물 R</span><span class="hs-v" id="hs2-g2">—</span></button>
       </div>
     </div>
   </section>
@@ -1283,7 +1284,11 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
           <button data-p="L" aria-pressed="true">L</button>
           <button data-p="R" aria-pressed="false">R</button>
         </div>
-        <button class="hslot" data-k="g"><span class="hs-l">선물</span><span class="hs-v" id="hs-g">—</span></button>
+        <button class="hslot" data-k="g"><span class="hs-l" data-gl>선물</span><span class="hs-v" id="hs-g">—</span></button>
+        <!-- 스페셜태그배틀은 한 판이지만 **양쪽이 각각 선물을 받는다** (v3.44.0 · 잭 지적) —
+             디스펜서가 두 장을 뱉는 유일한 경우라 배급 복원에는 둘 다 필요하다.
+             스페셜일 때만 뜬다. 못 본 쪽은 비워 두면 «?» 로 나간다. -->
+        <button class="hslot hs-g2" data-k="g2" hidden><span class="hs-l">선물 R</span><span class="hs-v" id="hs-g2">—</span></button>
       </div>
       <div class="setsw" role="group" aria-label="기록 출처" id="hSrc">
         <button data-src="play" aria-pressed="false">플레이</button>
@@ -2013,7 +2018,7 @@ const TAGIMG={
 const tagArt=b=>TAGIMG[b.s+'-'+b.r+'-'+b.n]||null;
 
 const RANK_N=10;          // 순위에 보여줄 개수
-const VERSION='3.43.0';
+const VERSION='3.46.0';
 const BUILT='2026-08-20';
 
 /* ══ 자산을 CSS 로 한 번만 심는다 (DOM 에 base64 중복 방지) ══ */
@@ -4132,7 +4137,7 @@ const hEsc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;
 const HDKEY=HKEY+':draft';
 /* src: 'play' = 내가 한 판(플레이 화면에서 가져옴) · 'watch' = 남의 판을 옆에서 본 것(관전).
    기본은 관전이다 — 기록 탭에서 손으로 넣는 판은 대개 남의 판이기 때문이다 (v3.34.0 · 잭 지정). */
-const hFresh=(p)=>({m:p==='LR'?'스페셜':'지역',p,src:'watch',g:null,s1:null,b:null,s2:null,got:false});
+const hFresh=(p)=>({m:p==='LR'?'스페셜':'지역',p,src:'watch',g:null,g2:null,s1:null,b:null,s2:null,got:false});
 let hDrafts={L:hFresh('L'),R:hFresh('R'),LR:hFresh('LR')};
 let hActiveP='L', hBackP='L';
 let hEditIdx=null, hEditBuf=null;            // 목록에서 불러와 고치는 중이면 인덱스·버퍼
@@ -4146,18 +4151,24 @@ try{
   }
 }catch(e){}
 function hDraftStore(){ try{ localStorage.setItem(HDKEY, JSON.stringify({drafts:hDrafts,active:hActiveP})); }catch(e){} }
-const hHasContent=d=> !!(d && (d.g||d.s1||d.b||d.s2||d.got));
+const hHasContent=d=> !!(d && (d.g||d.g2||d.s1||d.b||d.s2||d.got));
 let hSlot=null, hWipeT=null;
 
-const hFmt=t=> t ? t.n+(t.r||'') : '?';
+/* 내보낼 때 이름의 **공백을 없앤다** (v3.46.0 · 잭 지정) — «가라르 직구리3» → «가라르직구리3».
+   줄이 공백으로 갈리는 형식이라 이름 안의 공백은 자리를 흐트러뜨린다.
+   ⚠ 앱 안에 저장된 이름은 그대로 두고 **내보낼 때만** 지운다 — 도감 대조는 원래 이름으로 한다. */
+const hFmt=t=> t ? String(t.n).replace(/\s+/g,'')+(t.r||'') : '?';
 function hLine(e){
   const got=e.got?' 겟':'';
   const src=e.src==='play'?' [플레이]':' [관전]';
   /* 선물은 지역배틀과 **같은 자리**(위치 바로 뒤)에 적는다 — 되읽을 때 자리로 가른다.
      예: «LR 빠모2 스페셜태그배틀 제크로무6 겟 [플레이]» */
-  if(e.m==='스페셜') return e.p+' '+hFmt(e.g)+' 스페셜태그배틀 '+hFmt(e.b)+got+src;
-  if(e.m==='다맥')   return e.p+' '+hFmt(e.g)+' 다이맥스 '+hFmt(e.b)+got+src;
-  return e.p+' '+hFmt(e.g)+' '+hFmt(e.s1)+' '+hFmt(e.b)+' '+hFmt(e.s2)+got+src;
+  /* 판 종류는 **모든 줄에 적는다** (v3.45.0 · 잭 지적) — 지역배틀만 빠져 있어
+     줄마다 형식이 달랐다. 자리는 «위치 · 선물 · 판 종류 · 상대…» 로 통일한다.
+     이름은 버튼과 같은 정식 명칭을 쓴다. */
+  if(e.m==='스페셜') return e.p+' '+hFmt(e.g)+' '+hFmt(e.g2)+' 스페셜태그배틀 '+hFmt(e.b)+got+src;
+  if(e.m==='다맥')   return e.p+' '+hFmt(e.g)+' 다이맥스포켓몬 '+hFmt(e.b)+got+src;
+  return e.p+' '+hFmt(e.g)+' 지역배틀 '+hFmt(e.s1)+' '+hFmt(e.b)+' '+hFmt(e.s2)+got+src;
 }
 
 function renderHCur(){
@@ -4183,7 +4194,11 @@ function renderHCur(){
     const k=el.dataset.k;
     el.classList.toggle('hs-off', !local && k!=='b' && k!=='g');
   });
-  [['g','hs-g'],['s1','hs-s1'],['b','hs-b'],['s2','hs-s2'],['g','hs2-g']].forEach(([k,id])=>{
+  const sp=hCur.m==='스페셜';
+  document.querySelectorAll('.hs-g2').forEach(el=>el.hidden=!sp);
+  document.querySelectorAll('[data-gl]').forEach(el=>el.textContent=sp?'선물 L':'선물');
+  [['g','hs-g'],['s1','hs-s1'],['b','hs-b'],['s2','hs-s2'],
+   ['g','hs2-g'],['g2','hs-g2'],['g2','hs2-g2']].forEach(([k,id])=>{
     const el=document.getElementById(id); if(!el) return;
     const t=hCur[k];
     el.innerHTML = t ? hEsc(t.n)+(t.r?'<b>★'+hEsc(t.r)+'</b>':'') : '—';
@@ -4228,7 +4243,7 @@ document.getElementById('hSaveBtn').addEventListener('click',()=>{
   /* 보스도 못 볼 수 있다 (v3.32.1 · 잭 지정) — 연속된 판을 사실대로 남기는 것이
      목적이므로 **비움도 저장한다** (내보내기에서 «?»). 다만 «모든 칸이 빈 판» 은
      실수 저장을 막기 위해 두 번 탭으로 받는다 (alert 금지 규칙 — 인라인 확인). */
-  const empty = !hCur.b && !hCur.g && !hCur.s1 && !hCur.s2 && !hCur.got;
+  const empty = !hCur.b && !hCur.g && !hCur.g2 && !hCur.s1 && !hCur.s2 && !hCur.got;
   if(empty && hEditIdx==null){
     if(Date.now()-hEmptyArm>4000){
       hEmptyArm=Date.now();
@@ -4240,8 +4255,9 @@ document.getElementById('hSaveBtn').addEventListener('click',()=>{
   const e={m:hCur.m,p:hCur.p,src:hCur.src||'watch',got:hCur.got,ts:hCur.ts||Date.now(),
            gver:hCur.gver||gverStr(),          // 판마다 기계 버전을 남긴다 (v3.37.0)
            tid:hCur.tid||tidCur,               // 어느 트레이너 ID 로 했는지 (v3.41.0)
-           g:hCur.g,s1:hCur.s1,b:hCur.b,s2:hCur.s2};
-  if(e.m!=='지역'){ e.s1=e.s2=null; }   // 선물(g)은 남긴다 — 판 종류와 무관하게 받는다
+           g:hCur.g,g2:hCur.g2,s1:hCur.s1,b:hCur.b,s2:hCur.s2};
+  if(e.m!=='지역'){ e.s1=e.s2=null; }   // 선물(g·g2)은 남긴다 — 판 종류와 무관하게 받는다
+  if(e.m!=='스페셜') e.g2=null;          // 선물 R 은 스페셜에만 있다
   if(hEditIdx!=null){
     /* 목록에서 불러온 판을 고쳐 저장 — 제자리에 반영하고 편집 모드를 닫는다 */
     hist[hEditIdx]=e; hStore(); renderHList();
@@ -4377,11 +4393,11 @@ const hQ=document.getElementById('hQ');
    전부 foeModal 의 규칙 그대로다. 다른 점 하나: 도감에 없는 이름을 받는
    «그대로 쓰기» 점선 버튼이 검색 시 맨 앞에 뜬다. */
 let hRank='5', hSet='1';
-const hSlotName={g:'선물',s1:'서브1',b:'보스',s2:'서브2'};
+const hSlotName={g:'선물',g2:'선물 R',s1:'서브1',b:'보스',s2:'서브2'};
 /* 이어 고르기 묶음 (v3.36.0 · 잭 지정) — **선물은 이어 고르기에서 뺀다.**
    선물은 판 시작에 받고 상대 3장은 그 뒤에 뜨므로 사이에 텀이 있다.
    선물을 고르면 거기서 닫히고, 상대는 서브1 → 보스 → 서브2 로 이어 받는다. */
-const hOrder=()=> hSlot==='g' ? ['g'] : (hCur.m==='지역' ? ['s1','b','s2'] : ['b']);
+const hOrder=()=> (hSlot==='g'||hSlot==='g2') ? [hSlot] : (hCur.m==='지역' ? ['s1','b','s2'] : ['b']);
 function hSetTitle(){
   const o=hOrder(), i=o.indexOf(hSlot);
   const step = o.length>1 ? ` <span class="pickstep">${i+1} / ${o.length}</span>` : '';
@@ -4439,7 +4455,7 @@ function renderHPick(){
   hint.hidden=false;
   hint.textContent = searching
     ? `«${q}» 검색 — 성급 상관없이 ${list.length}장`
-    : (hSlot==='g' ? '선물 한 장만 넣습니다 — 상대는 배틀이 뜨면 서브1 부터 이어 받습니다'
+    : (hSlot==='g'||hSlot==='g2' ? '선물 한 장만 넣습니다 — 상대는 배틀이 뜨면 서브1 부터 이어 받습니다'
       : hOrder().length>1 ? '고르면 남은 칸으로 넘어갑니다 · 한 장만 넣으려면 바깥을 눌러 닫으세요'
                           : '이 판 종류는 선물과 보스만 기록합니다');
   g.innerHTML='';
