@@ -7,7 +7,7 @@
 <meta name="description" content="포켓몬 태그스타 스타더스트 1탄·2탄 ★6·★5 보스 공략. 보유 태그로 3턴 로테이션과 서포트 티켓을 추천합니다.">
 <meta name="theme-color" content="#120B2E">
 <meta name="color-scheme" content="dark">
-<meta name="version" content="3.46.0">
+<meta name="version" content="3.47.0">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -2018,7 +2018,7 @@ const TAGIMG={
 const tagArt=b=>TAGIMG[b.s+'-'+b.r+'-'+b.n]||null;
 
 const RANK_N=10;          // 순위에 보여줄 개수
-const VERSION='3.46.0';
+const VERSION='3.47.0';
 const BUILT='2026-08-20';
 
 /* ══ 자산을 CSS 로 한 번만 심는다 (DOM 에 base64 중복 방지) ══ */
@@ -4137,7 +4137,8 @@ const hEsc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;
 const HDKEY=HKEY+':draft';
 /* src: 'play' = 내가 한 판(플레이 화면에서 가져옴) · 'watch' = 남의 판을 옆에서 본 것(관전).
    기본은 관전이다 — 기록 탭에서 손으로 넣는 판은 대개 남의 판이기 때문이다 (v3.34.0 · 잭 지정). */
-const hFresh=(p)=>({m:p==='LR'?'스페셜':'지역',p,src:'watch',g:null,g2:null,s1:null,b:null,s2:null,got:false});
+const hFresh=(p)=>({m:p==='LR'?'스페셜':'지역', p:(p==='LR'?'L':p),
+  src:'watch',g:null,g2:null,s1:null,b:null,s2:null,got:false});
 let hDrafts={L:hFresh('L'),R:hFresh('R'),LR:hFresh('LR')};
 let hActiveP='L', hBackP='L';
 let hEditIdx=null, hEditBuf=null;            // 목록에서 불러와 고치는 중이면 인덱스·버퍼
@@ -4166,7 +4167,7 @@ function hLine(e){
   /* 판 종류는 **모든 줄에 적는다** (v3.45.0 · 잭 지적) — 지역배틀만 빠져 있어
      줄마다 형식이 달랐다. 자리는 «위치 · 선물 · 판 종류 · 상대…» 로 통일한다.
      이름은 버튼과 같은 정식 명칭을 쓴다. */
-  if(e.m==='스페셜') return e.p+' '+hFmt(e.g)+' '+hFmt(e.g2)+' 스페셜태그배틀 '+hFmt(e.b)+got+src;
+  if(e.m==='스페셜') return e.p+' '+hFmt(e.g)+' 스페셜태그배틀 '+hFmt(e.b)+got+src;
   if(e.m==='다맥')   return e.p+' '+hFmt(e.g)+' 다이맥스포켓몬 '+hFmt(e.b)+got+src;
   return e.p+' '+hFmt(e.g)+' 지역배틀 '+hFmt(e.s1)+' '+hFmt(e.b)+' '+hFmt(e.s2)+got+src;
 }
@@ -4180,7 +4181,7 @@ function renderHCur(){
       && b.dataset.p!==hCur.p && hHasContent(hDrafts[b.dataset.p]));
   });
   const pos=document.getElementById('hPos');
-  if(pos) pos.classList.toggle('hlr', hCur.p==='LR');   // 스페셜 = LR 자동, 줄 잠금 표시
+  if(pos) pos.classList.remove('hlr');   // v3.47.0 — 스페셜도 L/R 을 고른다 (내가 앉은 자리)
   document.querySelectorAll('.hgotg button').forEach(b=>b.setAttribute('aria-pressed',(b.dataset.g==='1')===hCur.got));
   document.querySelectorAll('#hSrc button').forEach(b=>
     b.setAttribute('aria-pressed', b.dataset.src===(hCur.src||'watch')));
@@ -4194,7 +4195,9 @@ function renderHCur(){
     const k=el.dataset.k;
     el.classList.toggle('hs-off', !local && k!=='b' && k!=='g');
   });
-  const sp=hCur.m==='스페셜';
+  /* 스페셜은 **양쪽이 각각 판을 한다** — 저장할 때 L·R 두 줄로 나뉜다 (v3.47.0 · 잭 지정).
+     그래서 새 판을 넣을 때만 선물 두 칸을 받고, 이미 저장된 한쪽 판을 고칠 때는 한 칸이다. */
+  const sp=hCur.m==='스페셜' && hEditIdx==null;
   document.querySelectorAll('.hs-g2').forEach(el=>el.hidden=!sp);
   document.querySelectorAll('[data-gl]').forEach(el=>el.textContent=sp?'선물 L':'선물');
   [['g','hs-g'],['s1','hs-s1'],['b','hs-b'],['s2','hs-s2'],
@@ -4258,6 +4261,22 @@ document.getElementById('hSaveBtn').addEventListener('click',()=>{
            g:hCur.g,g2:hCur.g2,s1:hCur.s1,b:hCur.b,s2:hCur.s2};
   if(e.m!=='지역'){ e.s1=e.s2=null; }   // 선물(g·g2)은 남긴다 — 판 종류와 무관하게 받는다
   if(e.m!=='스페셜') e.g2=null;          // 선물 R 은 스페셜에만 있다
+  /* 스페셜은 한 배틀이지만 **양쪽이 각각 판을 하고 각각 선물을 받는다** —
+     기계 재고도 두 장이 빠진다. 그래서 L·R **두 줄**로 남긴다 (v3.47.0 · 잭 지정).
+     겟은 «내가 앉은 자리» 쪽에만 적는다 — 반대편 결과는 대개 모른다. */
+  if(e.m==='스페셜' && hEditIdx==null){
+    const mine=(hCur.p==='R')?'R':'L', other=(mine==='L')?'R':'L';
+    const mk=(side,gift,got)=>Object.assign({},e,{p:side,g:gift,g2:null,got});
+    const rows=[ mk(mine, mine==='L'?hCur.g:hCur.g2, hCur.got),
+                 mk(other, other==='L'?hCur.g:hCur.g2, false) ];
+    rows.sort((a,b)=>a.p==='L'?-1:1);          // 줄 순서는 늘 L 먼저
+    hist.push(...rows); hStore(); renderHList(); track('rec_save');
+    note.textContent='스페셜 2줄 저장됨 (L·R)';
+    hDrafts[hActiveP]=hFresh(hActiveP);
+    if(hActiveP==='LR'){ hActiveP=hBackP||'L'; }
+    hCur=hDrafts[hActiveP]; hDraftStore(); renderHCur();
+    return;
+  }
   if(hEditIdx!=null){
     /* 목록에서 불러온 판을 고쳐 저장 — 제자리에 반영하고 편집 모드를 닫는다 */
     hist[hEditIdx]=e; hStore(); renderHList();
@@ -4296,16 +4315,34 @@ document.getElementById('hEditCancel').addEventListener('click',()=>{
 });
 document.querySelectorAll('#hMode button').forEach(b=>b.addEventListener('click',()=>{
   const m=b.dataset.m;
+  /* 스페셜은 한 배틀이지만 **양쪽이 각각 판을 하고 각각 선물을 받는다** —
+     기계 재고도 두 장이 빠진다. 그래서 L·R **두 줄**로 남긴다 (v3.47.0 · 잭 지정).
+     겟은 «내가 앉은 자리» 쪽에만 적는다 — 반대편 결과는 대개 모른다. */
+  if(e.m==='스페셜' && hEditIdx==null){
+    const mine=(hCur.p==='R')?'R':'L', other=(mine==='L')?'R':'L';
+    const mk=(side,gift,got)=>Object.assign({},e,{p:side,g:gift,g2:null,got});
+    const rows=[ mk(mine, mine==='L'?hCur.g:hCur.g2, hCur.got),
+                 mk(other, other==='L'?hCur.g:hCur.g2, false) ];
+    rows.sort((a,b)=>a.p==='L'?-1:1);          // 줄 순서는 늘 L 먼저
+    hist.push(...rows); hStore(); renderHList(); track('rec_save');
+    note.textContent='스페셜 2줄 저장됨 (L·R)';
+    hDrafts[hActiveP]=hFresh(hActiveP);
+    if(hActiveP==='LR'){ hActiveP=hBackP||'L'; }
+    hCur=hDrafts[hActiveP]; hDraftStore(); renderHCur();
+    return;
+  }
   if(hEditIdx!=null){
     /* 수정 중에는 드래프트 전환 없이 그 판의 종류·위치만 고친다 */
     hCur.m=m;
-    if(m==='스페셜'){ if(hCur.p!=='LR'){ hCur._backP=hCur.p; hCur.p='LR'; } }
-    else if(hCur.p==='LR'){ hCur.p=hCur._backP||'L'; }
+    if(hCur.p==='LR') hCur.p='L';      // v3.47.0 — 판은 늘 한쪽 자리다 (LR 값은 없앴다)
     renderHCur(); return;
   }
   if(m==='스페셜'){
-    if(hActiveP!=='LR'){ hBackP=hActiveP; hActiveP='LR'; hCur=hDrafts.LR; }
+    /* 스페셜 입력은 전용 드래프트(LR 칸)를 쓰되, 그 안의 `p` 는 **내가 앉은 자리**다.
+       직전에 쓰던 자리를 그대로 이어받는다. */
+    if(hActiveP!=='LR'){ hBackP=hActiveP; hActiveP='LR'; hCur=hDrafts.LR; hCur.p=hBackP; }
     hCur.m='스페셜';
+    if(hCur.p!=='L'&&hCur.p!=='R') hCur.p='L';
   } else {
     if(hActiveP==='LR'){ hActiveP=hBackP||'L'; hCur=hDrafts[hActiveP]; }
     hCur.m=m;
@@ -4335,7 +4372,7 @@ function hPullPlay(note){
   /* 플레이 화면의 mode 값('지역'·'다맥'·'스페셜')은 기록의 판 종류와 같은 낱말이다.
      스페셜이면 기록도 LR 드래프트로 옮긴다 — «스페셜 = LR» 규칙을 깨지 않기 위해. */
   if(hEditIdx==null){
-    if(mode==='스페셜' && hActiveP!=='LR'){ hBackP=hActiveP; hActiveP='LR'; hCur=hDrafts.LR; }
+    if(mode==='스페셜' && hActiveP!=='LR'){ hBackP=hActiveP; hActiveP='LR'; hCur=hDrafts.LR; hCur.p=hBackP; }
     else if(mode!=='스페셜' && hActiveP==='LR'){ hActiveP=hBackP||'L'; hCur=hDrafts[hActiveP]; }
   }
   hCur.m=mode;
@@ -4559,7 +4596,23 @@ document.getElementById('hList').addEventListener('click',ev=>{
   if(d){
     const i=Number(d.dataset.i);
     hist.splice(i,1); hStore();
-    if(hEditIdx!=null){                        // 고치던 판이 지워지거나 앞이 줄면 정리
+    /* 스페셜은 한 배틀이지만 **양쪽이 각각 판을 하고 각각 선물을 받는다** —
+     기계 재고도 두 장이 빠진다. 그래서 L·R **두 줄**로 남긴다 (v3.47.0 · 잭 지정).
+     겟은 «내가 앉은 자리» 쪽에만 적는다 — 반대편 결과는 대개 모른다. */
+  if(e.m==='스페셜' && hEditIdx==null){
+    const mine=(hCur.p==='R')?'R':'L', other=(mine==='L')?'R':'L';
+    const mk=(side,gift,got)=>Object.assign({},e,{p:side,g:gift,g2:null,got});
+    const rows=[ mk(mine, mine==='L'?hCur.g:hCur.g2, hCur.got),
+                 mk(other, other==='L'?hCur.g:hCur.g2, false) ];
+    rows.sort((a,b)=>a.p==='L'?-1:1);          // 줄 순서는 늘 L 먼저
+    hist.push(...rows); hStore(); renderHList(); track('rec_save');
+    note.textContent='스페셜 2줄 저장됨 (L·R)';
+    hDrafts[hActiveP]=hFresh(hActiveP);
+    if(hActiveP==='LR'){ hActiveP=hBackP||'L'; }
+    hCur=hDrafts[hActiveP]; hDraftStore(); renderHCur();
+    return;
+  }
+  if(hEditIdx!=null){                        // 고치던 판이 지워지거나 앞이 줄면 정리
       if(i===hEditIdx) hEditExit();
       else if(i<hEditIdx) hEditIdx--;
     }
