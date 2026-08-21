@@ -7,7 +7,7 @@
 <meta name="description" content="포켓몬 태그스타 스타더스트 1탄·2탄 ★6·★5 보스 공략. 보유 태그로 3턴 로테이션과 서포트 티켓을 추천합니다.">
 <meta name="theme-color" content="#120B2E">
 <meta name="color-scheme" content="dark">
-<meta name="version" content="3.48.1">
+<meta name="version" content="3.48.2">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -2018,8 +2018,8 @@ const TAGIMG={
 const tagArt=b=>TAGIMG[b.s+'-'+b.r+'-'+b.n]||null;
 
 const RANK_N=10;          // 순위에 보여줄 개수
-const VERSION='3.48.1';
-const BUILT='2026-08-20';
+const VERSION='3.48.2';
+const BUILT='2026-08-22';
 
 /* ══ 자산을 CSS 로 한 번만 심는다 (DOM 에 base64 중복 방지) ══ */
 const AK={}, TK={}, GK={}, SK={};
@@ -2411,8 +2411,8 @@ const survives3=(c,boss)=>survivesN(c,boss,3);
    ⚠ 파트너가 세거나 약하면 이 가정이 흔들린다 — 이번 판만 해도 파트너 몫이 1턴 100% · 2턴 64% 였다.
    파트너 화력을 직접 넣게 되면 그때 hp 를 2.0 으로 올리고 파트너 피해를 빼야 한다. */
 const MODES={
-  '지역'  :{n:'지역배틀',        hp:1,    note:'상대 3장 중 <b>대상 1장</b>만 잡으면 승리. 대상은 카드 스탯 그대로 계산합니다. 아래 <b>상대 파티</b>에 서브 2장을 넣으면 생존 판정에 반영됩니다.'},
-  '다맥'  :{n:'다이맥스 포켓몬', hp:1,    note:'보스 1마리만 나오는 모드. <b>실측 표본이 없어</b> 카드 스탯 그대로 계산합니다.'},
+  '지역'  :{n:'지역배틀',        hp:1,    note:'상대 3장 중 <b>보스 1장</b>만 잡으면 승리. 아래 <b>상대 파티</b>에 서브 2장을 넣으면 생존 판정에 반영됩니다.'},
+  '다맥'  :{n:'다이맥스 포켓몬', hp:1,    note:'보스 1마리만 나오는 모드. <b>실측 표본이 없어</b> 카드 스탯 그대로 계산합니다. 지역배틀 판이어도, 보스만 노린 계산을 보려면 이 모드로 두세요.'},
   '스페셜':{n:'스페셜태그배틀',  hp:1.15, note:'2인 협동. 보스 실제 HP는 카드의 <b>약 ×2</b>인데, 파트너가 절반쯤 맡는다고 보고 <b>내 몫 ×1.15</b>로 계산합니다. 파트너가 약하면 이보다 오래 걸립니다.'}
 };
 let mode='지역';
@@ -2860,7 +2860,7 @@ function renderFoes(){
   const boss=BOSSES.find(b=>b.id===bossId);
   // 저장된 bossId 가 무효하거나(탄 개편 등) 아직 못 고른 상태 — 여기서 죽으면 안 된다.
   if(!boss){
-    wrap.innerHTML='<p class="tab-note">대상을 먼저 고르세요.</p>';
+    wrap.innerHTML='<p class="tab-note">보스를 먼저 고르세요.</p>';
     const pk=document.getElementById('foeModal'); if(pk) pk.hidden=true;
     const nt=document.getElementById('foeNote'); if(nt) nt.textContent='';
     return;
@@ -3084,7 +3084,7 @@ function renderFoes(){
        판정 로직을 낙관 쪽으로 바꾸는 근거로 삼지 말 것. 되살리지도 말 것. */
     ? `서브 ${k}장 반영. 아래 칸은 <b>바로 위 상대가 활성일 때 낼 태그</b>입니다 — 서브는 «선공 + 원턴킬»이면 `
       +`그 턴 피해가 0 이고 그 장은 배틀에서 빠집니다.`
-    : '위 서브 칸을 눌러 상대를 넣으면 아래에 대응 태그가 나옵니다. 비워두면 <b>대상 한 장</b>만 때린다고 봅니다.';
+    : '위 서브 칸을 눌러 상대를 넣으면 아래에 대응 태그가 나옵니다. 비워두면 <b>보스 한 장</b>만 때린다고 봅니다.';
 }
 /* 보스를 바꾸면 **서브를 비운다** (v2.0.0 · 잭 지정). 서브는 «그 보스와 같은 파티에
    나온 상대» 라 보스가 바뀌면 남아 있을 이유가 없고, 남겨 두면 지난 파티의 서브에
@@ -4364,7 +4364,7 @@ document.querySelectorAll('#hSrc button').forEach(b=>b.addEventListener('click',
    선물·겟은 화면에 없는 값이라 건드리지 않는다 (직접 넣는다). 출처는 «플레이» 로 바뀐다. */
 function hPullPlay(note){
   const boss=BOSSES.find(x=>x.id===bossId);
-  if(!boss){ if(note) note.textContent='플레이 탭에서 대상을 먼저 고르세요.'; return false; }
+  if(!boss){ if(note) note.textContent='플레이 탭에서 보스를 먼저 고르세요.'; return false; }
   /* 플레이 화면의 mode 값('지역'·'다맥'·'스페셜')은 기록의 판 종류와 같은 낱말이다.
      스페셜이면 기록도 LR 드래프트로 옮긴다 — «스페셜 = LR» 규칙을 깨지 않기 위해. */
   if(hEditIdx==null){
