@@ -77,4 +77,5 @@ globalThis.__fixture=()=>{                 // 테스트 기준 컬렉션: 1탄 �
   console.log('발화한 클릭: 보스 '+n+'회, 서포트 '+k+'회, 컬렉션 '+m+'회, 기타 10종');
   console.log('오류: '+(errs.length?errs.length+'건':'0건'));
   errs.slice(0,8).forEach(e=>console.log('   ★ '+e));
-})().catch(e=>console.log('치명적:',e.message));
+  process.exitCode = errs.length ? 1 : 0;          // 훅·check.js 가 이 값으로 가른다
+})().catch(e=>{ console.log('치명적:',e.message); process.exitCode=1; });

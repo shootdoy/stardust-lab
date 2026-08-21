@@ -24,4 +24,8 @@ for(const m of js.matchAll(/(?:^|[^.\w$\u0080-\uFFFF])([A-Za-z_$][\w$]*)\s*\(/g)
 const missing=[...called].filter(n=>!defined.has(n)&&!builtins.has(n));
 console.log('정의된 함수/상수: '+defined.size);
 console.log('호출되나 정의 없음:', missing.length?missing.join(', '):'없음');
+/* CSS 함수 오탐 셋만 정상이다 (CLAUDE.md «검증 도구»). 그 밖의 이름이 나오면 진짜 누락이므로
+   종료 코드로 알린다 — 안 그러면 dev/check.js 와 훅이 통과로 본다. */
+const CSSFN=new Set(['var','gradient','rgba']);
+process.exit(missing.some(n=>!CSSFN.has(n))?1:0);
  

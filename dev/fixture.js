@@ -32,10 +32,12 @@ let risky=0;
   console.log('');
 }
 console.log('기믹 중복 '+gimBad+'건 · 탈진 위반 '+exBad+'건 · 생존 위반 '+survBad+'건 · 후보 부족 '+risky+'보스 · 2턴격파 '+ko2+'보스');
+globalThis.__bad = gimBad+exBad+survBad;   // 후보 부족은 위반이 아니라 정보라 뺀다
 `;
 const sb={console,JSON,Math,Array,Set,Map,String,Object,Number,window:{},
   document:{getElementById:()=>null,querySelectorAll:()=>[],createElement:()=>({set textContent(v){}}),head:{appendChild(){}}},setTimeout,clearTimeout,
   localStorage:{setItem(){throw 0},getItem(){throw 0},removeItem(){throw 0}}};
 sb.globalThis=sb; vm.createContext(sb);
 vm.runInContext(head+ev+test,sb);
+process.exit(sb.__bad ? 1 : 0);
  
