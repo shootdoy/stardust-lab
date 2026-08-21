@@ -7,7 +7,7 @@
 <meta name="description" content="포켓몬 태그스타 스타더스트 1탄·2탄 ★6·★5 보스 공략. 보유 태그로 3턴 로테이션과 서포트 티켓을 추천합니다.">
 <meta name="theme-color" content="#120B2E">
 <meta name="color-scheme" content="dark">
-<meta name="version" content="3.48.2">
+<meta name="version" content="3.48.3">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -2018,7 +2018,7 @@ const TAGIMG={
 const tagArt=b=>TAGIMG[b.s+'-'+b.r+'-'+b.n]||null;
 
 const RANK_N=10;          // 순위에 보여줄 개수
-const VERSION='3.48.2';
+const VERSION='3.48.3';
 const BUILT='2026-08-22';
 
 /* ══ 자산을 CSS 로 한 번만 심는다 (DOM 에 base64 중복 방지) ══ */
@@ -2301,19 +2301,34 @@ async function load(){
   dexPrune();
 }
 let sT;
-const savePayload=()=>JSON.stringify({ownedA:[...ownedSets.A],ownedB:[...ownedSets.B],ownedC:[...ownedSets.C],chance,guideHidden,detail,rankSort,bossRank,dmaxLv,megaTier,mode,foes,foeSets,tagClass,dex:[...dex],playRec,gver});
+/* ⚠⚠ 저장이 «조용히» 실패하던 구멍을 막는다 (v3.48.3 · 잭 지적 «플레이 기록이 안 남는다»).
+   `savePayload()` 가 try 밖이라, 값 하나가 상해 예외가 나면 saveWrite 가 거부되는데
+   그 거부를 아무도 잡지 않았다. `backend` 는 'local' 그대로여서 **화면은 계속 «저장 켜짐»
+   이라고 말하면서 그 뒤로 아무것도 저장되지 않는다.** 예전에 저장된 값은 남아 있고
+   기록(HKEY)은 다른 경로라 계속 저장되니, 증상이 «설정만 안 남는다» 로 보였다.
+   세 겹으로 막는다 — ① 값 하나가 상해도 나머지는 저장한다 ② 실패를 화면과 콘솔에 드러낸다
+   ③ 호출 쪽에서 거부를 잡는다. **이 방어를 걷어내지 말 것.** */
+const bagArr=b=>{ try{ return [...b] }catch(e){ return [] } };
+let saveErr='';
+function saveFail(where,e){
+  saveErr = where+' — '+String((e&&e.message)||e).split('\n')[0].slice(0,80);   // 상태줄은 한 줄이다
+  backend='memory'; renderBackend();
+  try{ console.error('[스타더스트] 저장 실패:',where,e) }catch(_){}
+}
+const savePayload=()=>JSON.stringify({ownedA:bagArr(ownedSets.A),ownedB:bagArr(ownedSets.B),ownedC:bagArr(ownedSets.C),chance,guideHidden,detail,rankSort,bossRank,dmaxLv,megaTier,mode,foes,foeSets,tagClass,dex:bagArr(dex),playRec,gver});
 async function saveWrite(){
-  const p=savePayload();
+  let p;
+  try{ p=savePayload() }catch(e){ saveFail('값 만들기',e); return }
   if(backend==='claude'){try{await window.storage.set(KEY,p);return}catch(e){}}
   if(backend==='claude'||backend==='local'){try{localStorage.setItem(KEY,p);backend='local';return}catch(e){}}
   backend='memory'; renderBackend();
 }
-function save(){clearTimeout(sT);sT=setTimeout(saveWrite,400)}
+function save(){clearTimeout(sT);sT=setTimeout(()=>{saveWrite().catch(e=>saveFail('쓰기',e))},400)}
 /* 저장은 400ms 미뤄 모아 쓴다 — 연타로 켜고 끌 때 쓰기를 아끼려는 것이다.
    그런데 **설정을 바꾸고 바로 앱을 닫거나 새로고침하면 그 400ms 를 못 채우고 유실**된다
    (v3.48.0 · 잭 지적 «플레이 기록 설정이 안 남는다»). 화면이 숨겨질 때 즉시 밀어 쓴다.
    ⚠ 이 flush 를 지우지 말 것 — 모바일에서는 앱을 바로 내리는 일이 흔하다. */
-function saveFlush(){ if(sT){ clearTimeout(sT); sT=null; saveWrite(); } }
+function saveFlush(){ if(sT){ clearTimeout(sT); sT=null; saveWrite().catch(e=>saveFail('쓰기',e)); } }
 const BT={claude:['저장 켜짐','Claude 계정에 저장 — 다른 기기에서도 유지'],
  local:['저장 켜짐','이 브라우저에 저장 — 방문 기록을 지우면 초기화'],
  memory:['저장 꺼짐','새로고침하면 초기화됩니다']};
@@ -2321,7 +2336,10 @@ function renderBackend(){
   const n=document.getElementById('backend'); if(!n)return;
   const [a,b]=BT[backend]; n.className='backend '+backend;
   const note = seeded ? ' · 시험용 26장을 미리 켜 뒀습니다' : '';   // 내가 켠 게 아님을 알린다
-  n.innerHTML=`<b>${a}</b><span>${b}${note}</span>`;
+  /* 저장이 실패했으면 이유를 그대로 적는다 — 모바일에는 콘솔이 없어
+     «왜 안 남는가» 를 물어볼 근거가 화면에 있어야 한다 (v3.48.3). */
+  const err = saveErr ? ' · 저장 실패 — ' + saveErr : '';
+  n.innerHTML=`<b>${a}</b><span>${b}${note}${err}</span>`;
 }
 
 /* ══ 평가 ══ */

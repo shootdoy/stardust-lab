@@ -208,7 +208,7 @@ const checks=[
   ['겹침이 없으면 그렇게 적는다',      html, true,  '이 분류의 성급은 다른 분류와 겹치지 않습니다'],
   ['BEST-C 는 10장',                   html, true,  "const BESTC=new Bag([['1-4-만마드',1]"],
   ['세 분류를 다 쥔다',                html, true,  'let ownedSets={A:DEFAULT_OWNED(), B:new Bag(), C:new Bag()};'],
-  ['C 도 따로 저장',                   html, true,  'ownedC:[...ownedSets.C]'],
+  ['C 도 따로 저장',                   html, true,  'ownedC:bagArr(ownedSets.C)'],
   ['bestSet 이 세 분류를 안다',        html, true,  '{A:BESTA25,B:BESTB25,C:BESTC}'],
   ['BEST-B 는 20장',                   html, true,  "const BESTB25=new Bag([['1-5-거대코뿌리',1],['2-5-마기라스',1]"],
   ['배지 장수를 박아 쓰지 않는다',      html, true,  '${tagClass}${bestSet().size}'],
@@ -225,7 +225,7 @@ const checks=[
   ['분류를 저장한다',                  html, true,  'mode,foes,foeSets,tagClass,dex'],
   // A·B 를 분리된 리스트로 (v3.2.0 · 잭 지정)
   ['owned 는 지금 분류의 별칭',        html, true,  'const useClass=()=>{ owned=ownedSets[tagClass]; };'],
-  ['A·B 를 따로 저장',                 html, true,  'ownedA:[...ownedSets.A],ownedB:[...ownedSets.B]'],
+  ['A·B 를 따로 저장',                 html, true,  'ownedA:bagArr(ownedSets.A),ownedB:bagArr(ownedSets.B)'],
   ['옛 저장 이관 코드 유지',           html, true,  "ownedSets={A:pick(arr,'A'), B:pick(arr,'B'), C:pick(arr,'C')};"],
   ['분류 밖 성급은 걸러낸다',          html, true,  'const trimClass=(bag,cl)=>'],
   ['Bag 순회는 ids()',                 html, true,  'bag.ids().forEach(id=>{ if(!ok.has(id)) bag.delete(id); })'],
@@ -457,7 +457,7 @@ const checks=[
   // v3.35.0 — 플레이 기록 토글 + 인라인 블록
   ['플레이 기록 토글',                html, true,  'id="playRecSw"'],
   ['기본 꺼짐',                       html, true,  'let playRec=false;'],
-  ['save 에 playRec',                 html, true,  'dex:[...dex],playRec'],
+  ['save 에 playRec',                 html, true,  'dex:bagArr(dex),playRec'],
   ['wipe 에 playRec',                 html, true,  'dex=new Bag(); playRec=false;'],
   ['플레이 상단 블록 (선물)',         html, true,  'id="sPlayRecTop"'],
   ['플레이 하단 블록 (겟·저장)',      html, true,  'id="sPlayRecBot"'],
@@ -525,6 +525,15 @@ const checks=[
   ['스페셜도 한쪽 선물만 내보냄',     html, true,  "e.p+' '+hFmt(e.g)+' 스페셜태그배틀 '"],
   // v3.48.0 — 저장 유실 방지
   ['flush 함수',                      html, true,  'function saveFlush('],
+  /* v3.48.3 — 저장이 «조용히» 실패하던 구멍. savePayload 가 try 밖이라 예외가 나면
+     saveWrite 가 거부되는데 아무도 잡지 않았고, backend 는 local 그대로여서 화면이
+     «저장 켜짐» 이라 말하면서 아무것도 저장되지 않았다. 넷을 짝으로 감시한다. */
+  ['저장 실패를 드러낸다',            html, true,  'function saveFail('],
+  ['payload 를 try 로 감싼다',        html, true,  'try{ p=savePayload() }catch'],
+  ['옛 무방비 payload 제거',          html, false, '\n  const p=savePayload();'],
+  ['값 하나가 상해도 저장',           html, true,  'const bagArr='],
+  ['거부를 호출 쪽에서 잡는다',       html, true,  'saveWrite().catch('],
+  ['실패 이유를 화면에 적는다',       html, true,  'saveErr ?'],
   ['숨겨질 때 flush',                 html, true,  'if(document.hidden) saveFlush();'],
   ['pagehide 에서도 flush',           html, true,  "window.addEventListener('pagehide',saveFlush)"],
   // v3.42.0 — ID 별 스타 포켓몬 리스트 (3단계)
