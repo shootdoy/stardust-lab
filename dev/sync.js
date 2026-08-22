@@ -666,6 +666,24 @@ let bad=bad0;
      · 합계 900KB — HTML + 아트 + 워커. 3탄 25장(≈+60KB)까지 받아낼 여유다.
    ★6·★5·공통 56장은 **일부러 크게 둔다** (잭 지정 2026-08-14) — 컬렉션 탭에서 늘 보이는
    그림이라 체감이 크다. 재압축 도구는 `dev/recompress.py`. */
+/* ── 소스와 생성물이 일치하는가 (v3.52.0) ─────────────────────────────────────
+   `docs/index.html` 은 `src/` 10개를 이어 붙인 **생성물**이다. 다시 조립해 대조한다 —
+   ⚠ 이 검사가 없으면 «소스만 고치고 빌드를 잊은» 배포와 «생성물을 손으로 고친» 편집이
+     둘 다 조용히 지나간다. 전자는 배포물이 옛것이고 후자는 다음 빌드에 사라진다. */
+{
+  let ok = false, why = '';
+  try {
+    const src = fs.existsSync(__dirname+'/../src/index.html');
+    if(!src) why = ' — src/ 가 없다 (아직 안 나눴다면 정상)';
+    else ok = require('./build.js').assemble() === html;
+  } catch(e) { why = ' — ' + e.message.slice(0, 60); }
+  console.log('빌드  src/ 를 다시 조립해 docs/index.html 과 대조'+why);
+  if(!ok && !why.includes('src/ 가 없다')){
+    console.log('  ★ 어긋난다 — 빌드를 안 했거나 생성물을 손으로 고쳤다. `node dev/build.js` 를 돌릴 것');
+    bad++;
+  } else console.log('  OK');
+}
+
 const KB=fs.statSync(__dirname+'/../docs/index.html').size/1024;
 const artKB=(()=>{ try{ const d=__dirname+'/../docs/art';
     return fs.readdirSync(d).reduce((s,f)=>s+fs.statSync(d+'/'+f).size,0)/1024 }catch(e){ return 0 } })();

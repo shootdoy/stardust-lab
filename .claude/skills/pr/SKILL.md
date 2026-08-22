@@ -66,13 +66,15 @@ git rev-parse --abbrev-ref HEAD
 ### 3. 배포 전 점검 (`index.html` 이 바뀌었을 때만)
 
 `git diff --stat origin/main..HEAD` 에 `docs/index.html` 이 있으면 **전부** 확인한다.
+
+⚠ 생성물이므로 **`src/` 변경과 짝**이어야 한다. 한쪽만 있으면 멈추고 `node dev/build.js` 를 돌린다.
 CI 가 없으므로 **여기가 유일한 관문이다.**
 
 ```bash
 node dev/check.js                                              # 다섯 검사 (2초 안팎)
-grep -n 'name="version"\|const VERSION=\|const BUILT=' docs/index.html
+grep -rn 'name="version"\|const VERSION=\|const BUILT=' src/   # meta→index.html · 상수→data.js
 grep -n '^- 버전:' CLAUDE.md          # ← sync.js 가 문서와 코드를 대조한다
-wc -c docs/index.html                                               # sync.js 예산 900KB
+wc -c docs/index.html      # sync.js 예산 — index.html 480KB · 아트 포함 합계 900KB
 ```
 
 | 볼 것 | 기준 |
