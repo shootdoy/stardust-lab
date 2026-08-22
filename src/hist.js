@@ -26,27 +26,47 @@ const hEsc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;
 /* v3.32.0 (잭 지정) — L 과 R 은 **동시에** 진행되는 일이 많다.
    그래서 위치마다 «작성 중» 드래프트를 따로 쥐고, L/R 버튼은 값이 아니라
    **드래프트 전환기**다. 드래프트는 localStorage 에도 적어 두어(HDKEY)
-   현장에서 앱이 새로고침돼도 살아남는다. LR 드래프트는 스페셜 전용이다. */
-/* ══ 드래프트 (판 3개) ──── */
+   현장에서 앱이 새로고침돼도 살아남는다.
+
+   ⚠⚠ **LR 드래프트를 되살리지 말 것** (v3.56.0 에 없앴다 · 잭 지정 «LR 은 없애고 각각 기록»).
+   v3.47~3.55 에는 스페셜 전용 드래프트 `LR` 이 따로 있었고, 판 종류를 스페셜로 바꾸면
+   `hActiveP` 가 그쪽으로 **갈아치워졌다.** 그래서 실전에서 이렇게 깨졌다 —
+   L 자리에 선물·상대를 넣어 두고 스페셜을 수락해 판 종류만 바꿨더니
+   **넣어 둔 선물이 사라지고 지난번 LR 값이 떠 있었다.**
+   지금은 자리마다(L·R) 판을 온전히 갖고, **판 종류는 그 판의 한 칸일 뿐**이다. */
+/* ══ 드래프트 (자리마다 하나 — L · R) ──── */
 const HDKEY=HKEY+':draft';
 /* src: 'play' = 내가 한 판(플레이 화면에서 가져옴) · 'watch' = 남의 판을 옆에서 본 것(관전).
    기본은 관전이다 — 기록 탭에서 손으로 넣는 판은 대개 남의 판이기 때문이다 (v3.34.0 · 잭 지정). */
-const hFresh=(p)=>({m:p==='LR'?'스페셜':'지역', p:(p==='LR'?'L':p),
-  src:'watch',g:null,g2:null,s1:null,b:null,s2:null,got:false});
-let hDrafts={L:hFresh('L'),R:hFresh('R'),LR:hFresh('LR')};
-let hActiveP='L', hBackP='L';
+const hFresh=(p)=>({m:'지역', p, src:'watch',g:null,s1:null,b:null,s2:null,got:false});
+let hDrafts={L:hFresh('L'),R:hFresh('R')};
+let hActiveP='L';
+let hLostLR=false;   // 옛 LR 드래프트를 옮길 자리가 없어 버렸는가 (아래 이관 참고)
 let hEditIdx=null, hEditBuf=null;            // 목록에서 불러와 고치는 중이면 인덱스·버퍼
 let hCur=hDrafts.L;                           // 항상 «지금 화면이 편집 중인 판» 을 가리킨다
 try{
   const d=localStorage.getItem(HDKEY);
   if(d){ const o=JSON.parse(d)||{};
-    if(o.drafts) hDrafts=Object.assign({L:hFresh('L'),R:hFresh('R'),LR:hFresh('LR')},o.drafts);
+    if(o.drafts) hDrafts=Object.assign({L:hFresh('L'),R:hFresh('R')},o.drafts);
+    /* v3.55.0 까지 쓰던 LR 드래프트를 이관한다 — 현장 데이터라 말없이 버리지 않는다.
+       제 자리(p)가 비었으면 그리로, 아니면 반대편이 비었으면 그리로. 둘 다 차 있으면
+       옮길 데가 없어 버리고 `hLostLR` 로 화면에 알린다. */
+    if(o.drafts && o.drafts.LR){
+      const lr=o.drafts.LR, has=d=>!!(d&&(d.g||d.g2||d.s1||d.b||d.s2||d.got));
+      if(has(lr)){
+        const want=(lr.p==='R')?'R':'L', other=(want==='L')?'R':'L';
+        const to = !has(hDrafts[want]) ? want : (!has(hDrafts[other]) ? other : null);
+        if(to){ hDrafts[to]=Object.assign({},lr,{p:to}); delete hDrafts[to].g2; }
+        else hLostLR=true;
+      }
+      delete hDrafts.LR;
+    }
     if(o.active && hDrafts[o.active]) hActiveP=o.active;
     hCur=hDrafts[hActiveP];
   }
 }catch(e){}
 function hDraftStore(){ try{ localStorage.setItem(HDKEY, JSON.stringify({drafts:hDrafts,active:hActiveP})); }catch(e){} }
-const hHasContent=d=> !!(d && (d.g||d.g2||d.s1||d.b||d.s2||d.got));
+const hHasContent=d=> !!(d && (d.g||d.s1||d.b||d.s2||d.got));
 let hSlot=null, hWipeT=null;
 
 /* 내보낼 때 이름의 **공백을 없앤다** (v3.46.0 · 잭 지정) — «가라르 직구리3» → «가라르직구리3».
@@ -90,13 +110,11 @@ function renderHCur(){
     const k=el.dataset.k;
     el.classList.toggle('hs-off', !local && k!=='b' && k!=='g');
   });
-  /* 스페셜은 **양쪽이 각각 판을 한다** — 저장할 때 L·R 두 줄로 나뉜다 (v3.47.0 · 잭 지정).
-     그래서 새 판을 넣을 때만 선물 두 칸을 받고, 이미 저장된 한쪽 판을 고칠 때는 한 칸이다. */
-  const sp=hCur.m==='스페셜' && hEditIdx==null;
-  document.querySelectorAll('.hs-g2').forEach(el=>el.hidden=!sp);
-  document.querySelectorAll('[data-gl]').forEach(el=>el.textContent=sp?'선물 L':'선물');
+  /* ⚠ **선물 칸은 하나다.** v3.55.0 까지는 스페셜일 때 «선물 L / 선물 R» 두 칸을 받아
+     한 드래프트에서 두 줄을 만들었는데 그 모델을 없앴다 (v3.56.0) — 자리마다 판이
+     따로이므로 각 자리가 자기 선물을 갖는다. 판 종류로 선물 칸을 다시 나누지 말 것. */
   [['g','hs-g'],['s1','hs-s1'],['b','hs-b'],['s2','hs-s2'],
-   ['g','hs2-g'],['g2','hs-g2'],['g2','hs2-g2']].forEach(([k,id])=>{
+   ['g','hs2-g']].forEach(([k,id])=>{
     const el=document.getElementById(id); if(!el) return;
     const t=hCur[k];
     el.innerHTML = t ? hEsc(t.n)+(t.r?'<b>★'+hEsc(t.r)+'</b>':'') : '—';
@@ -142,7 +160,7 @@ document.getElementById('hSaveBtn').addEventListener('click',()=>{
   /* 보스도 못 볼 수 있다 (v3.32.1 · 잭 지정) — 연속된 판을 사실대로 남기는 것이
      목적이므로 **비움도 저장한다** (내보내기에서 «?»). 다만 «모든 칸이 빈 판» 은
      실수 저장을 막기 위해 두 번 탭으로 받는다 (alert 금지 규칙 — 인라인 확인). */
-  const empty = !hCur.b && !hCur.g && !hCur.g2 && !hCur.s1 && !hCur.s2 && !hCur.got;
+  const empty = !hCur.b && !hCur.g && !hCur.s1 && !hCur.s2 && !hCur.got;
   if(empty && hEditIdx==null){
     if(Date.now()-hEmptyArm>4000){
       hEmptyArm=Date.now();
@@ -154,25 +172,13 @@ document.getElementById('hSaveBtn').addEventListener('click',()=>{
   const e={m:hCur.m,p:hCur.p,src:hCur.src||'watch',got:hCur.got,ts:hCur.ts||Date.now(),
            gver:hCur.gver||gverStr(),          // 판마다 기계 버전을 남긴다 (v3.37.0)
            tid:hCur.tid||tidCur,               // 어느 트레이너 ID 로 했는지 (v3.41.0)
-           g:hCur.g,g2:hCur.g2,s1:hCur.s1,b:hCur.b,s2:hCur.s2};
-  if(e.m!=='지역'){ e.s1=e.s2=null; }   // 선물(g·g2)은 남긴다 — 판 종류와 무관하게 받는다
-  if(e.m!=='스페셜') e.g2=null;          // 선물 R 은 스페셜에만 있다
-  /* 스페셜은 한 배틀이지만 **양쪽이 각각 판을 하고 각각 선물을 받는다** —
-     기계 재고도 두 장이 빠진다. 그래서 L·R **두 줄**로 남긴다 (v3.47.0 · 잭 지정).
-     겟은 «내가 앉은 자리» 쪽에만 적는다 — 반대편 결과는 대개 모른다. */
-  if(e.m==='스페셜' && hEditIdx==null){
-    const mine=(hCur.p==='R')?'R':'L', other=(mine==='L')?'R':'L';
-    const mk=(side,gift,got)=>Object.assign({},e,{p:side,g:gift,g2:null,got});
-    const rows=[ mk(mine, mine==='L'?hCur.g:hCur.g2, hCur.got),
-                 mk(other, other==='L'?hCur.g:hCur.g2, false) ];
-    rows.sort((a,b)=>a.p==='L'?-1:1);          // 줄 순서는 늘 L 먼저
-    hist.push(...rows); hStore(); renderHList(); track('rec_save');
-    note.textContent='스페셜 2줄 저장됨 (L·R)';
-    hDrafts[hActiveP]=hFresh(hActiveP);
-    if(hActiveP==='LR'){ hActiveP=hBackP||'L'; }
-    hCur=hDrafts[hActiveP]; hDraftStore(); renderHCur();
-    return;
-  }
+           g:hCur.g,s1:hCur.s1,b:hCur.b,s2:hCur.s2};
+  if(e.m!=='지역'){ e.s1=e.s2=null; }   // 선물은 남긴다 — 판 종류와 무관하게 받는다
+  /* ⚠⚠ **스페셜에서 두 줄을 만들지 말 것** (v3.47.0 의 규칙을 v3.56.0 에 철회 · 잭 지정).
+     그때는 스페셜 전용 LR 드래프트가 있어 한 번 저장으로 L·R 두 줄을 냈다. 그런데
+     그 모델이 «판 종류를 바꾸면 드래프트가 갈아치워지는» 버그의 뿌리였다.
+     지금은 **자리마다 저장한다** — 양쪽을 다 봤으면 L 에서 한 번, R 에서 한 번.
+     한쪽만 봤으면 한 줄만 남는 것이 맞다 (못 본 판을 지어내지 않는다). */
   if(hEditIdx!=null){
     /* 목록에서 불러온 판을 고쳐 저장 — 제자리에 반영하고 편집 모드를 닫는다 */
     hist[hEditIdx]=e; hStore(); renderHList();
@@ -185,8 +191,7 @@ document.getElementById('hSaveBtn').addEventListener('click',()=>{
   /* 저장한 드래프트만 비운다. 자동 L↔R 교대는 뺐다 (v3.32.0 · 잭 지정 — 동시 진행) —
      대신 반대편에 쓰다 만 판이 있으면 그쪽으로 넘어간다. LR 드래프트는 원래 자리로. */
   hDrafts[hActiveP]=hFresh(hActiveP);
-  if(hActiveP==='LR'){ hActiveP=hBackP||'L'; }
-  else { const o=hActiveP==='L'?'R':'L'; if(hHasContent(hDrafts[o])) hActiveP=o; }
+  { const o=hActiveP==='L'?'R':'L'; if(hHasContent(hDrafts[o])) hActiveP=o; }
   hCur=hDrafts[hActiveP];
   hDraftStore(); renderHCur();
 });
@@ -218,16 +223,13 @@ document.querySelectorAll('#hMode button').forEach(b=>b.addEventListener('click'
     if(hCur.p==='LR') hCur.p='L';      // v3.47.0 — 판은 늘 한쪽 자리다 (LR 값은 없앴다)
     renderHCur(); return;
   }
-  if(m==='스페셜'){
-    /* 스페셜 입력은 전용 드래프트(LR 칸)를 쓰되, 그 안의 `p` 는 **내가 앉은 자리**다.
-       직전에 쓰던 자리를 그대로 이어받는다. */
-    if(hActiveP!=='LR'){ hBackP=hActiveP; hActiveP='LR'; hCur=hDrafts.LR; hCur.p=hBackP; }
-    hCur.m='스페셜';
-    if(hCur.p!=='L'&&hCur.p!=='R') hCur.p='L';
-  } else {
-    if(hActiveP==='LR'){ hActiveP=hBackP||'L'; hCur=hDrafts[hActiveP]; }
-    hCur.m=m;
-  }
+  /* ⚠⚠ **판 종류는 그 판의 한 칸일 뿐이다. 드래프트를 갈아치우지 말 것.**
+     실전 예 — L 에 선물·상대를 넣어 두고 게임 중, R 에서 스페셜이 떴다. L 이 수락하면
+     L 의 판 종류만 지역배틀 → 스페셜태그배틀로 바뀐다. **넣어 둔 값은 그대로여야 한다.**
+     v3.55.0 까지는 여기서 hActiveP 를 'LR' 로 옮겨 **선물이 사라지고 지난번 값이 떴다**
+     (v3.56.0 에서 고침 · 잭 지적). */
+  hCur.m=m;
+  if(hCur.p!=='L'&&hCur.p!=='R') hCur.p='L';
   hDraftStore(); renderHCur();
 }));
 document.querySelectorAll('.hposg button').forEach(b=>b.addEventListener('click',()=>{
@@ -252,11 +254,7 @@ function hPullPlay(note){
   const boss=BOSSES.find(x=>x.id===bossId);
   if(!boss){ if(note) note.textContent='플레이 탭에서 보스를 먼저 고르세요.'; return false; }
   /* 플레이 화면의 mode 값('지역'·'다맥'·'스페셜')은 기록의 판 종류와 같은 낱말이다.
-     스페셜이면 기록도 LR 드래프트로 옮긴다 — «스페셜 = LR» 규칙을 깨지 않기 위해. */
-  if(hEditIdx==null){
-    if(mode==='스페셜' && hActiveP!=='LR'){ hBackP=hActiveP; hActiveP='LR'; hCur=hDrafts.LR; hCur.p=hBackP; }
-    else if(mode!=='스페셜' && hActiveP==='LR'){ hActiveP=hBackP||'L'; hCur=hDrafts[hActiveP]; }
-  }
+     ⚠ 판 종류만 옮긴다 — 드래프트는 지금 자리를 그대로 쓴다 (v3.56.0 에 «LR» 을 없앴다). */
   hCur.m=mode;
   hCur.src='play';
   hCur.b={n:boss.n, r:String(boss.r)};
@@ -313,11 +311,11 @@ const hQ=document.getElementById('hQ');
    전부 foeModal 의 규칙 그대로다. 다른 점 하나: 도감에 없는 이름을 받는
    «그대로 쓰기» 점선 버튼이 검색 시 맨 앞에 뜬다. */
 let hRank='5', hSet='1';
-const hSlotName={g:'선물',g2:'선물 R',s1:'서브1',b:'보스',s2:'서브2'};
+const hSlotName={g:'선물',s1:'서브1',b:'보스',s2:'서브2'};
 /* 이어 고르기 묶음 (v3.36.0 · 잭 지정) — **선물은 이어 고르기에서 뺀다.**
    선물은 판 시작에 받고 상대 3장은 그 뒤에 뜨므로 사이에 텀이 있다.
    선물을 고르면 거기서 닫히고, 상대는 서브1 → 보스 → 서브2 로 이어 받는다. */
-const hOrder=()=> (hSlot==='g'||hSlot==='g2') ? [hSlot] : (hCur.m==='지역' ? ['s1','b','s2'] : ['b']);
+const hOrder=()=> hSlot==='g' ? ['g'] : (hCur.m==='지역' ? ['s1','b','s2'] : ['b']);
 function hSetTitle(){
   const o=hOrder(), i=o.indexOf(hSlot);
   const step = o.length>1 ? ` <span class="pickstep">${i+1} / ${o.length}</span>` : '';
@@ -375,7 +373,7 @@ function renderHPick(){
   hint.hidden=false;
   hint.textContent = searching
     ? `«${q}» 검색 — 성급 상관없이 ${list.length}장`
-    : (hSlot==='g'||hSlot==='g2' ? '선물 한 장만 넣습니다 — 상대는 배틀이 뜨면 서브1 부터 이어 받습니다'
+    : (hSlot==='g' ? '선물 한 장만 넣습니다 — 상대는 배틀이 뜨면 서브1 부터 이어 받습니다'
       : hOrder().length>1 ? '고르면 남은 칸으로 넘어갑니다 · 한 장만 넣으려면 바깥을 눌러 닫으세요'
                           : '이 판 종류는 선물과 보스만 기록합니다');
   g.innerHTML='';

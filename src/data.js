@@ -389,7 +389,7 @@ const TAGSET=new Set(TAGART);
 const tagArt=b=>TAGSET.has(b.s+'-'+b.r+'-'+b.n)?b.s+'-'+b.r+'-'+b.n:null;
 
 const RANK_N=10;          // 순위에 보여줄 개수
-const VERSION='3.55.0';
+const VERSION='3.56.0';
 const BUILT='2026-08-22';
 
 /* ══ 자산을 CSS 로 한 번만 심는다 (DOM 에 base64 중복 방지) ══ */
