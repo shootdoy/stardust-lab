@@ -23,7 +23,7 @@
 import sys, os, re, io, base64, argparse
  
 HERE = os.path.dirname(os.path.abspath(__file__))
-HTML = os.path.join(HERE, '..', 'release', 'index.html')
+HTML = os.path.join(HERE, '..', 'docs', 'index.html')
 LAND = (144, 81)          # ★6·★5·공통 — 가로 카드 (기존 자산 규격 중 큰 쪽)
 PORT = (108, 192)         # ★4 이하  — 세로 카드
  

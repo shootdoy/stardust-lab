@@ -1,6 +1,6 @@
 // 호출되지만 정의되지 않은 식별자 탐지
 const fs=require('fs');
-const s=fs.readFileSync('../release/index.html','utf8');
+const s=fs.readFileSync('../docs/index.html','utf8');
 let js=s.split('<script>')[1].split('</script>')[0];
 js=js.replace(/const (TAGIMG|TYPEICON|GIMICON)=\{[\s\S]*?\};/g,'const $1={};');
 const defined=new Set();

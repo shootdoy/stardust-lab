@@ -36,7 +36,7 @@ CLAUDE.md 의 «검증 통과 = 반영 완료가 아니다» 가 이 이야기�
 실제 출현은 **27** 이다.
 
 ```bash
-grep -o -- '<앵커>' release/index.html | wc -l
+grep -o -- '<앵커>' docs/index.html | wc -l
 ```
 
 | 결과 | 할 일 |
@@ -56,7 +56,7 @@ v3.48.1 사고가 이 단계를 빼먹어 났다. `if(hEditIdx!=null){` 은 **�
 ```bash
 python3 - <<'EOF'
 import io,re
-s=io.open('release/index.html',encoding='utf-8').read()
+s=io.open('docs/index.html',encoding='utf-8').read()
 A='function buildSeq'       # 교체 시작
 B='/* ══ 렌더 ══ */'        # 교체 끝 — 보통 «다음 정의의 시작»
 i=s.index(A); j=s.index(B,i); seg=s[i:j]
@@ -79,7 +79,7 @@ EOF
 실행해야 터진다 — `scrollToReadout` 사고가 그것이다.
 
 ```bash
-grep -o -- '<지울 이름>' release/index.html | wc -l
+grep -o -- '<지울 이름>' docs/index.html | wc -l
 ```
 
 ### 4. 편집 — 정확한 문자열만
@@ -93,9 +93,9 @@ grep -o -- '<지울 이름>' release/index.html | wc -l
 ### 5. 되읽어 확인 — 검증 통과 ≠ 반영 완료
 
 ```bash
-grep -o -- '<새 문자열>' release/index.html | wc -l   # 기대 1
-grep -o -- '<옛 문자열>' release/index.html | wc -l   # 기대 0
-wc -c release/index.html                              # 크기가 예상만큼 변했는가
+grep -o -- '<새 문자열>' docs/index.html | wc -l   # 기대 1
+grep -o -- '<옛 문자열>' docs/index.html | wc -l   # 기대 0
+wc -c docs/index.html                              # 크기가 예상만큼 변했는가
 ```
 
 v1.42~1.46 유실이 이 단계를 빼먹어 났다 — 치환 스크립트가 예외로 죽어 파일이 저장되지
@@ -104,7 +104,7 @@ v1.42~1.46 유실이 이 단계를 빼먹어 났다 — 치환 스크립트가 �
 아트를 넣었으면 키 수도 센다 (`sync.js` 의 `TAGIMG_N`·`LOW_N` 과 맞아야 통과한다):
 
 ```bash
-python3 -c "import io,re;s=io.open('release/index.html',encoding='utf-8').read();
+python3 -c "import io,re;s=io.open('docs/index.html',encoding='utf-8').read();
 i=s.index('const TAGIMG={');j=s.index(chr(10)+'};',i);
 print(len(re.findall(r'\"[^\"]+\":\"',s[i:j])))"
 ```
@@ -133,7 +133,7 @@ v1.42~1.46 유실이 그렇게 났다. «있어야 하는 것» 과 «없어야 
 **묻고 나서** 고친다.
 
 ```bash
-grep -n 'name="version"\|const VERSION=\|const BUILT=' release/index.html
+grep -n 'name="version"\|const VERSION=\|const BUILT=' docs/index.html
 grep -n '^- 버전:' CLAUDE.md
 ```
 
@@ -188,7 +188,7 @@ grep -n '^- 버전:' CLAUDE.md
 
 ## 편집 대상이 `index.html` 이 아닐 때
 
-- **`docs/` · `CLAUDE.md`** — 위 절차가 필요 없다. 다만 코드와 어긋나는 서술을 새로 적으면
+- **`notes/` · `CLAUDE.md`** — 위 절차가 필요 없다. 다만 코드와 어긋나는 서술을 새로 적으면
   `sync.js` 가 잡을 수 있으니 `node dev/sync.js` 를 한 번 돌린다
 - **`dev/` 스크립트** — 훅은 `index.html` 만 본다. 고친 스크립트를 직접 돌려 확인한다
 - **데이터를 더했으면** 에너지 검산부터 (`POOL` 1.00 · `SUBS` 2.50 이하 — **성급별로 기준이 다르다**)

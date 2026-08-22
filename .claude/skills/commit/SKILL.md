@@ -43,11 +43,11 @@ git rev-parse --abbrev-ref HEAD
 
 이 프로젝트에서 스테이징 실수가 잦은 곳:
 - `backup-v*.html` · `art_in/` · 잭의 실측 캡처 스샷 → 대개 커밋 대상이 아니다
-- `release/index.html` 하나만 고쳤을 때는 그 한 파일만 넣는다
+- `docs/index.html` 하나만 고쳤을 때는 그 한 파일만 넣는다
 
 ### 3. 검증 (index.html 을 고쳤을 때만)
 
-`git diff --cached --name-only` 에 `release/index.html` 이 있으면 **커밋 전에** 확인한다.
+`git diff --cached --name-only` 에 `docs/index.html` 이 있으면 **커밋 전에** 확인한다.
 
 - `.claude/settings.json` 의 PostToolUse 훅이 이미 `dev/check.js` 를 돌려 뒀다 —
   훅이 exit 0 이었다면 통과다. 훅을 껐거나 못 미더우면 손으로 다시 돈다:
@@ -80,7 +80,7 @@ git rev-parse --abbrev-ref HEAD
 이 저장소에서 자주 쓸 만한 것:
 - 데이터/규칙 변경: `feat` (예: `feat: 대기 피격 곡선 반영`)
 - 버그 수정: `fix` (예: `fix: hEditIdx 앵커가 세 곳에 중복 붙던 버그`)
-- 문서: `docs` (CLAUDE.md·docs/ 만 바뀐 경우)
+- 문서: `docs` (CLAUDE.md·notes/ 만 바뀐 경우)
 - 스크립트/훅: `chore` (dev/ 도구)
 
 **제목 규칙**
@@ -154,7 +154,7 @@ EOF
 - **`dev/sync.js`** 는 문서와 코드가 어긋나지 않는지 감시한다. `dev/check.js` 가 이를 부른다 —
   훅이 통과했으면 통과다
 - **아트 삽입** (`artgen.py --write`) 뒤에는 `TAGIMG_N`·`LOW_N` 을 함께 올려야 sync 가 통과한다.
-  그 편집 자체가 «조용한 미저장» 을 유발할 수 있으므로 (`docs/machine.md` 근처 CLAUDE.md 참고),
+  그 편집 자체가 «조용한 미저장» 을 유발할 수 있으므로 (`notes/machine.md` 근처 CLAUDE.md 참고),
   이 커밋을 만들 때 파일 크기와 키 수를 한 번 더 확인한다
 - **커밋 메시지는 한국어.** 이 저장소의 모든 커밋 이력이 그렇다
 
@@ -173,7 +173,7 @@ v3.17.0 은 활성 피해를 대기 전원에게 그대로 복사했는데,
 ### 좋은 예 — 짧게 끝나는 커밋
 
 ```
-docs: docs/machine.md 로 배급 연구 노트를 분리
+docs: notes/machine.md 로 배급 연구 노트를 분리
 ```
 
 ### 나쁜 예

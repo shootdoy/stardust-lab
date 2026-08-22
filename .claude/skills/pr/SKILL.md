@@ -65,14 +65,14 @@ git rev-parse --abbrev-ref HEAD
 
 ### 3. 배포 전 점검 (`index.html` 이 바뀌었을 때만)
 
-`git diff --stat origin/main..HEAD` 에 `release/index.html` 이 있으면 **전부** 확인한다.
+`git diff --stat origin/main..HEAD` 에 `docs/index.html` 이 있으면 **전부** 확인한다.
 CI 가 없으므로 **여기가 유일한 관문이다.**
 
 ```bash
 node dev/check.js                                              # 다섯 검사 (2초 안팎)
-grep -n 'name="version"\|const VERSION=\|const BUILT=' release/index.html
+grep -n 'name="version"\|const VERSION=\|const BUILT=' docs/index.html
 grep -n '^- 버전:' CLAUDE.md          # ← sync.js 가 문서와 코드를 대조한다
-wc -c release/index.html                                               # sync.js 예산 900KB
+wc -c docs/index.html                                               # sync.js 예산 900KB
 ```
 
 | 볼 것 | 기준 |
@@ -90,11 +90,11 @@ wc -c release/index.html                                               # sync.js
 
 ### 4. 공개 저장소다 — 유출 확인
 
-이 저장소는 **PUBLIC** 이고, `CLAUDE.md` · `docs/` · `data/` 는 **일부러 빼 뒀다**
+이 저장소는 **PUBLIC** 이고, `CLAUDE.md` · `notes/` · `data/` 는 **일부러 빼 뒀다**
 (2026-08-22 잭 지정). `git add -f` 로 우회하면 다시 들어갈 수 있으니 diff 로 확인한다.
 
 ```bash
-git diff --name-only origin/main..HEAD | grep -E '^(CLAUDE\.md|docs/|data/)' \
+git diff --name-only origin/main..HEAD | grep -E '^(CLAUDE\.md|notes/|data/)' \
   && echo '★ 멈춘다 — 제외 대상이 들어 있다' || echo '깨끗'
 git diff origin/main..HEAD | grep -inE 'jack\.a|kakaoent\.com|api[_-]?key|secret|Bearer |ghp_' | head
 ```
@@ -184,7 +184,7 @@ curl -s --max-time 15 https://shootdoy.github.io/stardust-lab/ \
 | `gh pr merge` 자동 실행 | 병합 = 실사용자에게 배포 |
 | `gh pr merge --admin` | 보호 규칙 우회 |
 | PR 본문에 연구 노트·실측 원자료 | 공개된다. 결론만 적는다 |
-| `CLAUDE.md`·`docs/`·`data/` 가 든 PR | 일부러 뺀 것이다 (잭 지정) |
+| `CLAUDE.md`·`notes/`·`data/` 가 든 PR | 일부러 뺀 것이다 (잭 지정) |
 | `index.html` 이 바뀌었는데 버전 그대로 | 앱의 새 버전 알림이 안 뜬다 |
 | 리뷰어 지정 | 혼자 쓰는 저장소다 |
 | `main` 에서 PR 생성 시도 | 브랜치가 필요하다 |
