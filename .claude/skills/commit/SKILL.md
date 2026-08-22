@@ -43,11 +43,16 @@ git rev-parse --abbrev-ref HEAD
 
 이 프로젝트에서 스테이징 실수가 잦은 곳:
 - `backup-v*.html` · `art_in/` · 잭의 실측 캡처 스샷 → 대개 커밋 대상이 아니다
-- `docs/index.html` 하나만 고쳤을 때는 그 한 파일만 넣는다
+- `src/` 의 소스를 고쳤으면 **그 소스와 `docs/index.html`(생성물) 을 함께** 넣는다.
+  생성물만 넣으면 소스가 빠져 다음 빌드에 되돌아가고, 소스만 넣으면 배포물이 옛것이다
 
 ### 3. 검증 (index.html 을 고쳤을 때만)
 
-`git diff --cached --name-only` 에 `docs/index.html` 이 있으면 **커밋 전에** 확인한다.
+`git diff --cached --name-only` 에 `src/` 나 `docs/index.html` 이 있으면 **커밋 전에** 확인한다.
+
+⚠ **`docs/index.html` 은 생성물이다** (v3.52.0 · `src/` 10개를 `dev/build.js` 가 이어 붙인다).
+소스와 생성물이 짝으로 담겼는지 보라 — `dev/sync.js` 가 다시 조립해 대조하므로
+어긋나면 검사가 막지만, 스테이징에서 한쪽만 빠지는 것은 검사가 못 잡는다.
 
 - `.claude/settings.json` 의 PostToolUse 훅이 이미 `dev/check.js` 를 돌려 뒀다 —
   훅이 exit 0 이었다면 통과다. 훅을 껐거나 못 미더우면 손으로 다시 돈다:

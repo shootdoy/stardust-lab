@@ -60,9 +60,12 @@ self.addEventListener('fetch', e => {
   // ⚠ 갱신 감지가 쓰는 요청 — 절대 가로채지 않는다
   if (req.cache === 'no-store' || req.cache === 'reload') return;
 
-  const isArt = /\/art\/[^/]+\.webp$/.test(url.pathname);
+  /* 아트와 고정 자산(폰트·로고·카드) — 둘 다 «거의 안 바뀌고 바뀌면 ?v= 가 바뀐다».
+     v3.52.0 에서 `asset/` 을 더했다. 목록은 여기 적지 않는다 — 경로 모양으로만 가른다. */
+  const isArt = /\/art\/[^/]+\.webp$/.test(url.pathname)
+             || /\/asset\/[^/]+$/.test(url.pathname);
   if (isArt) {
-    // 아트는 내용이 바뀌면 ?v= 가 바뀌므로 캐시를 그대로 믿어도 된다
+    // 내용이 바뀌면 ?v= 가 바뀌므로 캐시를 그대로 믿어도 된다
     e.respondWith(
       caches.match(req).then(hit => hit || fetch(req).then(r => {
         if (r.ok) caches.open(CACHE).then(c => c.put(req, r.clone()));

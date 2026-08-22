@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>스타더스트 랩 · 태그스타 보스 공략</title>
+<meta name="description" content="포켓몬 태그스타 스타더스트 1탄·2탄 ★6·★5 보스 공략. 보유 태그로 3턴 로테이션과 서포트 티켓을 추천합니다.">
+<meta name="theme-color" content="#120B2E">
+<meta name="color-scheme" content="dark">
+<meta name="version" content="3.52.0">
+<meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="스타더스트 랩">
+<meta name="format-detection" content="telephone=no">
+<meta property="og:type" content="website">
+<meta property="og:title" content="스타더스트 랩 · 태그스타 보스 공략">
+<meta property="og:description" content="보유 태그로 3턴 로테이션과 서포트 티켓을 추천합니다.">
+<meta property="og:locale" content="ko_KR">
+<link rel="icon" type="image/png" sizes="32x32" href="@B64:favicon.png@">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1384191135178594"
+     crossorigin="anonymous"></script>
+<link rel="apple-touch-icon" href="@B64:appicon.webp@">
+<link rel="preload" as="font" type="font/woff2" href="asset/blackhansans.woff2?v=@V@" crossorigin>
+<style>
+/* 폰트 내장 — 이 파일에 쓰인 글자만 서브셋 */
+@font-face{font-family:'Black Han Sans';font-style:normal;font-weight:400;font-display:swap;src:url(asset/blackhansans.woff2?v=@V@) format('woff2')}
+</style>
+<!--@style-->
+</head>
+<body>
+<div class="bezel" aria-hidden="true"></div>
+<div class="bezel-in" aria-hidden="true"></div>
+<div class="wrap">
+
+<header>
+  <div class="hero">
+    <div class="tcard" aria-hidden="true"><img src="asset/tagcard.webp?v=@V@" alt="" width="176" height="312"></div>
+    <div class="hero-txt">
+      <div class="brand" id="brand" role="button" tabindex="0" title="사용법 다시 보기"><img src="asset/logo.webp?v=@V@" alt="포켓몬 태그스타더스트 랩" width="320" height="108"></div>
+        <p class="eyebrow">스타더스트 1탄 · 2탄 &nbsp;<span class="s">★6 · ★5</span>&nbsp; 보스 공략</p>
+    </div>
+  </div>
+  <div class="sub" id="guide">
+    <p><b>플레이</b>에서 보스를 고르고, <b>컬렉션</b>에서 가진 태그만 켜두세요.
+       타입 상성과 스탯으로 3턴 로테이션을 짜 드립니다.</p>
+    <button id="guideX" aria-label="설명 닫기" title="닫기">✕</button>
+  </div>
+</header>
+
+<div class="viewsw" role="group" aria-label="화면 전환">
+  <button id="vB" aria-pressed="true">플레이</button>
+  <button id="vC" aria-pressed="false">컬렉션 <span class="ct" id="vCct"></span></button>
+  <!-- 실측 기록 (v3.31.0 · 잭 요청 «히스토리 데이터 입력») — 현장에서 판마다
+       위치·선물·상대·겟을 남긴다. 채팅에 직접 타이핑하던 것을 대체한다. -->
+  <button id="vH" aria-pressed="false">기록 <span class="ct" id="vHct"></span></button>
+  <!-- 이 탭은 룰렛 보정 말고도 다이맥스 레벨·메가 성공도·초기화까지 들고 있어서
+       v2.7.0 에 «설정» 으로 바꿨다 (잭 지정). 값 뱃지(vXct)는 «설정 30/45/30/70» 이
+       읽히지 않으므로 섹션 안내줄로 옮겼다 — 지우지는 않았다(renderChance 가 쓴다). -->
+  <button id="vX" aria-pressed="false">설정</button>
+</div>
+
+<div id="viewBattle" data-d="0">
+  <!-- 플레이 기록 (v3.35.0 · 잭 지정) — 게임 진행 순서대로 끼운다.
+       선물은 판 시작에 제일 먼저 받으므로 맨 위, 겟 결과와 저장은 배틀이 끝난 뒤라 매치 아래.
+       두 블록은 기록 탭과 **같은 드래프트**(hCur)를 쓴다 — 어느 쪽에서 넣어도 같은 판이다. -->
+  <section id="sPlayRecTop" hidden>
+    <div class="card hplayrec">
+      <div class="hrow1">
+        <!-- 플레이는 한쪽에서만 한다 (v3.36.1 · 잭 지정) — 여기 L/R 은 드래프트 전환이
+             아니라 **«내가 앉은 자리» 값**이다. 한 번 고르면 계속 그 자리로 남는다. -->
+        <div class="setsw hposrow hposg hposval" role="group" aria-label="플레이 위치">
+          <button data-p="L" aria-pressed="true">L</button>
+          <button data-p="R" aria-pressed="false">R</button>
+        </div>
+        <button class="hslot" data-k="g"><span class="hs-l" data-gl>선물</span><span class="hs-v" id="hs2-g">—</span></button>
+        <button class="hslot hs-g2" data-k="g2" hidden><span class="hs-l">선물 R</span><span class="hs-v" id="hs2-g2">—</span></button>
+      </div>
+    </div>
+  </section>
+  <section id="sTID">
+    <div class="sec-head"><h2>트레이너 ID</h2><span class="hint">게임 시작 때 스캔</span>
+      <button class="mini" id="qrFileLab">사진에서 등록</button>
+      <input type="file" id="qrFile" accept="image/*"
+        style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none">
+    </div>
+    <div class="card">
+      <!-- 칸이 둘 이상 등록됐을 때만 뜬다 — 하나뿐이면 고를 것이 없어 자리만 차지한다 -->
+      <div class="setsw tidsw" role="group" aria-label="트레이너 ID 선택" id="tidPick" hidden></div>
+      <div class="myqr" id="myqr"></div>
+      <p class="tab-note" id="myqrNote"></p>
+    </div>
+  </section>
+
+  <section id="sMode">
+    <div class="sec-head"><h2>배틀 모드</h2><span class="hint">시작할 때 랜덤으로 정해집니다</span></div>
+    <div class="modesw" role="group" aria-label="배틀 모드">
+      <button data-mode="지역" aria-pressed="true">지역배틀<i>3vs3</i></button>
+      <button data-mode="다맥" aria-pressed="false">다이맥스 포켓몬<i>1vs3</i></button>
+      <button data-mode="스페셜" aria-pressed="false">스페셜태그배틀<i>1vs6</i></button>
+    </div>
+    <p class="tab-note" id="modeNote"></p>
+  </section>
+
+  <section id="sBoss">
+    <div class="sec-head"><h2>보스 선택</h2><span class="hint" id="bossHint"></span></div>
+    <div class="setsw" role="group" aria-label="탄 선택" id="bossSetSw">
+      <button id="sw1" class="s1" aria-pressed="false">1탄</button>
+      <button id="sw2" class="s2" aria-pressed="true">2탄</button>
+    </div>
+    <div class="setsw" role="group" aria-label="등급 전환">
+      <button id="sr6" aria-pressed="true">★6</button>
+      <button id="sr5" aria-pressed="false">★5</button>
+      <button id="srR" aria-pressed="false">레귤러</button>
+    </div>
+    <div class="boss-grid" id="bossGrid"></div>
+  </section>
+
+  <section id="sSup">
+    <div class="sec-head"><h2>서포트 티켓</h2><span class="hint">배틀 중 나타나 도와줍니다</span></div>
+    <div class="card"><div class="sup" id="sup"></div>
+      <p class="tab-note" id="supNote"></p></div>
+  </section>
+
+  <section id="sRot">
+    <div class="sec-head"><h2 id="rotH2">추천 로테이션</h2><span class="hint" id="rotHint">보유 태그 기준 · 탄 무관</span></div>
+    <!-- 어느 전투 태그 세트로 뛰는지. 컬렉션의 분류 스위치와 **같은 상태**(`tagClass`)를 쓴다 —
+         여기서 바꾸면 컬렉션 화면도 따라 바뀐다 (v3.8.0 · 잭 지정). -->
+    <div class="setsw" role="group" aria-label="쓸 전투 태그" id="matchClassSw">
+      <button data-tc="A" aria-pressed="true">전투태그A <small>★5·★6</small></button>
+      <button data-tc="B" aria-pressed="false">전투태그B <small>★5</small></button>
+      <button data-tc="C" aria-pressed="false">전투태그C <small>★4</small></button>
+    </div>
+    <p class="tab-note" id="matchClassNote"></p>
+    <div class="seg" id="foeSeg" role="group" aria-label="표시 단계" hidden>
+      <button data-lv="1" aria-pressed="true">상성</button>
+      <button data-lv="2">상세</button>
+    </div>
+    <div class="card" id="foeBox" hidden>
+      <div class="fl-h">상대 파티<span>가운데가 보스 · 위 상대 ▼ 아래 낼 태그</span></div>
+      <div class="fl-grid" id="foeLanes"></div>
+      <!-- 상대마다 낼 태그. 세로 3칸에는 수치를 다 못 넣어 로테이션과 같은
+           가로 슬롯으로 뺐다 (v1.97.0 · 잭 지정). -->
+      <div class="mplans" id="foePlans"></div>
+      <p class="tab-note" id="foeNote"></p>
+    </div>
+    <div class="card" id="readout"></div>
+    <div class="card" id="rotBox">
+      <div class="seg" role="group" aria-label="표시 단계">
+        <button data-lv="0" aria-pressed="true">태그</button>
+        <button data-lv="1">상성</button>
+        <button data-lv="2">상세</button>
+      </div>
+      <div class="rot" id="rot"></div>
+      <p class="tab-note" id="rotNote"></p>
+          <span class="tag-rule">예상 피해 = 위력 × 공격÷보스방어 × 타입배율 · HP 감소량이 아닙니다. 같은 보스 안에서만 비교하세요</span>
+      <span class="tag-rule">탈진 · 1턴 태그는 3턴에 재사용 가능</span>
+      <span class="tag-rule">기믹 · 메가진화, Z기술, 다이맥스 각 배틀당 1회</span>
+    </div>
+  </section>
+
+  <section id="sPlayRecBot" hidden>
+    <div class="card hplayrec">
+      <div class="setsw hgotg" role="group" aria-label="포획 결과">
+        <button data-g="1" aria-pressed="false">겟-성공</button>
+        <button data-g="0" aria-pressed="true">겟-실패</button>
+      </div>
+      <div class="hact hact-center">
+        <button class="hmain" id="hPlaySave">저장</button>
+        <span class="tab-note" id="hPlayNote"></span>
+      </div>
+    </div>
+  </section>
+
+  <section id="sRank">
+    <details id="rankBox" open>
+      <summary><span class="band" style="background:var(--star)"></span>보유 태그 순위
+        <span class="ct" id="rankCt"></span></summary>
+      <div class="ranksort" role="group" aria-label="정렬 기준">
+        <button data-sort="score" aria-pressed="true">종합</button>
+        <button data-sort="dmg" aria-pressed="false">화력만</button>
+        <span class="sortnote" id="sortNote"></span>
+      </div>
+      <div class="rank" id="rank" style="padding:0 13px 15px"></div>
+    </details>
+  </section>
+</div>
+
+<div id="viewChance" hidden>
+  <section>
+    <div class="sec-head"><h2>상대 태그 탄</h2>
+      <span class="hint">기계에 걸린 탄만 켜 두세요 · <b>내 수집 태그와는 무관</b></span></div>
+    <div class="card">
+      <div class="setsw" role="group" aria-label="상대로 나오는 탄" id="foeSetsSw">
+        <button data-fs="1" aria-pressed="true">1탄</button>
+        <button data-fs="2" aria-pressed="true">2탄</button>
+      </div>
+      <p class="tab-note" id="foeSetsNote"></p>
+    </div>
+  </section>
+  <section>
+    <div class="sec-head"><h2>룰렛 보정</h2>
+      <span class="hint">기믹별 룰렛값 · 공격력에 가산 <b class="ct" id="vXct"></b></span></div>
+    <div class="card">
+      <p style="font-size:12.5px;color:var(--ink-dim);margin:0 0 14px;line-height:1.7">
+        룰렛에서 뜬 숫자가 공격력에 그대로 더해집니다. 다이맥스는 태그의 다이맥스 레벨에 따라
+        룰렛 숫자가 커지고, 다이맥스밴드+의 거다이맥스 보너스+가 발동하면 최대 80까지 나옵니다.<br><b style="color:var(--ink)">기본값 30 / 45 / 30 / 70은 실제 플레이에서 관찰한 평균</b>입니다. 체감이 다르면 조절하세요.</p>
+      <div class="roul" aria-hidden="true">
+        <svg viewBox="0 0 300 150" width="100%" height="150" role="img">
+          <path d="M38 132 A112 112 0 0 1 262 132" fill="none"
+                stroke="#0B0718" stroke-width="34" stroke-linecap="round"/>
+          <path class="dots" d="M25 132 A125 125 0 0 1 275 132"/>
+          <path class="dots" d="M51 132 A99 99 0 0 1 249 132"/>
+          <g class="chips">
+            <g class="o" transform="translate(42,103)"><circle r="15"/><text>20</text></g>
+            <g transform="translate(63,61)"><circle r="15"/><text>10</text></g>
+            <g transform="translate(99,32)"><circle r="15"/><text>10</text></g>
+            <g class="win" transform="translate(150,20)">
+              <rect x="-24" y="-17" width="48" height="34" rx="7"/>
+              <polygon points="-36,-6 -36,6 -28,0"/>
+              <polygon points="36,-6 36,6 28,0"/>
+              <g class="star"><polygon points="0.0,-19.5 4.9,-15.2 11.5,-15.8 12.9,-9.4 18.5,-6.0 16.0,0.0 18.5,6.0 12.9,9.4 11.5,15.8 4.9,15.2 0.0,19.5 -4.9,15.2 -11.5,15.8 -12.9,9.4 -18.5,6.0 -16.0,0.0 -18.5,-6.0 -12.9,-9.4 -11.5,-15.8 -4.9,-15.2"/><text>35</text></g>
+            </g>
+            <g class="o" transform="translate(201,32)"><circle r="15"/><text>20</text></g>
+            <g transform="translate(237,61)"><circle r="15"/><text>10</text></g>
+            <g class="o" transform="translate(258,103)"><circle r="15"/><text>20</text></g>
+          </g>
+        </svg>
+        <span class="roul-c">룰렛에서 멈춘 숫자가 그대로 공격력에 더해집니다</span>
+      </div>
+      <div id="chanceRows"></div>
+      <div class="dlv">
+        <span class="dlv-l">다이맥스 레벨 <i>룰렛에서 뜬 값 · 에너지에 배율</i></span>
+        <div class="dlv-b" role="group" aria-label="다이맥스 레벨">
+          <button data-dlv="0">꽝</button>
+          <button data-dlv="1">레벨 1</button>
+          <button data-dlv="5" aria-pressed="true">레벨 5</button>
+          <button data-dlv="10">레벨 10</button>
+        </div>
+        <span class="dlv-n" id="dlvNote"></span>
+      </div>
+      <div class="dlv mgt">
+        <span class="dlv-l">메가진화 등급 <i>성공 · 대성공</i></span>
+        <div class="dlv-b" role="group" aria-label="메가진화 등급">
+          <button data-mg="성공">성공</button>
+          <button data-mg="대성공" aria-pressed="true">대성공</button>
+        </div>
+        <span class="dlv-n" id="mgtNote"></span>
+      </div>
+      <button class="mini" id="chanceReset" style="margin-top:14px"></button>
+
+    </div>
+  </section>
+  <section>
+    <div class="sec-head"><h2>플레이 기록</h2>
+      <span class="hint">플레이 화면에서 판을 바로 남깁니다 · <b>기본 꺼짐</b></span></div>
+    <div class="card">
+      <div class="setsw" role="group" aria-label="플레이 기록 사용" id="playRecSw">
+        <button data-pr="0" aria-pressed="true">끄기</button>
+        <button data-pr="1" aria-pressed="false">켜기</button>
+      </div>
+      <p class="tab-note">켜면 플레이 화면 맨 위에 <b>L·R·선물</b>, 상대별 매치 아래에
+        <b>겟 결과와 저장</b>이 붙습니다. 보스와 서브는 플레이 화면에서 고른 것이 그대로 들어가고,
+        저장한 판은 <b>기록</b> 탭에 «플레이»로 쌓입니다.</p>
+    </div>
+  </section>
+  <section>
+    <div class="sec-head"><h2>트레이너 ID</h2>
+      <span class="hint">메인 1 · 서브 4 · 플레이 화면에서 골라 씁니다</span></div>
+    <div class="card">
+      <div id="tidSet"></div>
+      <p class="tab-note">새 ID 는 <b>pokemontagstar.co.kr</b> 에서 만듭니다.
+        QR 사진만 이 기기에 저장되고, 어느 ID 에 무엇이 들어 있는지는 앱이 알지 못합니다.</p>
+    </div>
+  </section>
+  <section>
+    <div class="sec-head"><h2>게임기 버전</h2>
+      <span class="hint">기계 화면에 적힌 버전 · 기록에 함께 남습니다</span></div>
+    <div class="card">
+      <p class="verline"><b id="verNow">1.0.4.39608.ko.</b></p>
+      <div class="verrow" data-v="maj"><span class="ver-k">메이저</span>
+        <button class="mini" data-d="-1" aria-label="메이저 내리기">−</button>
+        <b class="ver-n" id="verMaj">1</b>
+        <button class="mini" data-d="1" aria-label="메이저 올리기">+</button></div>
+      <div class="verrow" data-v="min"><span class="ver-k">마이너</span>
+        <button class="mini" data-d="-1" aria-label="마이너 내리기">−</button>
+        <b class="ver-n" id="verMin">0</b>
+        <button class="mini" data-d="1" aria-label="마이너 올리기">+</button></div>
+      <div class="verrow" data-v="pat"><span class="ver-k">패치</span>
+        <button class="mini" data-d="-1" aria-label="패치 내리기">−</button>
+        <b class="ver-n" id="verPat">4</b>
+        <button class="mini" data-d="1" aria-label="패치 올리기">+</button></div>
+      <div class="verrow"><span class="ver-k">빌드</span>
+        <input class="verbuild" id="verBuild" type="text" inputmode="numeric"
+               autocomplete="off" aria-label="빌드 번호" value="39608">
+        <span class="ver-k">.ko.</span></div>
+      <p class="tab-note">기계가 업데이트되면 여기서 바꾸세요. 저장하는 판마다 이 버전이 함께
+        남아, 나중에 <b>버전이 바뀌기 전후를 갈라</b> 볼 수 있습니다.</p>
+    </div>
+  </section>
+  <!-- 개인정보·쿠키 (v3.13.0 · 잭 지정). 애드센스와 GA4 가 쿠키를 쓰므로 밝혀 둔다.
+       ⚠ **측정 ID 를 바꾸거나 집계를 끄면 이 글도 함께 고칠 것** — 안 맞으면 안 적느니만 못하다. -->
+  <section id="sPriv">
+    <div class="sec-head"><h2>개인정보 안내</h2><span class="hint">무엇을 어디에 저장하는지 · 쿠키 사용</span></div>
+    <div class="card priv">
+      <p><b>이 앱에는 서버가 없습니다.</b> 컬렉션 · 도감 · 보정 · 상대 파티 기록은
+        <b>이 브라우저</b>(로컬 저장소)에만 남고, Claude 앱에서 열었을 때만 Claude 계정 저장소에 남습니다.
+        어느 쪽이든 <b>운영자가 그 내용을 들여다볼 수 없습니다.</b></p>
+
+      <p><b>쿠키를 쓰는 곳은 둘입니다.</b></p>
+      <ul>
+        <li><b>Google 애널리틱스 4</b> — 며칠에 몇 명이 왔는지, 다시 오는지 같은
+          <b>이용 통계</b>를 봅니다. 개인을 알아보는 데 쓰지 않고, 구글이 최대 14개월 보관합니다.</li>
+        <li><b>Google 애드센스</b> — 화면 아래 광고를 띄우고 성과를 재는 데 씁니다.</li>
+      </ul>
+      <p>두 경우 모두 <b>수집된 정보는 구글로 전송</b>되며, 처리 방식은 구글의 정책을 따릅니다.</p>
+
+      <p><b>원하지 않으면 이렇게 막을 수 있습니다.</b></p>
+      <ul>
+        <li>브라우저 설정에서 쿠키를 차단하면 됩니다 — <b>앱 기능은 그대로 쓸 수 있습니다.</b></li>
+        <li>구글 <b>광고 설정</b>에서 맞춤 광고를 끌 수 있습니다.</li>
+        <li>PC 라면 구글이 주는 <b>애널리틱스 차단 부가기능</b>을 쓸 수 있습니다.</li>
+      </ul>
+
+      <p class="tab-note">기록을 지우려면 위 <b>처음 상태로 초기화</b>를 누르거나
+        브라우저의 사이트 데이터를 지우면 됩니다. 통계·광고 쿠키는 브라우저 설정에서 지웁니다.</p>
+    </div>
+  </section>
+  <section id="sWipe">
+    <div class="card">
+      <div class="wipebox" style="margin-top:0;padding-top:0;border-top:0">
+        <button class="mini" id="wipeBtn">처음 상태로 초기화…</button>
+        <div class="wipe-ask" id="wipeAsk" hidden>
+          <b>정말 초기화할까요?</b> 컬렉션 · 보정 · 도감 · 표시 설정이 전부 지워집니다.
+          <div class="wipe-b">
+            <button id="wipeYes">지운다</button>
+            <button id="wipeNo">취소</button>
+          </div>
+        </div>
+        <p class="tab-note" style="margin-top:10px">기록 탭의 판 기록은 <b>여기서 지워지지
+          않습니다</b> — 기록은 그쪽 화면의 «기록 전체 삭제»로만 지웁니다.</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- 실측 기록 (v3.31.0). 판 형식은 잭의 신형식 «위치 · 선물 · 서브1 · 보스 · 서브2 [겟]».
+     저장은 이 브라우저(localStorage)에만 하고 wipe() 대상에서 **일부러 뺐다** —
+     현장 데이터는 보정값과 달리 다시 만들 수 없어서, 전체 초기화에 딸려 지워지면 안 된다.
+     지우는 길은 이 화면의 «기록 전체 삭제» 하나뿐이다. -->
+<div id="viewHist" hidden>
+  <section>
+    <div class="sec-head"><h2>전투 입력</h2><span class="hint">칸을 눌러 태그를 고르세요 · L 과 R 은 따로 적어 두었다가 오갈 수 있습니다</span></div>
+    <div class="card">
+      <!-- 줄 배치 (v3.31.3 · 잭 지정): 현장 진행 순서를 그대로 따른다 —
+           ①위치+선물(판 시작에 아는 것) ②판 종류 ③상대 화면 순서(서브1·보스·서브2)
+           ④결과 ⑤저장. 스페셜태그배틀을 고르면 위치는 LR 로 자동 — LR 버튼은 없앴다. -->
+      <div class="hrow1" id="hRow1">
+        <div class="setsw hposrow hposg" role="group" aria-label="플레이 위치" id="hPos">
+          <button data-p="L" aria-pressed="true">L</button>
+          <button data-p="R" aria-pressed="false">R</button>
+        </div>
+        <button class="hslot" data-k="g"><span class="hs-l" data-gl>선물</span><span class="hs-v" id="hs-g">—</span></button>
+        <!-- 스페셜태그배틀은 한 판이지만 **양쪽이 각각 선물을 받는다** (v3.44.0 · 잭 지적) —
+             디스펜서가 두 장을 뱉는 유일한 경우라 배급 복원에는 둘 다 필요하다.
+             스페셜일 때만 뜬다. 못 본 쪽은 비워 두면 «?» 로 나간다. -->
+        <button class="hslot hs-g2" data-k="g2" hidden><span class="hs-l">선물 R</span><span class="hs-v" id="hs-g2">—</span></button>
+      </div>
+      <div class="setsw" role="group" aria-label="기록 출처" id="hSrc">
+        <button data-src="play" aria-pressed="false">플레이</button>
+        <button data-src="watch" aria-pressed="true">관전</button>
+      </div>
+      <div class="setsw" role="group" aria-label="판 종류" id="hMode">
+        <button data-m="지역" aria-pressed="true">지역배틀</button>
+        <button data-m="다맥" aria-pressed="false">다이맥스포켓몬</button>
+        <button data-m="스페셜" aria-pressed="false">스페셜태그배틀</button>
+      </div>
+      <div class="hslots hslots3" id="hSlots">
+        <button class="hslot" data-k="s1"><span class="hs-l">서브1</span><span class="hs-v" id="hs-s1">—</span></button>
+        <button class="hslot hs-boss" data-k="b"><span class="hs-l">보스</span><span class="hs-v" id="hs-b">—</span></button>
+        <button class="hslot" data-k="s2"><span class="hs-l">서브2</span><span class="hs-v" id="hs-s2">—</span></button>
+      </div>
+      <div class="setsw hgotg" role="group" aria-label="포획 결과" id="hGot">
+        <button data-g="1" aria-pressed="false">겟-성공</button>
+        <button data-g="0" aria-pressed="true">겟-실패</button>
+      </div>
+      <div class="hact">
+        <button class="mini" id="hFromPlay">플레이 화면에서 가져오기</button>
+      </div>
+      <div class="hact hact-center">
+        <button class="hmain" id="hSaveBtn">저장</button>
+        <button class="mini" id="hEditCancel" hidden>수정 취소</button>
+        <span class="tab-note" id="hNote"></span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>기록 통계</h2><span class="hint">저장된 판으로 계산 · 현장 판단용</span></div>
+    <div class="card">
+      <div id="hStat"></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>기록 목록</h2><span class="hint" id="hCt"></span></div>
+    <div class="card">
+      <div class="hact">
+        <button class="mini" id="hCopy">전체 복사</button>
+        <button class="mini hdanger" id="hWipeBtn">기록 전체 삭제…</button>
+      </div>
+      <div class="wipe-ask" id="hWipeAsk" hidden>
+        <span>기록 <b id="hWipeN"></b>판을 지웁니다. 되돌릴 수 없습니다.</span>
+        <div class="wipe-b">
+          <button class="mini hdanger" id="hWipeYes">지운다</button>
+          <button class="mini" id="hWipeNo">취소</button>
+        </div>
+      </div>
+      <div id="hList"></div>
+    </div>
+  </section>
+
+</div>
+
+<div id="viewCollection" hidden>
+  <section>
+    <div class="sec-head"><h2>컬렉션</h2><span class="hint" id="ownHint"></span>
+    </div>
+    <div class="setsw" role="group" aria-label="컬렉션 화면 선택">
+      <button id="ct1" aria-pressed="true">전투태그</button>
+      <button id="ct2" aria-pressed="false">수집태그</button>
+    </div>
+    <div class="setsw" role="group" aria-label="전투 태그 분류" id="tagClassSw">
+      <button data-tc="A" aria-pressed="true">전투태그A <small>★5·★6</small></button>
+      <button data-tc="B" aria-pressed="false">전투태그B <small>★5</small></button>
+      <button data-tc="C" aria-pressed="false">전투태그C <small>★4</small></button>
+    </div>
+    <p class="tab-note" id="tagClassNote"></p>
+    <p class="b23n" id="b23ct"></p>
+    <div class="setsw" role="group" aria-label="컬렉션 탄 선택">
+      <button id="rs1" class="s1" aria-pressed="true">1탄</button>
+      <button id="rs2" class="s2" aria-pressed="false">2탄</button>
+    </div>
+    <div id="backend" class="backend"></div>
+    <div id="colBattle">
+      <div class="bulk" style="padding:0 0 8px">
+        <button class="mini" id="dexBestGo">수집 기준 추천-25</button>
+        <button class="mini" id="dexBestOn" hidden>이 25장만 켜기</button>
+        <button class="mini" id="dexBestClr" hidden>추천 지우기</button>
+      </div>
+      <p class="hint" id="dexBestMsg" style="padding:0 0 10px"></p>
+      <div class="bulk" style="padding:0 0 12px">
+        <button class="mini" id="preset16">1탄 ★6</button>
+        <button class="mini" id="preset26">2탄 ★6</button>
+        <button class="mini" id="resetOwn">전부 켜기</button>
+        <button class="mini" id="clearOwn">전부 끄기</button>
+      </div>
+      <div id="roster"></div>
+    </div>
+    <div id="colDex" hidden>
+      <p class="hint" id="dexHint" style="padding:0 0 10px;text-align:center"></p>
+      <div class="bulk" style="padding:0 0 12px">
+        <button class="mini" id="dexFromOwn">전투 보유 가져오기</button>
+        <button class="mini" id="dexAll">전부 켜기</button>
+        <button class="mini" id="dexClear">전부 끄기</button>
+      </div>
+      <div id="dexHost"></div>
+    </div>
+  </section>
+</div>
+
+<div class="adbox">
+  <!-- 디스플레이-수평 -->
+  <ins class="adsbygoogle"
+       style="display:block"
+       data-ad-client="ca-pub-1384191135178594"
+       data-ad-slot="1557019000"
+       data-ad-format="auto"
+       data-full-width-responsive="true"></ins>
+</div>
+
+<footer>
+후보는 ★6 · ★5 · 레귤러 · 스페셜 · 보스는 ★6 · ★5<br>
+  스탯·기술은 공식·팬페이지 표기값 (1탄 25 · 2탄 25 · 공통 6)<br>
+  받는 피해는 보스 표기 기술 기준
+  <!-- ⚠ **여기에 버전·날짜를 적지 말 것** — 상수(VLABEL)를 베껴 적었더니
+       BUILT 만 고쳤을 때 화면이 옛 날짜를 계속 보여 줬다 (v3.24.0 · 잭 지적). -->
+  <span class="ver" id="ver"></span>
+</footer>
+</div>
+
+<div class="upd" id="upd" hidden role="status">
+  <span><b id="updV"></b> 새 버전이 있습니다</span>
+  <button id="updGo">새로고침</button>
+</div>
+
+<nav class="dock" id="dock" aria-label="섹션 바로가기">
+  <button data-go="sTID">ID</button>
+  <button data-go="sBoss">보스</button>
+  <button data-go="sSup">서포트</button>
+  <button data-go="sRot" id="navRot">로테이션</button>
+  <button data-go="sRank">순위</button>
+</nav>
+
+<!-- 서브 선택 팝업 (v1.82.0 · 잭 지정). 종전에는 상대 그리드 아래 인라인 패널이었는데
+     칸을 누르면 목록이 화면 밖으로 밀려나 보이지 않는 일이 있었다. 아래에서 올라오는
+     시트라 엄지가 닿는다. 안쪽 id 는 인라인 시절 그대로라 기존 핸들러가 그대로 붙는다. -->
+<!-- 태그 픽커 (v3.31.5 · v3.35.1 에 최상위로 이동) — foeModal 과 **같은 컴포넌트 골격** (잭 지정):
+     pickhead · foesearch · pickhint · 성급 setsw · foegrid · «바깥을 눌러 닫기».
+     도감에 없는 이름(홍나숭 사례)은 검색 시 점선 «그대로 쓰기» 버튼으로 받는다.
+   **이 블록은 반드시 뷰 밖(최상위)에 둔다** — v3.35.0 에서 viewHist 안에 두었더니
+   플레이 화면의 선물 칸을 눌렀을 때 숨은 기록 뷰 속에서 열려 화면에 안 보였다.
+   foeModal 도 같은 이유로 최상위에 있다. **다시 뷰 안으로 옮기지 말 것.** -->
+<!-- 트레이너 ID 별 «스타 포켓몬 리스트» (v3.42.0 · 잭 지정) — 기계 화면과 같은 구성.
+     칸을 탭할 때마다 **미출현 → 출현 → 포획** 으로 돌고, ID 마다 따로 저장된다.
+     교환 이벤트의 «미보유 우대» 가설을 재려면 «이 ID 가 무엇을 가졌나» 를 알아야 한다.
+     ⚠ **뷰 밖 최상위에 둘 것** (v3.35.1 교훈 — 뷰 안에 두면 다른 화면에서 안 보인다). -->
+<div class="pickmodal" id="tdxModal" hidden>
+  <div class="pickbox" role="dialog" aria-modal="true" aria-labelledby="tdxHead">
+    <div class="pickhead">
+      <b id="tdxHead">스타 포켓몬 리스트</b>
+      <button class="qrx" id="tdxX" aria-label="닫기">✕</button>
+    </div>
+    <div class="setsw" role="group" aria-label="탄" id="tdxSet">
+      <button data-s="1" aria-pressed="true">1탄</button>
+      <button data-s="2" aria-pressed="false">2탄</button>
+    </div>
+    <div id="tdxBody"></div>
+    <p class="qrnote"><span class="qrdim">탭할 때마다 미출현 → 출현 → 포획 으로 바뀝니다</span></p>
+  </div>
+</div>
+
+<div class="pickmodal" id="hModal" hidden>
+  <div class="pickbox" role="dialog" aria-modal="true" aria-labelledby="hPickH">
+    <div class="pickhead">
+      <b id="hPickH">태그 선택</b>
+      <button class="qrx" id="hPickX" aria-label="닫기">✕</button>
+    </div>
+    <input class="foesearch" id="hQ" type="search" inputmode="search" autocomplete="off"
+           placeholder="이름으로 검색 (초성도 됨)" aria-label="태그 이름 검색">
+    <p class="pickhint" id="hPickHint" hidden></p>
+    <div class="setsw" role="group" aria-label="태그 성급" id="hRank">
+      <button data-r="6" aria-pressed="false">★6</button>
+      <button data-r="5" aria-pressed="true">★5</button>
+      <button data-r="4" aria-pressed="false">★4</button>
+      <button data-r="3" aria-pressed="false">★3</button>
+      <button data-r="2" aria-pressed="false">★2</button>
+      <button data-r="R" aria-pressed="false">레귤러</button>
+    </div>
+    <div class="setsw" role="group" aria-label="태그 탄" id="hSet">
+      <button data-s="1" aria-pressed="true">1탄</button>
+      <button data-s="2" aria-pressed="false">2탄</button>
+    </div>
+    <div class="foegrid" id="hGrid"></div>
+    <p class="qrnote"><span class="qrdim">바깥을 눌러 닫기 · 목록은 설정의 상대 탄을 따름</span></p>
+  </div>
+</div>
+
+<div class="pickmodal" id="foeModal" hidden>
+  <div class="pickbox" role="dialog" aria-modal="true" aria-labelledby="foePickH">
+    <div class="pickhead">
+      <b id="foePickH">서브 선택</b>
+      <button class="qrx" id="foePickX" aria-label="닫기">✕</button>
+    </div>
+    <input class="foesearch" id="foeQ" type="search" inputmode="search" autocomplete="off"
+           placeholder="이름으로 검색 (초성도 됨)" aria-label="서브 이름 검색">
+    <p class="pickhint" id="foePickHint" hidden></p>
+    <div class="setsw" role="group" aria-label="서브 성급" id="foeRank">
+      <button data-r="6" aria-pressed="false">★6</button>
+      <button data-r="5" aria-pressed="true">★5</button>
+      <button data-r="4" aria-pressed="false">★4</button>
+      <button data-r="3" aria-pressed="false">★3</button>
+      <button data-r="2" aria-pressed="false">★2</button>
+      <button data-r="R" aria-pressed="false">레귤러</button>
+    </div>
+    <div class="setsw" role="group" aria-label="서브 탄" id="foeSet">
+      <button data-s="1" aria-pressed="true">1탄</button>
+      <button data-s="2" aria-pressed="false">2탄</button>
+    </div>
+    <div class="foegrid" id="foeGrid"></div>
+    <p class="qrnote"><span class="qrdim">바깥을 눌러 닫기</span></p>
+  </div>
+</div>
+
+<div class="qrmodal" id="qrModal" hidden>
+  <div class="qrbox" role="dialog" aria-modal="true" aria-labelledby="qrName">
+    <div class="qrhead" id="qrHead">
+      <span class="qrth" id="qrThumb"></span>
+      <span class="qrmeta"><b id="qrName"></b><span id="qrSub"></span></span>
+      <button class="qrx" id="qrClose" aria-label="닫기">✕</button>
+    </div>
+    <img id="qrImg" alt="" width="400" height="400">
+    <div id="qrCard" hidden></div>
+    <p class="qrnote"><span id="qrNote">배틀이 시작되기 전에 기기로 스캔하세요</span><br><span class="qrdim">아무 곳이나 눌러 닫기</span></p>
+  </div>
+</div>
+
+<!--@script-->
+</body>
+</html>

@@ -19,6 +19,34 @@ description: 스타더스트 랩의 index.html 을 안전하게 고친다. 앵�
 «무엇이 함께 사라졌는지» 도 «반영이 됐는지» 도 못 본다.
 CLAUDE.md 의 «검증 통과 = 반영 완료가 아니다» 가 이 이야기다.
 
+## ⚠⚠ 먼저 — 고칠 곳은 `src/` 다. `docs/index.html` 은 생성물이다
+
+v3.52.0 에서 소스를 10개로 나눴다 (4,776줄 한 파일이 편집에 불편해서 · 잭 지정).
+**배포물은 그대로 한 파일**이고 `node dev/build.js` 가 이어 붙여 만든다. 로딩은 안 바뀌었다.
+
+| 소스 | 줄 | 무엇 |
+|---|---|---|
+| `src/index.html` | 601 | `<head>` · `<body>` 마크업 · 자리표시 `<!--@style--> <!--@script-->` |
+| `src/style.css` | 922 | CSS 전부 |
+| `src/data.js` | 495 | CHART · MEASURED · POOL · BOSSES · TAGART · BEST25 · MEGA · 도감 · **VERSION** |
+| `src/state.js` | 209 | 저장·불러오기 · `Bag` · owned/dex · 모드·분류 |
+| `src/eval.js` | 268 | 데미지·상성·로테이션 탐색 |
+| `src/render.js` | 753 | 화면 그리기 |
+| `src/qr.js` | 395 | 트레이너 ID · QR · 서포트 티켓 · 순위 |
+| `src/dex.js` | 378 | 수집 탭 · 전투 분류 · 뷰 전환 · 버전 표시·갱신 감지 · 초기화 |
+| `src/hist.js` | 533 | 기록 탭 |
+| `src/boot.js` | 219 | 남은 렌더 · 이벤트 바인딩 · 부팅 · 서비스워커 등록 |
+
+- **`docs/index.html` 을 고치지 말 것.** 훅이 다음 편집에 덮어쓴다.
+  손으로 고친 흔적이 보이면 `build.js` 가 **덮어쓰지 않고 멈춘다** (편집이 사라지지 않게)
+- **빌드는 훅이 자동으로 한다.** 손으로 돌릴 일은 훅을 껐을 때뿐이다
+- `dev/sync.js` 가 다시 조립해 생성물과 대조한다 — 안 빌드했거나 손으로 고쳤으면 검사가 막는다
+- ⚠ **JS 는 한 스코프를 공유하고 순서에 의존한다** (`class Bag` 이 `BEST25` 보다 앞).
+  파일 사이로 정의를 옮기면 그 순서가 깨질 수 있다. 순서의 정본은 `build.js` 의 `ORDER` 다
+- ⚠ 어느 파일인지 모르겠으면 **`src/` 를 통째로 grep 한다** — 아래 명령들이 그렇게 되어 있다
+- ⚠ 검증 도구(`undef` `interact` `fixture` `glyph`)는 **생성물을 읽는다.** 실제로 배포되는 것을
+  검사해야 하기 때문이다. 그래서 «소스를 고쳤는데 검사가 옛 결과» 로 보이면 빌드를 안 한 것이다
+
 ## 언제 트리거되나
 
 - 사용자가 `/edit` 을 입력했을 때
@@ -36,7 +64,7 @@ CLAUDE.md 의 «검증 통과 = 반영 완료가 아니다» 가 이 이야기�
 실제 출현은 **27** 이다.
 
 ```bash
-grep -o -- '<앵커>' docs/index.html | wc -l
+grep -ro -- '<앵커>' src/ | wc -l          # 어느 파일인지 보려면: grep -rc -- '<앵커>' src/
 ```
 
 | 결과 | 할 일 |
@@ -56,7 +84,7 @@ v3.48.1 사고가 이 단계를 빼먹어 났다. `if(hEditIdx!=null){` 은 **�
 ```bash
 python3 - <<'EOF'
 import io,re
-s=io.open('docs/index.html',encoding='utf-8').read()
+s=io.open('src/eval.js',encoding='utf-8').read()   # ← 고치는 소스 파일
 A='function buildSeq'       # 교체 시작
 B='/* ══ 렌더 ══ */'        # 교체 끝 — 보통 «다음 정의의 시작»
 i=s.index(A); j=s.index(B,i); seg=s[i:j]
@@ -79,7 +107,7 @@ EOF
 실행해야 터진다 — `scrollToReadout` 사고가 그것이다.
 
 ```bash
-grep -o -- '<지울 이름>' docs/index.html | wc -l
+grep -ro -- '<지울 이름>' src/ | wc -l
 ```
 
 ### 4. 편집 — 정확한 문자열만
@@ -93,9 +121,9 @@ grep -o -- '<지울 이름>' docs/index.html | wc -l
 ### 5. 되읽어 확인 — 검증 통과 ≠ 반영 완료
 
 ```bash
-grep -o -- '<새 문자열>' docs/index.html | wc -l   # 기대 1
-grep -o -- '<옛 문자열>' docs/index.html | wc -l   # 기대 0
-wc -c docs/index.html                              # 크기가 예상만큼 변했는가
+grep -ro -- '<새 문자열>' src/ | wc -l   # 기대 1
+grep -ro -- '<옛 문자열>' src/ | wc -l   # 기대 0
+node dev/build.js && wc -c docs/index.html         # 빌드 후 크기가 예상만큼 변했는가
 ```
 
 v1.42~1.46 유실이 이 단계를 빼먹어 났다 — 치환 스크립트가 예외로 죽어 파일이 저장되지
@@ -104,9 +132,7 @@ v1.42~1.46 유실이 이 단계를 빼먹어 났다 — 치환 스크립트가 �
 아트를 넣었으면 키 수도 센다 (`sync.js` 의 `TAGIMG_N`·`LOW_N` 과 맞아야 통과한다):
 
 ```bash
-python3 -c "import io,re;s=io.open('docs/index.html',encoding='utf-8').read();
-i=s.index('const TAGIMG={');j=s.index(chr(10)+'};',i);
-print(len(re.findall(r'\"[^\"]+\":\"',s[i:j])))"
+python3 dev/artstore.py     # 목록↔파일 대조와 장수를 함께 찍는다
 ```
 
 ### 6. `dev/check.js`
@@ -133,8 +159,10 @@ v1.42~1.46 유실이 그렇게 났다. «있어야 하는 것» 과 «없어야 
 **묻고 나서** 고친다.
 
 ```bash
-grep -n 'name="version"\|const VERSION=\|const BUILT=' docs/index.html
+grep -rn 'name="version"\|const VERSION=\|const BUILT=' src/
 grep -n '^- 버전:' CLAUDE.md
+#  meta → src/index.html · VERSION·BUILT → src/data.js
+#  ⚠ src/dex.js 에도 const VERSION 문자열이 있으나 그것은 갱신 감지용 정규식이다
 ```
 
 | 고칠 곳 | |

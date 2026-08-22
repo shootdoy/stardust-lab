@@ -34,8 +34,12 @@ import io, os, re, sys, unicodedata as ud
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.normpath(os.path.join(HERE, '..'))
-HTML = os.path.join(ROOT, 'docs', 'index.html')
+HTML = os.path.join(ROOT, 'docs', 'index.html')   # 생성물 — **읽기만** 한다
 ART  = os.path.join(ROOT, 'docs', 'art')
+# ⚠ `TAGART` 목록의 정본은 **소스**다 (v3.52.0 에서 `src/` 로 나눴다).
+#   생성물에 써 넣으면 다음 빌드에 지워진다. 없으면 옛 구조로 보고 생성물을 쓴다.
+DATA = os.path.join(ROOT, 'src', 'data.js')
+KEYSRC = DATA if os.path.exists(DATA) else HTML
 
 LOWRE = re.compile(r'^\d-[1-4]-')          # ★4 이하 = 세로 카드
 MARK  = 'const TAGART=['
@@ -70,7 +74,7 @@ def keys(src=None):
         i, j = _span(src)
         return [nfc(x[1:-1]) for x in re.findall(r'"[^"]+"', src[i:j])]
     if _cache is None:
-        _cache = keys(load_html())
+        _cache = keys(io.open(KEYSRC, encoding='utf-8').read())
     return list(_cache)
 
 
@@ -106,6 +110,18 @@ def write(key, data):
     io.open(path(key), 'wb').write(data)
 
 
+def build():
+    """`src/` 를 이어 붙여 생성물을 다시 만든다. 소스로 나뉘지 않은 저장소면 아무것도 안 한다."""
+    if KEYSRC == HTML:
+        return
+    import subprocess
+    r = subprocess.run(['node', os.path.join(HERE, 'build.js')],
+                       capture_output=True, text=True)
+    print('  ' + (r.stdout or r.stderr).strip().splitlines()[-1])
+    if r.returncode:
+        sys.exit('★ 빌드 실패 — 위 메시지를 볼 것')
+
+
 def files():
     """디스크에 있는 키 (정렬). 목록과 대조할 때 쓴다."""
     try:
@@ -133,14 +149,15 @@ def add_keys(new, write_html=True):
       «이미 캐시된 옛 번호» 와 어긋난다 — 404 도 안 나고 엉뚱한 그림이 뜬다.
     """
     global _cache
-    src = load_html()
+    src = io.open(KEYSRC, encoding='utf-8').read()
     cur = keys(src)
     add = [nfc(k) for k in new if nfc(k) not in cur]
     if not add:
         return src, []
     out = src[:_span(src)[0]] + _block(cur + add) + src[_span(src)[1]:]
     if write_html:
-        io.open(HTML, 'w', encoding='utf-8').write(out)
+        io.open(KEYSRC, 'w', encoding='utf-8').write(out)
+        build()                   # 생성물에도 곧 반영한다 — 안 하면 CSS 규칙이 안 생긴다
     _cache = cur + add            # write() 가 곧 이 키를 쓴다 — 캐시를 맞춰 둔다
     return out, add
 
