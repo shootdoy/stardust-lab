@@ -10,6 +10,11 @@ const doc =fs.readFileSync(__dirname+'/../CLAUDE.md','utf8');
 const fix =fs.readFileSync(__dirname+'/fixture.js','utf8');
 const fix2=fs.readFileSync(__dirname+'/interact.js','utf8');
 const undf=fs.readFileSync(__dirname+'/undef.js','utf8');
+/* 없으면 빈 문자열로 둔다 — 파일이 사라지면 «있어야 할 것이 없다» 로 조용히 잡히는 편이
+   readFileSync 예외로 검사 전체가 죽는 것보다 낫다. */
+const rd=p=>{ try{ return fs.readFileSync(__dirname+'/'+p,'utf8') }catch(e){ return '' } };
+const ccrop=rd('cardcrop.py');       // 가로 카드 «그림만» 크롭 (v3.49.0)
+const fart =rd('fetch-art.sh');      // 공식 카드 원본 받기
 
 const checks=[
   // [설명, 대상, 있어야 하는가, 찾을 문자열]
@@ -183,7 +188,10 @@ const checks=[
   // 서브 선택 팝업 검색 (v2.6.0 · 잭 지정)
   ['팝업에 검색창',                    html, true,  '<input class="foesearch" id="foeQ"'],
   // iOS 자동 확대 방지 (v2.9.1 · 잭 지적) — 16px 미만이면 포커스 때 확대되고 안 돌아온다
-  ['검색창 글자는 16px',               html, true,  'font-weight:600;font-size:16px;line-height:1.2;-webkit-appearance:none}'],
+  /* ⚠ 선언 «전체» 를 박아 두면 무관한 CSS 를 더할 때마다 깨진다 (2026-08-22 appearance 추가에서
+     실제로 깨졌다). 지켜야 하는 것은 «16px» 하나이므로 그 부분만 본다. */
+  ['검색창 글자는 16px',               html, true,  'font-size:16px;line-height:1.2'],
+  ['검색창에 표준 appearance',         html, true,  '-webkit-appearance:none;appearance:none'],
   ['그 이유를 코드에 남김',            html, true,  '16px 아래로 내리지 말 것'],
   // 셋째 탭은 «설정» (v2.7.0 · 잭 지정)
   ['셋째 탭 이름은 설정',              html, true,  '<button id="vX" aria-pressed="false">설정</button>'],
@@ -547,6 +555,28 @@ const checks=[
   ['몬스터볼은 CSS',                  html, true,  '.tdxc .bl{position:absolute'],
   ['아트는 artCls 로',                html, true,  'ac=artCls(p)'],
   ['base64 직접 삽입 없음',           html, false, 'url(${art})'],
+
+  /* ── 공식 카드에서 아트 만들기 (v3.49.0) ────────────────────────────────
+     ⚠ 성급마다 «그림만» 창이 다르다. ★6 은 장식이 아래, ★5 는 왼쪽 세로 띠에 있어서
+       ★5 에 ★6 창을 쓰면 왼쪽 장식이 잔뜩 들어온다 (실제로 겪었다).
+       창 상수가 조용히 하나로 합쳐지지 않게 짝으로 감시한다. */
+  ['가로 크롭 스크립트 존재',         ccrop, true,  'def main()'],
+  ['★6 창 (배지 회피)',              ccrop, true,  "'6': (59, 17, 238, 118)"],
+  ['★5 창 (왼쪽 띠 회피)',           ccrop, true,  "'5': (99, 35, 267, 130)"],
+  ['성급별로 나누라고 남김',          ccrop, true,  '한 창으로 묶지 말 것'],
+  ['artgen --force 금지를 남김',      ccrop, true,  'artgen.py --force'],
+  ['치환은 1회만 허용',               ccrop, true,  '치환 {cnt}회'],
+  ['투명→흰색 함정을 남김',           ccrop, true,  '바로 열지 말 것'],
+  /* ⚠ 파일명은 «코드-이름-면» 이다. 성급을 파일명에 넣지 않는 대신 코드로 앱을 조회한다 —
+     작은 이미지에서 이름·번호를 눈으로 읽다 틀린 적이 두 번 있다 (만마드 056/055 등). */
+  ['원본 파일명은 코드-이름-면',      fart,  true,  '$code-$name-$face.png'],
+  /* ⚠ 'nback' 만 찾으면 주석에도 있어서 «읽기» 를 되돌려도 통과한다 (사보타주로 걸렸다).
+     실제 동작 지점 두 곳을 본다 — 넷째 칸을 읽는 곳과 뒷면에 쓰는 곳. */
+  ['앞뒤 번호 — 넷째 칸을 읽는다',    fart,  true,  'read -r n key code nback'],
+  ['앞뒤 번호 — 뒷면에 쓴다',         fart,  true,  'base="$nback"'],
+  ['앞뒤 번호 — curl 이 base 를 쓴다', fart, true,  '$BASE_URL/$base$suf.png'],
+  ['원본은 탄별 폴더',                fart,  true,  'printf \'%s/%s탄\''],
+  ['원본을 커밋하지 말라고 남김',     fart,  true,  '커밋하지 말 것'],
 
   ['문서 버전이 코드와 같은가',       doc,  true,  null],
 ];
