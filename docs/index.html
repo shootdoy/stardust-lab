@@ -4538,7 +4538,9 @@ function hAnalyze(){
   const local=hist.filter(e=>e.m==='지역');
   const six=hist.filter(e=>hIs6(e.b));
   const gotAll=hist.filter(e=>e.got);
-  /* 지금 건조 — 마지막 ★6 보스 이후 몇 판인가. 6판을 넘겼으면 곧 나온다
+  /* 지금 «마의 구간» — 마지막 ★6 보스 이후 몇 판인가. 6판을 넘겼으면 곧 나온다
+     ⚠ 화면 문구는 **«마의 구간»** 이다 (v3.56.0 · 잭 지정 — 종전 «건조»).
+       내부 이름 `dry` 는 그대로 둔다. 화면 낱말과 변수명이 다른 것을 헷갈리지 말 것.
      (간격이 무작위보다 규칙적 · 실측 평균 1.5판). */
   let dry=0;
   for(let i=n-1;i>=0;i--){ if(hIs6(hist[i].b)) break; dry++; }
@@ -4585,7 +4587,7 @@ function renderHStat(){
     +(a.gvers.length>1?' — 버전이 바뀐 판이 섞여 있습니다':'')]);
   rows.push(['★6 보스', a.six+'회 ('+pct(a.six,a.n)+') · 겟 '+a.six6got+' · 전체 겟 '+a.got]);
   rows.push(['★6 미출현', a.dry+'판째'+(a.dry>=6?' — 곧 나올 구간입니다 (자리를 지키세요)'
-    : a.dry>=3?' — 건조 한복판일 수 있습니다':'')]);
+    : a.dry>=3?' — 마의 구간 한복판일 수 있습니다':'')]);
   if(a.slots) rows.push(['상대 풀 폭', a.kinds+'종 / 최근 '+a.slots+'슬롯'
     +(a.slots>=9&&a.kinds<=a.slots*0.45?' — 좁습니다. 재고 끝물 신호':'')]);
   if(a.subs) rows.push(['서브 성급', '★2 '+pct(a.r2,a.subs)+' · ★4~5 '+pct(a.strong,a.subs)
