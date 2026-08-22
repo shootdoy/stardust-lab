@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko">
+<!-- ══ 머리 — meta · 광고 · 파비콘 · 폰트 ──── -->
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -7,7 +8,7 @@
 <meta name="description" content="포켓몬 태그스타 스타더스트 1탄·2탄 ★6·★5 보스 공략. 보유 태그로 3턴 로테이션과 서포트 티켓을 추천합니다.">
 <meta name="theme-color" content="#120B2E">
 <meta name="color-scheme" content="dark">
-<meta name="version" content="3.54.0">
+<meta name="version" content="3.55.0">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -29,6 +30,7 @@
 </style>
 <!--@style-->
 </head>
+<!-- ══ 본문 시작 — 베젤 · 히어로 · 사용법 ──── -->
 <body>
 <div class="bezel" aria-hidden="true"></div>
 <div class="bezel-in" aria-hidden="true"></div>
@@ -61,6 +63,7 @@
   <button id="vX" aria-pressed="false">설정</button>
 </div>
 
+<!-- ══ 플레이 뷰 ──── -->
 <div id="viewBattle" data-d="0">
   <!-- 플레이 기록 (v3.35.0 · 잭 지정) — 게임 진행 순서대로 끼운다.
        선물은 판 시작에 제일 먼저 받으므로 맨 위, 겟 결과와 저장은 배틀이 끝난 뒤라 매치 아래.
@@ -79,6 +82,7 @@
       </div>
     </div>
   </section>
+<!-- ══ 플레이 ① 트레이너 ID ──── -->
   <section id="sTID">
     <div class="sec-head"><h2>트레이너 ID</h2><span class="hint">게임 시작 때 스캔</span>
       <button class="mini" id="qrFileLab">사진에서 등록</button>
@@ -93,6 +97,7 @@
     </div>
   </section>
 
+<!-- ══ 플레이 ② 배틀 모드 ──── -->
   <section id="sMode">
     <div class="sec-head"><h2>배틀 모드</h2><span class="hint">시작할 때 랜덤으로 정해집니다</span></div>
     <div class="modesw" role="group" aria-label="배틀 모드">
@@ -103,6 +108,7 @@
     <p class="tab-note" id="modeNote"></p>
   </section>
 
+<!-- ══ 플레이 ③ 보스 선택 ──── -->
   <section id="sBoss">
     <div class="sec-head"><h2>보스 선택</h2><span class="hint" id="bossHint"></span></div>
     <div class="setsw" role="group" aria-label="탄 선택" id="bossSetSw">
@@ -117,12 +123,14 @@
     <div class="boss-grid" id="bossGrid"></div>
   </section>
 
+<!-- ══ 플레이 ④ 서포트 티켓 ──── -->
   <section id="sSup">
     <div class="sec-head"><h2>서포트 티켓</h2><span class="hint">배틀 중 나타나 도와줍니다</span></div>
     <div class="card"><div class="sup" id="sup"></div>
       <p class="tab-note" id="supNote"></p></div>
   </section>
 
+<!-- ══ 플레이 ⑤ 추천 로테이션 · 상대별 매치 ──── -->
   <section id="sRot">
     <div class="sec-head"><h2 id="rotH2">추천 로테이션</h2><span class="hint" id="rotHint">보유 태그 기준 · 탄 무관</span></div>
     <!-- 어느 전투 태그 세트로 뛰는지. 컬렉션의 분류 스위치와 **같은 상태**(`tagClass`)를 쓴다 —
@@ -173,6 +181,7 @@
     </div>
   </section>
 
+<!-- ══ 플레이 ⑥ 보유 태그 순위 ──── -->
   <section id="sRank">
     <details id="rankBox" open>
       <summary><span class="band" style="background:var(--star)"></span>보유 태그 순위
@@ -187,6 +196,7 @@
   </section>
 </div>
 
+<!-- ══ 설정 뷰 ① 상대 탄 · 룰렛 보정 ──── -->
 <div id="viewChance" hidden>
   <section>
     <div class="sec-head"><h2>상대 태그 탄</h2>
@@ -256,6 +266,7 @@
     <div class="sec-head"><h2>플레이 기록</h2>
       <span class="hint">플레이 화면에서 판을 바로 남깁니다 · <b>기본 꺼짐</b></span></div>
     <div class="card">
+<!-- ══ 설정 뷰 ② 플레이 기록 · 트레이너 ID ──── -->
       <div class="setsw" role="group" aria-label="플레이 기록 사용" id="playRecSw">
         <button data-pr="0" aria-pressed="true">끄기</button>
         <button data-pr="1" aria-pressed="false">켜기</button>
@@ -301,6 +312,7 @@
   </section>
   <!-- 개인정보·쿠키 (v3.13.0 · 잭 지정). 애드센스와 GA4 가 쿠키를 쓰므로 밝혀 둔다.
        ⚠ **측정 ID 를 바꾸거나 집계를 끄면 이 글도 함께 고칠 것** — 안 맞으면 안 적느니만 못하다. -->
+<!-- ══ 설정 뷰 ③ 개인정보 · 처음 상태로 초기화 ──── -->
   <section id="sPriv">
     <div class="sec-head"><h2>개인정보 안내</h2><span class="hint">무엇을 어디에 저장하는지 · 쿠키 사용</span></div>
     <div class="card priv">
@@ -350,6 +362,7 @@
      저장은 이 브라우저(localStorage)에만 하고 wipe() 대상에서 **일부러 뺐다** —
      현장 데이터는 보정값과 달리 다시 만들 수 없어서, 전체 초기화에 딸려 지워지면 안 된다.
      지우는 길은 이 화면의 «기록 전체 삭제» 하나뿐이다. -->
+<!-- ══ 기록 뷰 ──── -->
 <div id="viewHist" hidden>
   <section>
     <div class="sec-head"><h2>전투 입력</h2><span class="hint">칸을 눌러 태그를 고르세요 · L 과 R 은 따로 적어 두었다가 오갈 수 있습니다</span></div>
@@ -424,6 +437,7 @@
 
 </div>
 
+<!-- ══ 컬렉션 뷰 ──── -->
 <div id="viewCollection" hidden>
   <section>
     <div class="sec-head"><h2>컬렉션</h2><span class="hint" id="ownHint"></span>
@@ -481,6 +495,7 @@
        data-full-width-responsive="true"></ins>
 </div>
 
+<!-- ══ 푸터 · 갱신 알림 · 하단 dock ──── -->
 <footer>
 후보는 ★6 · ★5 · 레귤러 · 스페셜 · 보스는 ★6 · ★5<br>
   스탯·기술은 공식·팬페이지 표기값 (1탄 25 · 2탄 25 · 공통 6)<br>
@@ -517,6 +532,7 @@
      칸을 탭할 때마다 **미출현 → 출현 → 포획** 으로 돌고, ID 마다 따로 저장된다.
      교환 이벤트의 «미보유 우대» 가설을 재려면 «이 ID 가 무엇을 가졌나» 를 알아야 한다.
      ⚠ **뷰 밖 최상위에 둘 것** (v3.35.1 교훈 — 뷰 안에 두면 다른 화면에서 안 보인다). -->
+<!-- ══ 모달 — 트레이너 도감 · 기록 · 서브 픽커 · QR ──── -->
 <div class="pickmodal" id="tdxModal" hidden>
   <div class="pickbox" role="dialog" aria-modal="true" aria-labelledby="tdxHead">
     <div class="pickhead">

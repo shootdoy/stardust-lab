@@ -102,6 +102,7 @@ function qrProcess(img){
   if(url.slice(0,15)!=='data:image/webp') url=o.toDataURL('image/png');
   return url;
 }
+/* ══ QR 저장 · 불러오기 ──── */
 function tidSync(){ myqr = (tidBag[tidCur] && tidBag[tidCur].d) || null; }
 async function qrSave(){
   try{
@@ -130,6 +131,7 @@ async function qrLoad(){
   }
   tidSync();
 }
+/* ══ 트레이너 ID 5칸 ──── */
 function tidCard(){
   const inner = myqr
     ? `<span class="q"><img src="${myqr}" alt="트레이너 ID QR코드"></span>`
@@ -211,6 +213,7 @@ document.querySelectorAll('#tdxSet button').forEach(b=>
   b.addEventListener('click',()=>{ tdxSet=b.dataset.s; renderTidDex(); }));
 
 /* 설정의 5칸 목록 — 별명 고치기 · 등록/교체 · 삭제 */
+/* ══ 트레이너 ID 설정 화면 · 도감 모달 ──── */
 function renderTidSet(){
   const host=document.getElementById('tidSet'); if(!host)return;
   host.innerHTML='';
@@ -261,6 +264,7 @@ function renderTidPick(){
     box.appendChild(b);
   });
 }
+/* ══ 내 QR 화면 · QR 모달 ──── */
 function renderMyQR(){
   renderTidPick();
   const host=document.getElementById('myqr'); if(!host)return;
@@ -309,6 +313,7 @@ function openQR(s){
 }
 function closeQR(){const m=document.getElementById('qrModal'); if(m) m.hidden=true}
 
+/* ══ 서포트 티켓 ──── */
 function renderSupport(){
   const host=document.getElementById('sup'); if(!host)return;
   const boss=POOL.find(p=>p.id===bossId);
@@ -342,6 +347,7 @@ function renderSupport(){
     :          `세 장 다 반감됩니다. 그중 덜 깎이는 ${wrap(bat(raw)?'이':'가')} 낫습니다.`;
 }
 
+/* ══ 보유 태그 순위 ──── */
 function renderRank(){
   const ct=document.getElementById('rankCt');
   if(ct) ct.textContent='상위 '+RANK_N;

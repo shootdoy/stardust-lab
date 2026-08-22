@@ -730,18 +730,25 @@ let bad=bad0;
     const pts=[1,...m,L.length+1]; let w=0;
     for(let i=0;i<pts.length-1;i++) w=Math.max(w,pts[i+1]-pts[i]);
     return {n:m.length, worst:w} };
-  const css=rdsrc('style.css');
-  if(css===null){ console.log('구획  src/style.css 가 없다 (아직 안 나눴다면 정상)'); console.log('  OK'); }
+  /* v3.55.0 부터 **소스 10개 전부** 본다 (그 전에는 style.css 만이었다).
+     ⚠ `renderFoes` 가 240줄이라 함수 **안에도** 표시를 넣었다 (깊이 1 주석).
+       그래서 «구획 = 최상위 묶음» 이 아닌 곳이 있다 — 길잡이가 목적이므로 그대로 둔다.
+     ⚠ 표시를 넣을 때 **템플릿 리터럴 안은 절대 안 된다** — 그 글자가 화면에 그대로 나온다.
+       `dev/interact.js` 가 앱을 실제로 실행하므로 그런 사고는 잡히지만, 애초에 넣지 말 것. */
+  const FILES=['style.css','index.html','data.js','state.js','eval.js',
+               'render.js','qr.js','dex.js','hist.js','boot.js'];
+  const got=FILES.map(f=>[f,rdsrc(f)]).filter(x=>x[1]!==null).map(([f,t])=>[f,gap(t)]);
+  if(!got.length){ console.log('구획  src/ 가 없다 (아직 안 나눴다면 정상)'); console.log('  OK'); }
   else {
-    const g=gap(css);
-    console.log(`구획  style.css ${g.n}개 · 표시 없이 가장 긴 구간 ${g.worst}줄 (상한 ${GAP})`);
-    if(g.worst>GAP){ console.log('  ★ 통짜 구간이 생겼다 — `node dev/map.js --gaps` 로 자리를 찾을 것'); bad++; }
-    else console.log('  OK');
-    const rest=['index.html','data.js','state.js','eval.js','render.js','qr.js','dex.js','hist.js','boot.js']
-      .map(f=>[f,rdsrc(f)]).filter(x=>x[1]).map(([f,t])=>[f,gap(t)])
-      .filter(x=>x[1].worst>GAP).sort((a,b)=>b[1].worst-a[1].worst);
-    if(rest.length) console.log('      (아직 안 나눈 소스: '
-      +rest.slice(0,3).map(([f,g])=>`${f} ${g.worst}줄`).join(' · ')+` 외 ${Math.max(0,rest.length-3)}개)`);
+    const over=got.filter(([,g])=>g.worst>GAP).sort((a,b)=>b[1].worst-a[1].worst);
+    const w=got.reduce((a,[,g])=>Math.max(a,g.worst),0);
+    const n=got.reduce((a,[,g])=>a+g.n,0);
+    console.log(`구획  소스 ${got.length}개 · 표시 ${n}개 · 가장 긴 무표시 구간 ${w}줄 (상한 ${GAP})`);
+    if(over.length){
+      console.log('  ★ 통짜 구간이 생겼다 — `node dev/map.js --gaps` 로 자리를 찾을 것: '
+        +over.slice(0,3).map(([f,g])=>`${f} ${g.worst}줄`).join(' · '));
+      bad++;
+    } else console.log('  OK');
   }
 }
 

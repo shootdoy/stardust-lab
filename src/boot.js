@@ -1,3 +1,4 @@
+/* ══ 남은 렌더 — 표시 단계 · 안내 · 다이맥스 · 메가 · 찬스 ──── */
 function renderDetail(){
   const v=document.getElementById('viewBattle'); if(!v)return;
   v.dataset.d=detail;
@@ -80,6 +81,7 @@ function renderChance(){
    true 로 복원해도 **아무도 다시 그려 주지 않아** 탭이 감춰진 채로 남았다 —
    토글을 누르면 나타나고 새로고침하면 사라지는 증상이 이것이다.
    저장·복원은 처음부터 정상이었다 (저장값 playRec:true 를 잭이 콘솔로 확인). */
+/* ══ renderAll — 전체 갱신 ──── */
 function renderAll(){
   renderTagClass();renderFoeSets();renderBosses();renderFoes();renderReadout();renderRotation();renderSupport();renderRank();renderRoster();renderDex();renderMyQR();renderTidSet();renderBackend();renderChance();renderDmax();renderMega();renderGuide();renderDetail();renderDock();renderHCur();
   document.getElementById('vCct').innerHTML=
@@ -93,6 +95,7 @@ function renderAll(){
       + (tagClass==='B' ? ' — 후보가 ★5 30장뿐이라 21위부터는 보탬이 없습니다'
        : tagClass==='C' ? ' — ★4 는 기술 위력이 대부분 미표기라 순위를 크게 믿지 마세요' : ''); }
 }
+/* ══ 이벤트 바인딩 ──── */
 const pickBoss=()=>{                       // 탄·등급을 바꾸면 그 그룹의 첫 보스로
   const f=bossRank==='R' ? BOSSES.find(b=>b.r==='R')
                          : BOSSES.find(b=>b.s===setView&&b.r===bossRank);
@@ -146,6 +149,7 @@ document.getElementById('dexBestClr').addEventListener('click',()=>{
 /* 어디서 막히는지 알 수 있게 단계마다 문구를 남긴다.
    아티팩트 샌드박스에서는 파일 선택창 자체가 안 열릴 수 있다 (alert 이 막히는 것과 같은 이유).
    그 경우 «선택창이 열리지 않았습니다» 에서 멈춘다. */
+/* ══ QR 파일 고르기 ──── */
 let qrPicked=false;
 const qrNote=t=>{ const n=document.getElementById('myqrNote'); if(n) n.textContent=t; };
 function qrPick(){

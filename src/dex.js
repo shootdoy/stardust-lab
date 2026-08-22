@@ -1,3 +1,4 @@
+/* ══ 수집 기준 추천-25 (BEST-A25 의 «내가 가진 것만» 판) ──── */
 const DEXBEST_N=25, DEXBEST_SHORT=38;   // 추림 폭은 목표 장수보다 넉넉해야 한다
 /* 고정 BEST-A25 와 **같은 기준을 써야 한다** — 한쪽만 바꾸면 두 추천이 말없이 어긋난다.
    v3.3.0 에 1탄 ★5 를 되돌려 50보스 전체가 됐다 (잭 지정). */
@@ -46,6 +47,7 @@ function renderDexBestMsg(txt){
     const b=document.getElementById(id); if(b) b.hidden=!dexBest; });
 }
 
+/* ══ 전투 태그 목록 (roster) ──── */
 function renderRoster(){
   const host=document.getElementById('roster'); host.innerHTML='';
   const inSet=MYPOOL.filter(p=>p.s===rosterSet||p.s==='공통');
@@ -87,6 +89,7 @@ const dexOn=(r,it)=>dex.has(dexKey(rosterSet,r,it.no,it.n));
 const dexCnt=(r,it)=>dex.cnt(dexKey(rosterSet,r,it.no,it.n));
 function dexToggle(r,it){ const k=dexKey(rosterSet,r,it.no,it.n);
   dex.has(k)?dex.delete(k):dex.setCnt(k,1); }
+/* ══ 수집 탭 렌더 ──── */
 function renderDex(){
   const host=document.getElementById('dexHost'); if(!host)return;
   host.innerHTML='';
@@ -125,6 +128,7 @@ function renderDex(){
   host.dataset.keys=JSON.stringify(rows.map(keyOf));
 }
 /* 분류를 바꿔도 **보유는 그대로다** — 보는 창만 바뀐다. 저장까지 해서 다음에도 그 창으로 연다. */
+/* ══ 전투 분류 스위치 (두 군데를 함께 갱신한다) ──── */
 function setTagClass(v){ tagClass=v; useClass(); save(); renderAll(); }
 function renderTagClass(){
   /* 스위치가 두 군데(컬렉션·매치)다. **둘 다 갱신할 것** — 한쪽만 하면
@@ -158,6 +162,7 @@ function renderTagClass(){
           + ` 뜨지만 <b>보유는 별개</b>예요 — 한쪽에서 켜도 다른 쪽에 안 켜집니다.`
         : ` 이 분류의 성급은 다른 분류와 겹치지 않습니다.`);
 }
+/* ══ 컬렉션 서브탭 · 뷰 전환 ──── */
 function setColTab(v){
   colTab=v;
   document.getElementById('colBattle').hidden = v!=='battle';
@@ -206,6 +211,7 @@ document.querySelectorAll('.ranksort button').forEach(b=>
   b.addEventListener('click',()=>{rankSort=b.dataset.sort; save(); renderRank()}));
 document.querySelectorAll('.seg button').forEach(b=>
   b.addEventListener('click',()=>{detail=Number(b.dataset.lv); save(); renderDetail()}));
+/* ══ 버전 표시 · 초기화 · 갱신 감지 ──── */
 const verEl=document.getElementById('ver');
 const VLABEL='v'+VERSION+' · '+BUILT;
 { const v=document.getElementById('ver'); if(v) v.textContent=VLABEL; }
@@ -325,6 +331,7 @@ document.getElementById('qrModal').addEventListener('click',closeQR);
 
 /* 서브 선택 팝업 닫기 (v1.82.0). 바깥·✕·Esc 셋 다 먹는다.
    시트 안쪽 클릭은 막아야 한다 — 안 막으면 성급 단추를 눌러도 팝업이 닫힌다. */
+/* ══ 픽커 닫기 · 사용법 안내 · 프리셋 ──── */
 function closeFoePick(){ if(foePickAt<0) return; foePickAt=-1; foeChain=false; clearFoeQ(); renderFoes(); }
 /* 검색어는 팝업을 여닫을 때마다 비운다. 남겨 두면 다음에 열었을 때
    **엉뚱하게 걸러진 목록**이 떠서 «태그가 사라졌다» 로 보인다. */

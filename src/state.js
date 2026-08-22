@@ -19,6 +19,7 @@ let bossId='2-6-가이오가', setView='2', bossRank='6', rosterSet='1';
    **하이스코어는 «상대보다 낮은 등급으로 이기면 보너스»** 로 알려져 있다 (미확인) —
    B 의 추천 기준은 «화력» 이 아니라 «이길 수 있는 가장 낮은 등급» 이 되어야 한다.
    그 규칙을 넣기 전에 실측으로 보너스 폭을 확인할 것. */
+/* ══ 전투 태그 분류 A · B · C ──── */
 let tagClass='A';
 const CLASSES={
   A:{label:'전투태그A', sub:'★5·★6', ranks:['6','5','R','S']},
@@ -52,6 +53,7 @@ const trimClass=(bag,cl)=>{ const ok=classIds(cl);
   /* Bag 은 Map 이라 그냥 펼치면 [id,장수] 쌍이 나온다. **`ids()` 를 쓸 것** —
      `[...bag]` 로 돌리면 id 가 배열이라 아무것도 안 걸러진다 (v3.2.0 에서 당했다). */
   bag.ids().forEach(id=>{ if(!ok.has(id)) bag.delete(id); }); return bag; };
+/* ══ 화면 상태 — 안내 · 표시 단계 · 정렬 · 다이맥스 ──── */
 let guideHidden=false;
 let detail=0;
 let rankSort='score';
@@ -68,6 +70,7 @@ let dmaxLv=5;        // 룰렛에서 뜬 다이맥스 레벨 (꽝 0 · 1 · 5 ·
    ⚠ **이 스위치는 «상대 후보(FOEPOOL)» 에만 건다. 내 쪽에는 절대 걸지 말 것** (잭 확인) —
    기계에서 1탄이 내려가도 **내가 가진 1탄 태그는 계속 쓸 수 있다.**
    `owned` · `POOL` · 컬렉션 · 로테이션 · BEST-A25 에 `foeOn` 을 끼워 넣지 말 것. */
+/* ══ 상대 탄 · 수집 · 트레이너 ID ──── */
 let foeSets={'1':true,'2':true};
 const foeOn=c=> c.s==='공통' || foeSets[c.s]!==false;
 let colTab='battle';           // 컬렉션 서브탭: battle | dex
@@ -85,6 +88,7 @@ let tidCur='main';             // 플레이 화면에서 고른 칸 (기본 메�
 let myqr=null;                 // 지금 고른 칸의 QR 이미지 (기존 코드가 쓰는 이름 · 파생값)
 let dexCalcBusy=false;         // 계산 중에는 owned 를 임시로 쓴다. 클릭을 막을 것
 
+/* ══ 저장 키 · 저장 위치(backend) ──── */
 const KEY='tagstar:owned';
 // 사용자 QR 은 따로 저장한다. 본 저장값은 태그를 켤 때마다 다시 쓰이므로
 // 여기에 이미지를 섞으면 매번 수십 KB 를 재기록하게 된다.
@@ -100,6 +104,7 @@ let backend='memory';
    옛 저장(`owned` 하나)은 **분류마다 받는 성급만 골라 양쪽에 나눠 넣는다** —
    ★6 은 A 로, ★4 는 B 로, ★5·레귤러·스페셜은 양쪽에. 지우는 것보다 덜 놀랍고
    틀렸으면 화면에서 끄면 된다. **이관 코드를 지우지 말 것** — 옛 저장이 남아 있다. */
+/* ══ 불러오기 ──── */
 function loadOwned(saved,arr){
   const pick=(list,cl)=>trimClass(toBag((list||[]).filter(x=>{
     const id=Array.isArray(x)?x[0]:x; return MYBY.has(id)})), cl);
@@ -165,6 +170,7 @@ async function load(){
   seedSandbox();
   dexPrune();
 }
+/* ══ 저장하기 — 실패를 드러낸다 ──── */
 let sT;
 /* ⚠⚠ 저장이 «조용히» 실패하던 구멍을 막는다 (v3.48.3 · 잭 지적 «플레이 기록이 안 남는다»).
    `savePayload()` 가 try 밖이라, 값 하나가 상해 예외가 나면 saveWrite 가 거부되는데
