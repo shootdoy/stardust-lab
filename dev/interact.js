@@ -1,5 +1,5 @@
 const fs=require('fs'),vm=require('vm');
-const s=fs.readFileSync('../index.html','utf8');
+const s=fs.readFileSync('../release/index.html','utf8');
 const js=s.split('<script>')[1].split('</script>')[0];
 const all=[];
 const mk=(tag)=>{const n={tag,children:[],attrs:{},h:{},_html:'',

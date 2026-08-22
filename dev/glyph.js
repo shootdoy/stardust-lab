@@ -11,14 +11,14 @@
  * 실행:  node glyph.js
  */
 const fs=require('fs'), crypto=require('crypto');
-const html=fs.readFileSync(__dirname+'/../index.html','utf8');
+const html=fs.readFileSync(__dirname+'/../release/index.html','utf8');
  
 /* REGEN — 폰트를 바꾸면 이 두 줄을 다시 만든다.
    pip install fonttools brotli --break-system-packages
    python3 -c "
 import re,base64,hashlib
 from fontTools.ttLib import TTFont
-s=open('index.html',encoding='utf-8').read()
+s=open('release/index.html',encoding='utf-8').read()
 b=re.search(r\"base64,([A-Za-z0-9+/=]+)\\)\",s,re.S).group(1)
 open('/tmp/f.woff2','wb').write(base64.b64decode(b))
 cm=TTFont('/tmp/f.woff2').getBestCmap()

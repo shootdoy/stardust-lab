@@ -65,14 +65,14 @@ git rev-parse --abbrev-ref HEAD
 
 ### 3. 배포 전 점검 (`index.html` 이 바뀌었을 때만)
 
-`git diff --stat origin/main..HEAD` 에 `index.html` 이 있으면 **전부** 확인한다.
+`git diff --stat origin/main..HEAD` 에 `release/index.html` 이 있으면 **전부** 확인한다.
 CI 가 없으므로 **여기가 유일한 관문이다.**
 
 ```bash
 node dev/check.js                                              # 다섯 검사 (2초 안팎)
-grep -n 'name="version"\|const VERSION=\|const BUILT=' index.html
+grep -n 'name="version"\|const VERSION=\|const BUILT=' release/index.html
 grep -n '^- 버전:' CLAUDE.md          # ← sync.js 가 문서와 코드를 대조한다
-wc -c index.html                                               # sync.js 예산 900KB
+wc -c release/index.html                                               # sync.js 예산 900KB
 ```
 
 | 볼 것 | 기준 |

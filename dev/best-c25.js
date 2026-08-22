@@ -3,7 +3,7 @@
 //     A 판만큼 믿지 말 것 — 위력이 실측되면 이 목록부터 다시 뽑아야 한다.
 // 규칙(찬스 기본값·KHP 등)이 바뀌면 이걸 돌려 const BESTC 를 갱신한다.
 const fs=require('fs'),vm=require('vm');
-const s=fs.readFileSync('../index.html','utf8');
+const s=fs.readFileSync('../release/index.html','utf8');
 const js=s.split('<script>')[1].split('</script>')[0];
 const head=js.split('const KEY=')[0];
 const ev=js.split('/* ══ 평가 ══ */')[1].split('/* ══ 렌더 ══ */')[0];
