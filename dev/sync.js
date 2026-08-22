@@ -370,7 +370,7 @@ const checks=[
   ['이 칸 태그에 on 부여',            html, true,  "if(foes[foePickAt]===s.id){ b.className='on'"],
   ['다른 칸 태그에 used 부여',         html, true,  "else if(foes[other]===s.id){ b.className='used'"],
   ['아트 키에 성급 포함',              html, true,  "TAGSET.has(b.s+'-'+b.r+'-'+b.n)"],
-  ['아트는 파일로 뺐다',               html, true,  "url(art/'+encodeURIComponent(k)+'.webp?v='+VERSION"],
+  ['아트는 파일로 뺐다',               html, true,  "url(art/'+encodeURIComponent(k)+'.webp?v='+MEDIAV"],
   ['옛 base64 아트 블록 제거',         html, false, 'const TAGIMG={'],
   ['artCls 도 성급 포함',              html, true,  "AK[c.s+'-'+c.r+'-'+c.n]"],
   ['★4 이하는 세로 아트',              html, true,  "'432'.includes(c.r)"],
@@ -601,13 +601,20 @@ const checks=[
         VERSION 을 비교하는데, 워커가 그걸 캐시로 답하면 버전이 늘 같아 보여 알림이
         영구히 안 뜬다. GitHub Pages 는 커스텀 헤더를 못 걸어 그 감지가 유일한 수단이다. */
   ['아트 목록 상수',                  html,  true,  'const TAGART=['],
-  ['아트 파일 URL 에 버전',           html,  true,  ".webp?v='+VERSION"],
+  /* ⚠⚠ 아트 URL 은 **앱 버전이 아니라 내용 개정판**에 묶는다. VERSION 에 묶으면
+        배포마다 373KB 를 다시 받는다 — 그림이 그대로인데도 (v3.52.0 버그 · 잭 지적). */
+  ['아트 URL 은 내용 개정판에',       html,  true,  ".webp?v='+MEDIAV"],
+  ['아트 URL 이 버전에 안 묶였다',    html,  false, ".webp?v='+VERSION"],
+  ['미디어 개정판 상수',              html,  true,  'const MEDIAV='],
+  ['미디어 토큰이 안 남았다',         html,  false, '@MEDIAV@'],
+  ['워커가 미디어 캐시를 따로 둔다',  sw,    true,  "'stardust-media-' + M"],
+  ['워커 문서 캐시는 버전에',         sw,    true,  "'stardust-doc-' + V"],
+  ['옛 단일 캐시로 안 돌아갔다',      sw,    false, "'stardust-' + V"],
   ['워커 등록은 https 에서만',        html,  true,  "location.protocol==='https:'"],
-  ['워커 등록 URL 에 버전',           html,  true,  "register('sw.js?v='+VERSION)"],
+  ['워커 등록에 버전과 개정판',       html,  true,  "register('sw.js?v='+VERSION+'&m='+MEDIAV)"],
   ['아트 목록은 TAGART 하나만',       html,  true,  'urls:TAGART.map'],
   ['워커가 no-store 를 안 가로챈다',  sw,    true,  "req.cache === 'no-store'"],
   ['워커는 문서를 network-first',     sw,    true,  'network-first'],
-  ['워커 캐시 이름에 버전',           sw,    true,  "'stardust-' + V"],
   ['워커에 아트 목록을 안 박았다',    sw,    false, '.webp",'],
 
   /* ── 고정 자산을 파일로 (v3.52.0) ─────────────────────────────────────────

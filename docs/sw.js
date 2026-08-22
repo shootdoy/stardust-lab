@@ -17,13 +17,22 @@
  * ⚠ 아트 목록을 여기 적지 않는다. 146개를 두 곳에 두면 반드시 갈라진다 —
  *   페이지가 `TAGART` 를 근거로 `warm` 메시지를 보내고, 워커는 받은 것만 담는다.
  */
-const V = new URL(self.location.href).searchParams.get('v') || 'dev';
-const CACHE = 'stardust-' + V;
+const Q = new URL(self.location.href).searchParams;
+const V = Q.get('v') || 'dev';          // 앱 버전 — 문서 캐시를 가른다
+const M = Q.get('m') || 'dev';          // 미디어 개정판 — 아트·자산 캐시를 가른다
+
+/* ⚠⚠ **캐시를 둘로 가른다. 다시 하나로 묶지 말 것.**
+   v3.52.0 까지는 캐시가 `stardust-<버전>` 하나였고 activate 가 나머지를 다 지웠다.
+   그래서 **배포마다 아트 333KB + 자산 40KB 를 다시 받았다** — 그림이 그대로인데도 (잭 지적).
+   원인이 둘이었다: ① 캐시 이름이 버전에 묶임 ② URL 의 ?v= 도 버전이라 키까지 달라짐.
+   지금 미디어는 **내용 해시**(m)에 묶여 있어, 버전만 오르면 MEDIA 캐시가 그대로 살아남는다. */
+const DOC   = 'stardust-doc-' + V;
+const MEDIA = 'stardust-media-' + M;
 const SHELL = ['./', './index.html'];
 
 self.addEventListener('install', e => {
   e.waitUntil(
-    caches.open(CACHE)
+    caches.open(DOC)
       .then(c => c.addAll(SHELL))
       .catch(() => {})           // 하나라도 실패하면 설치를 막지 않는다
       .then(() => self.skipWaiting())
@@ -33,7 +42,10 @@ self.addEventListener('install', e => {
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys()
-      .then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k))))
+      /* ⚠ 지금 쓰는 **둘**만 남긴다. 하나만 남기도록 되돌리면 미디어까지 지워져
+            배포마다 다시 받게 된다 — 그것이 v3.52.0 까지의 버그였다. */
+      .then(ks => Promise.all(ks.filter(k => k !== DOC && k !== MEDIA)
+                                .map(k => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
@@ -42,7 +54,7 @@ self.addEventListener('activate', e => {
 self.addEventListener('message', e => {
   const d = e.data || {};
   if (d.type !== 'warm' || !Array.isArray(d.urls)) return;
-  e.waitUntil(caches.open(CACHE).then(async c => {
+  e.waitUntil(caches.open(MEDIA).then(async c => {
     for (let i = 0; i < d.urls.length; i += 12) {          // 12개씩 — 한꺼번에 열면 느려진다
       await Promise.all(d.urls.slice(i, i + 12).map(u =>
         c.match(u).then(hit => hit || fetch(u).then(r => r.ok && c.put(u, r.clone())))
@@ -68,7 +80,7 @@ self.addEventListener('fetch', e => {
     // 내용이 바뀌면 ?v= 가 바뀌므로 캐시를 그대로 믿어도 된다
     e.respondWith(
       caches.match(req).then(hit => hit || fetch(req).then(r => {
-        if (r.ok) caches.open(CACHE).then(c => c.put(req, r.clone()));
+        if (r.ok) caches.open(MEDIA).then(c => c.put(req, r.clone()));
         return r;
       }))
     );
@@ -79,7 +91,7 @@ self.addEventListener('fetch', e => {
   e.respondWith(
     fetch(req).then(r => {
       if (r.ok && (req.mode === 'navigate' || url.pathname.endsWith('.html')))
-        caches.open(CACHE).then(c => c.put(req, r.clone()));
+        caches.open(DOC).then(c => c.put(req, r.clone()));
       return r;
     }).catch(() => caches.match(req).then(hit => hit || caches.match('./index.html')))
   );

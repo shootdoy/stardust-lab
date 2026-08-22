@@ -210,13 +210,13 @@ load().then(qrLoad).then(renderAll);
        `docs/sw.js` 머리말 참고. 그 규칙을 풀면 사용자가 옛 판에 갇힌다. */
 if(location.protocol==='https:' && 'serviceWorker' in navigator){
   window.addEventListener('load',()=>{
-    navigator.serviceWorker.register('sw.js?v='+VERSION)
+    navigator.serviceWorker.register('sw.js?v='+VERSION+'&m='+MEDIAV)
       .then(()=>navigator.serviceWorker.ready)
       .then(reg=>{ if(reg && reg.active) reg.active.postMessage({type:'warm',
           /* 아트 146장 + 고정 자산 3개. **목록의 정본은 여기 하나다** —
              워커에 베껴 적으면 갈라진다 (`docs/sw.js` 머리말 참고). */
-          urls:TAGART.map(k=>'art/'+encodeURIComponent(k)+'.webp?v='+VERSION)
-               .concat(ASSETS.map(f=>'asset/'+f+'?v='+VERSION))}); })
+          urls:TAGART.map(k=>'art/'+encodeURIComponent(k)+'.webp?v='+MEDIAV)
+               .concat(ASSETS.map(f=>'asset/'+f+'?v='+MEDIAV))}); })
       .catch(()=>{});          // 등록 실패는 조용히 넘긴다 — 앱은 워커 없이도 다 동작한다
   });
 }
