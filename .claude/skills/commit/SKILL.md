@@ -34,6 +34,27 @@ git rev-parse --abbrev-ref HEAD
 - 스타일은 최근 커밋 5개(`git log`)에 맞춘다 — 이 저장소는 **한국어 짧은 제목** 관례다
   (예: «편집 검증 하네스 — dev/check.js + 자동 훅»)
 
+### 1.5 `main` 이면 **먼저 브랜치를 딴다**
+
+⚠⚠ **2026-08-22 에 이걸 두 번 빼먹었다.** 둘 다 `main` 에 커밋해 두고 PR 을 올릴 때야
+브랜치로 옮겼다 (PR #9 · #10). 잭이 «브랜치를 안 만들고 했구나» 라고 지적했다.
+
+`git rev-parse --abbrev-ref HEAD` 가 `main` 이면 **커밋 전에** 딴다:
+
+```bash
+git switch -c <type>/<짧은-이름>      # 예: feat/art-external-sw
+```
+
+이미 `main` 에 커밋해 버렸고 **아직 푸시 전이면** 파일을 안 건드리고 옮길 수 있다:
+
+```bash
+git checkout -b <브랜치>        # HEAD 만 옮긴다
+git branch -f main origin/main  # main 을 원격 자리로 되돌린다
+```
+
+⚠ `git reset --hard` 로 하지 말 것 — 작업 트리를 지운다. 위 두 줄은 파일을 안 건드린다.
+⚠ **푸시한 뒤라면 이 방법을 쓰지 말 것.** 원격 `main` 이 이미 움직였으면 되돌림 커밋이 답이다.
+
 ### 2. 스테이징
 
 - **`git add -A` · `git add .` 금지.** `.env` · 사용자 QR 사진 등이 딸려갈 수 있다
