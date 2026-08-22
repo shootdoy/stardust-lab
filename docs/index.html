@@ -8,7 +8,7 @@
 <meta name="description" content="포켓몬 태그스타 스타더스트 1탄·2탄 ★6·★5 보스 공략. 보유 태그로 3턴 로테이션과 서포트 티켓을 추천합니다.">
 <meta name="theme-color" content="#120B2E">
 <meta name="color-scheme" content="dark">
-<meta name="version" content="3.56.0">
+<meta name="version" content="3.57.0">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1947,7 +1947,7 @@ const TAGART=[
 /* 아트 키는 «탄-성급-이름» 이다 (v1.76.0). 같은 포켓몬이라도 **성급마다 그림이 다르다** —
    키에 성급이 없던 시절엔 1탄 고릴타 ★5·★4 가 같은 그림을 썼다. 성급을 빼지 말 것. */
 /* 고정 자산 — 폰트·로고·트레이너 카드. v3.52.0 에 HTML 밖으로 뺐다 (base64 53.8KB).
-   `src/index.html` 이 `asset/<이름>?v=3.56.0` 로 **정적으로** 참조하고, 이 목록은
+   `src/index.html` 이 `asset/<이름>?v=3.57.0` 로 **정적으로** 참조하고, 이 목록은
    서비스워커에 «미리 담아 둘 것» 을 알리는 데만 쓴다 (`src/boot.js` 의 warm).
    ⚠ 아트와 같은 위험이 있다 — 목록과 파일이 어긋나도 화면이 안 죽는다.
      `dev/sync.js` 가 1:1 로 대조하고, 마크업이 실제로 참조하는지까지 본다. */
@@ -1962,7 +1962,7 @@ const TAGSET=new Set(TAGART);
 const tagArt=b=>TAGSET.has(b.s+'-'+b.r+'-'+b.n)?b.s+'-'+b.r+'-'+b.n:null;
 
 const RANK_N=10;          // 순위에 보여줄 개수
-const VERSION='3.56.0';
+const VERSION='3.57.0';
 const BUILT='2026-08-22';
 
 /* ══ 자산을 CSS 로 한 번만 심는다 (DOM 에 base64 중복 방지) ══ */
@@ -4136,13 +4136,15 @@ function hStore(){ try{ localStorage.setItem(HKEY, JSON.stringify(hist)); }catch
    도감에 없는 이름(홍나숭이 그랬다)도 현장에선 나오므로 픽커가 자유 입력을 함께 받는다. */
 function hCat(){
   const out=[], seen=new Set();
-  const add=(n,r,s)=>{
+  const add=(n,r,s,g)=>{
     if(s!=='공통' && typeof foeSets!=='undefined' && foeSets[s]===false) return;
     const k=n+'|'+r+'|'+s;
     if(seen.has(k)) return;
-    seen.add(k); out.push({n:String(n), r:String(r), s:String(s)});
+    /* 기믹(g)도 담는다 — 다이맥스포켓몬 판의 보스를 거르는 데 쓴다 (v3.57.0).
+       ★4 이하는 기믹 데이터가 없어 null 이다. */
+    seen.add(k); out.push({n:String(n), r:String(r), s:String(s), g:g||null});
   };
-  POOL.forEach(p=>add(p.n,p.r,p.s)); SUBS.forEach(x=>add(x.n,x.r,x.s));
+  POOL.forEach(p=>add(p.n,p.r,p.s,p.g)); SUBS.forEach(x=>add(x.n,x.r,x.s,x.g));
   return out;
 }
 const HRORD='65432R';
@@ -4474,30 +4476,44 @@ function renderHPick(){
   const q=hQ.value.trim(), g=document.getElementById('hGrid');
   document.querySelectorAll('#hRank button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.r===hRank));
   const searching=!!q;
+  /* ⚠ **다이맥스포켓몬 판의 보스는 다이맥스 기술이 있는 태그뿐이다** (12장 · v3.57.0 잭 지정).
+     후보가 11장이라 성급·탄으로 또 가르면 빈 목록이 자주 나와 «눌러도 안 바뀐다» 로 보인다 —
+     그래서 한 목록으로 보여 주고 두 스위치를 감춘다 (foeModal 과 같은 규칙).
+     ⚠ **선물 칸은 거르지 않는다** — 선물은 판 종류를 가리지 않고 받는다.
+     ⚠ 막지는 않는다 — 목록에 없는 이름을 검색하면 «그대로 ★N / 성급 모름» 버튼이 뜬다.
+       현장에서 우리 데이터에 없는 것이 나올 수 있다 (홍나숭 사례). */
+  const dmaxBoss = hSlot==='b' && hCur.m==='다맥';
   /* 검색 중에는 거르개를 감춘다 — 안 감추면 «눌러도 목록이 안 바뀐다» 로 보인다 (foeModal 규칙) */
-  document.getElementById('hRank').hidden=searching;
+  document.getElementById('hRank').hidden = searching || dmaxBoss;
   /* 탄 스위치도 foeModal 규칙 그대로: 검색 중·레귤러(공통이라 탄 없음)·켜진 탄이
      하나뿐이면 통째로 감춘다. 설정에서 끈 탄의 버튼은 감춘다. */
   const onSets=(typeof foeSets==='undefined')?['1','2']:['1','2'].filter(k=>foeSets[k]!==false);
   if(!onSets.includes(hSet)) hSet=onSets[0]||'1';
   const hs=document.getElementById('hSet');
-  hs.hidden = searching || hRank==='R' || onSets.length<2;
+  hs.hidden = searching || dmaxBoss || hRank==='R' || onSets.length<2;
   document.querySelectorAll('#hSet button').forEach(b=>{
     b.hidden = !onSets.includes(b.dataset.s);
     b.setAttribute('aria-pressed', b.dataset.s===hSet);
   });
   const cat=hCat(), list=[];
+  /* ⚠ 검색에도 **똑같이** 건다 — 안 걸면 검색으로 우회해 넣을 수 있어 거른 의미가 없다
+     (설정의 상대 탄 스위치와 같은 규칙). */
+  const pool = dmaxBoss ? cat.filter(t=>t.g==='다이맥스') : cat;
   if(searching){
-    for(const t of cat) if(foeMatch(t.n,q)) list.push(t);
+    for(const t of pool) if(foeMatch(t.n,q)) list.push(t);
+    list.sort((a,b)=>HRORD.indexOf(a.r)-HRORD.indexOf(b.r)||a.n.localeCompare(b.n,'ko'));
+  } else if(dmaxBoss){
+    list.push(...pool);
     list.sort((a,b)=>HRORD.indexOf(a.r)-HRORD.indexOf(b.r)||a.n.localeCompare(b.n,'ko'));
   } else {
-    for(const t of cat) if(t.r===hRank && (hRank==='R'||t.s===hSet)) list.push(t);
+    for(const t of pool) if(t.r===hRank && (hRank==='R'||t.s===hSet)) list.push(t);
     list.sort((a,b)=>a.n.localeCompare(b.n,'ko'));
   }
   const hint=document.getElementById('hPickHint');
   hint.hidden=false;
   hint.textContent = searching
-    ? `«${q}» 검색 — 성급 상관없이 ${list.length}장`
+    ? `«${q}» 검색 — ${dmaxBoss?'다이맥스 태그 중 ':'성급 상관없이 '}${list.length}장`
+    : dmaxBoss ? `다이맥스 기술이 있는 태그 ${list.length}장만 나옵니다`
     : (hSlot==='g' ? '선물 한 장만 넣습니다 — 상대는 배틀이 뜨면 서브1 부터 이어 받습니다'
       : hOrder().length>1 ? '고르면 남은 칸으로 넘어갑니다 · 한 장만 넣으려면 바깥을 눌러 닫으세요'
                           : '이 판 종류는 선물과 보스만 기록합니다');
@@ -4515,7 +4531,9 @@ function renderHPick(){
   if(searching && !list.length && !q) g.innerHTML='';
   list.forEach(t=>{
     const b=document.createElement('button');
-    b.innerHTML = searching
+    /* 다이맥스 목록은 성급·탄이 섞여 있어 이름만으론 못 가른다 (1탄 마기라스 ★6 와
+       2탄 마기라스 ★5 가 함께 있다). 검색 결과와 같은 형식으로 함께 적는다. */
+    b.innerHTML = (searching||dmaxBoss)
       ? `${hEsc(t.n)}<small>${rlab(t.r)} · ${t.s==='공통'?'공통':t.s+'탄'}</small>`
       : hEsc(t.n);
     if(hCur[hSlot] && hCur[hSlot].n===t.n && hCur[hSlot].r===t.r){
