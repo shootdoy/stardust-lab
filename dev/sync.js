@@ -717,6 +717,34 @@ let bad=bad0;
   } else console.log('  OK');
 }
 
+/* ── 구획 표시 (v3.54.0) ────────────────────────────────────────────────────
+   CSS 923줄 중 886줄이 표시 없이 이어져 편집이 불편했다 (잭 지적). 39구획으로 나눴고
+   여기서 되돌아가는 것을 막는다. ⚠ **`style.css` 만 강제**한다 — 다른 소스도 긴 구간이
+   있지만 아직 안 나눴다. 함께 강제하면 통과할 수 없어 검사가 무력해진다.
+   목차는 `node dev/map.js` 가 그때그때 뽑는다 (문서에 베껴 적으면 낡는다). */
+{
+  const GAP=120;
+  const rdsrc=f=>{ try{ return fs.readFileSync(__dirname+'/../src/'+f,'utf8') }catch(e){ return null } };
+  const gap=t=>{ const L=t.split('\n');
+    const m=L.reduce((a,l,i)=>(l.includes('══')?a.concat(i+1):a),[]);
+    const pts=[1,...m,L.length+1]; let w=0;
+    for(let i=0;i<pts.length-1;i++) w=Math.max(w,pts[i+1]-pts[i]);
+    return {n:m.length, worst:w} };
+  const css=rdsrc('style.css');
+  if(css===null){ console.log('구획  src/style.css 가 없다 (아직 안 나눴다면 정상)'); console.log('  OK'); }
+  else {
+    const g=gap(css);
+    console.log(`구획  style.css ${g.n}개 · 표시 없이 가장 긴 구간 ${g.worst}줄 (상한 ${GAP})`);
+    if(g.worst>GAP){ console.log('  ★ 통짜 구간이 생겼다 — `node dev/map.js --gaps` 로 자리를 찾을 것'); bad++; }
+    else console.log('  OK');
+    const rest=['index.html','data.js','state.js','eval.js','render.js','qr.js','dex.js','hist.js','boot.js']
+      .map(f=>[f,rdsrc(f)]).filter(x=>x[1]).map(([f,t])=>[f,gap(t)])
+      .filter(x=>x[1].worst>GAP).sort((a,b)=>b[1].worst-a[1].worst);
+    if(rest.length) console.log('      (아직 안 나눈 소스: '
+      +rest.slice(0,3).map(([f,g])=>`${f} ${g.worst}줄`).join(' · ')+` 외 ${Math.max(0,rest.length-3)}개)`);
+  }
+}
+
 const KB=fs.statSync(__dirname+'/../docs/index.html').size/1024;
 const artKB=(()=>{ try{ const d=__dirname+'/../docs/art';
     return fs.readdirSync(d).reduce((s,f)=>s+fs.statSync(d+'/'+f).size,0)/1024 }catch(e){ return 0 } })();
