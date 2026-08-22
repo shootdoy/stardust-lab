@@ -16,6 +16,7 @@ const POWER={
 // 공격 찬스 보너스는 공격력에 가산 (조절 가능)
 // 넷 다 매판 달라지는 값의 기대값이다. 일반·메가진화·다이맥스는 룰렛,
 // Z기술은 룰렛이 아니라 플레이어의 기술 입력을 기계가 판정해 매번 다르게 준다.
+/* ══ 찬스 보너스 — 룰렛·판정 기대값 ──── */
 const CHANCE_DEFAULTS={'일반':30,'메가진화':45,'다이맥스':30,'Z기술':70};
 let chance={...CHANCE_DEFAULTS};
 // 메가진화는 기술 자체에 tagx 가 붙지 않는다. 카드 기믹이라서 두 번째 인자로 받는다.
@@ -37,6 +38,7 @@ function offense(card,boss,banGim){
   const mult=Math.max(...card.t.map(x=>eff(x,boss.t)));
   return {v:mult*RARITY[card.r].bonus,mult,ratio:null,move:null,pw:null,bonus:null,raw:null,atk:null,def:null,dmg:null};
 }
+/* ══ 받는 피해 · 생존 판정 ──── */
 const incoming=(card,boss)=>Math.max(...boss.mv.map(m=>eff(m.t,card.t)));
 const DW={0:1.5,.25:1.35,.5:1.2,1:1,2:.85,4:.7};
 
@@ -84,6 +86,7 @@ const survives3=(c,boss)=>survivesN(c,boss,3);
    그래서 1.15 를 2.0 으로 바꾸면 **이중으로 세어 과소평가**하게 된다. **바꾸지 말 것.**
    ⚠ 파트너가 세거나 약하면 이 가정이 흔들린다 — 이번 판만 해도 파트너 몫이 1턴 100% · 2턴 64% 였다.
    파트너 화력을 직접 넣게 되면 그때 hp 를 2.0 으로 올리고 파트너 피해를 빼야 한다. */
+/* ══ 배틀 모드 · 게임기 버전 ──── */
 const MODES={
   '지역'  :{n:'지역배틀',        hp:1,    note:'상대 3장 중 <b>보스 1장</b>만 잡으면 승리. 아래 <b>상대 파티</b>에 서브 2장을 넣으면 생존 판정에 반영됩니다.'},
   '다맥'  :{n:'다이맥스 포켓몬', hp:1,    note:'보스 1마리만 나오는 모드. <b>실측 표본이 없어</b> 카드 스탯 그대로 계산합니다. 지역배틀 판이어도, 보스만 노린 계산을 보려면 이 모드로 두세요.'},
@@ -99,6 +102,7 @@ const gverStr=()=>gver.maj+'.'+gver.min+'.'+gver.pat+'.'+(gver.build||'0')+'.ko.
 /* 지역배틀 상대 파티 — [왼쪽 서브, 오른쪽 서브]. 가운데(대상)는 `bossId` 가 맡는다.
    순서는 계산에 쓰지 않는다 (잭 확인 — 파티 구성일 뿐 턴 순서가 아니다).
    지역배틀에서만 쓰며 비워둘 수 있다. */
+/* ══ 상대 파티 · 후보 풀 (FOEPOOL · MYPOOL · 분류) ──── */
 let foes=[null,null];
 /* 상대 서브로 고를 수 있는 후보. **★6 까지 전 성급이 서브로 나온다** (2026-08-13 잭 실측 —
    ★5 는 흔하고 ★6 은 드물다). ★5·★6 은 `SUBS` 가 아니라 `POOL` 에 있으므로 합쳐 둔다.
@@ -132,6 +136,7 @@ const foeCount=()=>foes.filter(id=>id&&SUBBY.has(id)).length;
 const modeHp=boss=>boss.hp*(MODES[mode]?.hp??1);
 
 // 2턴에 끝낼 수 있다고 볼 기준. 빗나가면 3턴째를 맞으므로 여유를 둔다.
+/* ══ 카드 평가 · 순위 ──── */
 const KO_SAFE=1.15;
 const koIn2=(dmg,boss)=>dmg*KHP >= modeHp(boss)*KO_SAFE;
 function evalCard(card,boss,banGim){
@@ -145,6 +150,7 @@ const ranked=(boss,banGim,skip)=>classPool().filter(p=>owned.has(p.id)&&p.id!==b
   .map(c=>evalCard(c,boss,banGim)).filter(Boolean).sort((a,b)=>b.s-a.s||b.mult-a.mult);
 
 // 한 장을 특정 기술로 썼을 때의 평가
+/* ══ 기술 평가 — 기믹 포함 ──── */
 function evalMove(card,boss,m,megaOn){
   const M=megaOn?megaOf(card):null;
   const mult=eff(m.t,boss.t);
@@ -188,6 +194,7 @@ const RANDOM={c:{id:'__rand',n:'랜덤 태그',s:'랜덤',r:'?',t:[],mv:[],g:nul
 
    되돌리지 말 것 — v1.39 까지 «자기 턴에만 맞는다», v1.41 까지 «세 칸이 한 번씩 공격»
    으로 봤는데 둘 다 틀렸다. */
+/* ══ 3턴 로테이션 완전탐색 ──── */
 function buildSeq(boss){
   const all=classPool().filter(p=>owned.has(p.id)&&p.id!==boss.id);
   if(!all.length) return [];

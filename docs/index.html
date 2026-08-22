@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko">
+<!-- ══ 머리 — meta · 광고 · 파비콘 · 폰트 ──── -->
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -7,7 +8,7 @@
 <meta name="description" content="포켓몬 태그스타 스타더스트 1탄·2탄 ★6·★5 보스 공략. 보유 태그로 3턴 로테이션과 서포트 티켓을 추천합니다.">
 <meta name="theme-color" content="#120B2E">
 <meta name="color-scheme" content="dark">
-<meta name="version" content="3.54.0">
+<meta name="version" content="3.55.0">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -988,6 +989,7 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.chip:hover::after{transform:translateX(-120%)}}
 </style>
 </head>
+<!-- ══ 본문 시작 — 베젤 · 히어로 · 사용법 ──── -->
 <body>
 <div class="bezel" aria-hidden="true"></div>
 <div class="bezel-in" aria-hidden="true"></div>
@@ -1020,6 +1022,7 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
   <button id="vX" aria-pressed="false">설정</button>
 </div>
 
+<!-- ══ 플레이 뷰 ──── -->
 <div id="viewBattle" data-d="0">
   <!-- 플레이 기록 (v3.35.0 · 잭 지정) — 게임 진행 순서대로 끼운다.
        선물은 판 시작에 제일 먼저 받으므로 맨 위, 겟 결과와 저장은 배틀이 끝난 뒤라 매치 아래.
@@ -1038,6 +1041,7 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
       </div>
     </div>
   </section>
+<!-- ══ 플레이 ① 트레이너 ID ──── -->
   <section id="sTID">
     <div class="sec-head"><h2>트레이너 ID</h2><span class="hint">게임 시작 때 스캔</span>
       <button class="mini" id="qrFileLab">사진에서 등록</button>
@@ -1052,6 +1056,7 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
     </div>
   </section>
 
+<!-- ══ 플레이 ② 배틀 모드 ──── -->
   <section id="sMode">
     <div class="sec-head"><h2>배틀 모드</h2><span class="hint">시작할 때 랜덤으로 정해집니다</span></div>
     <div class="modesw" role="group" aria-label="배틀 모드">
@@ -1062,6 +1067,7 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
     <p class="tab-note" id="modeNote"></p>
   </section>
 
+<!-- ══ 플레이 ③ 보스 선택 ──── -->
   <section id="sBoss">
     <div class="sec-head"><h2>보스 선택</h2><span class="hint" id="bossHint"></span></div>
     <div class="setsw" role="group" aria-label="탄 선택" id="bossSetSw">
@@ -1076,12 +1082,14 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
     <div class="boss-grid" id="bossGrid"></div>
   </section>
 
+<!-- ══ 플레이 ④ 서포트 티켓 ──── -->
   <section id="sSup">
     <div class="sec-head"><h2>서포트 티켓</h2><span class="hint">배틀 중 나타나 도와줍니다</span></div>
     <div class="card"><div class="sup" id="sup"></div>
       <p class="tab-note" id="supNote"></p></div>
   </section>
 
+<!-- ══ 플레이 ⑤ 추천 로테이션 · 상대별 매치 ──── -->
   <section id="sRot">
     <div class="sec-head"><h2 id="rotH2">추천 로테이션</h2><span class="hint" id="rotHint">보유 태그 기준 · 탄 무관</span></div>
     <!-- 어느 전투 태그 세트로 뛰는지. 컬렉션의 분류 스위치와 **같은 상태**(`tagClass`)를 쓴다 —
@@ -1132,6 +1140,7 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
     </div>
   </section>
 
+<!-- ══ 플레이 ⑥ 보유 태그 순위 ──── -->
   <section id="sRank">
     <details id="rankBox" open>
       <summary><span class="band" style="background:var(--star)"></span>보유 태그 순위
@@ -1146,6 +1155,7 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
   </section>
 </div>
 
+<!-- ══ 설정 뷰 ① 상대 탄 · 룰렛 보정 ──── -->
 <div id="viewChance" hidden>
   <section>
     <div class="sec-head"><h2>상대 태그 탄</h2>
@@ -1215,6 +1225,7 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
     <div class="sec-head"><h2>플레이 기록</h2>
       <span class="hint">플레이 화면에서 판을 바로 남깁니다 · <b>기본 꺼짐</b></span></div>
     <div class="card">
+<!-- ══ 설정 뷰 ② 플레이 기록 · 트레이너 ID ──── -->
       <div class="setsw" role="group" aria-label="플레이 기록 사용" id="playRecSw">
         <button data-pr="0" aria-pressed="true">끄기</button>
         <button data-pr="1" aria-pressed="false">켜기</button>
@@ -1260,6 +1271,7 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
   </section>
   <!-- 개인정보·쿠키 (v3.13.0 · 잭 지정). 애드센스와 GA4 가 쿠키를 쓰므로 밝혀 둔다.
        ⚠ **측정 ID 를 바꾸거나 집계를 끄면 이 글도 함께 고칠 것** — 안 맞으면 안 적느니만 못하다. -->
+<!-- ══ 설정 뷰 ③ 개인정보 · 처음 상태로 초기화 ──── -->
   <section id="sPriv">
     <div class="sec-head"><h2>개인정보 안내</h2><span class="hint">무엇을 어디에 저장하는지 · 쿠키 사용</span></div>
     <div class="card priv">
@@ -1309,6 +1321,7 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
      저장은 이 브라우저(localStorage)에만 하고 wipe() 대상에서 **일부러 뺐다** —
      현장 데이터는 보정값과 달리 다시 만들 수 없어서, 전체 초기화에 딸려 지워지면 안 된다.
      지우는 길은 이 화면의 «기록 전체 삭제» 하나뿐이다. -->
+<!-- ══ 기록 뷰 ──── -->
 <div id="viewHist" hidden>
   <section>
     <div class="sec-head"><h2>전투 입력</h2><span class="hint">칸을 눌러 태그를 고르세요 · L 과 R 은 따로 적어 두었다가 오갈 수 있습니다</span></div>
@@ -1383,6 +1396,7 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
 
 </div>
 
+<!-- ══ 컬렉션 뷰 ──── -->
 <div id="viewCollection" hidden>
   <section>
     <div class="sec-head"><h2>컬렉션</h2><span class="hint" id="ownHint"></span>
@@ -1440,6 +1454,7 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
        data-full-width-responsive="true"></ins>
 </div>
 
+<!-- ══ 푸터 · 갱신 알림 · 하단 dock ──── -->
 <footer>
 후보는 ★6 · ★5 · 레귤러 · 스페셜 · 보스는 ★6 · ★5<br>
   스탯·기술은 공식·팬페이지 표기값 (1탄 25 · 2탄 25 · 공통 6)<br>
@@ -1476,6 +1491,7 @@ footer{margin-top:36px;text-align:center;font-family:var(--mono);font-size:10.5p
      칸을 탭할 때마다 **미출현 → 출현 → 포획** 으로 돌고, ID 마다 따로 저장된다.
      교환 이벤트의 «미보유 우대» 가설을 재려면 «이 ID 가 무엇을 가졌나» 를 알아야 한다.
      ⚠ **뷰 밖 최상위에 둘 것** (v3.35.1 교훈 — 뷰 안에 두면 다른 화면에서 안 보인다). -->
+<!-- ══ 모달 — 트레이너 도감 · 기록 · 서브 픽커 · QR ──── -->
 <div class="pickmodal" id="tdxModal" hidden>
   <div class="pickbox" role="dialog" aria-modal="true" aria-labelledby="tdxHead">
     <div class="pickhead">
@@ -1725,6 +1741,7 @@ const LOW4=[
    처음엔 스크롤 화면에서 앞뒷면이 어긋난 3건을 뺐다가, 재촬영본으로 채웠다 (전 14장 완비).
    ★4 는 2026-08-12 카드 뒷면 화면으로 재검증했다 — 17장 중 15장 완전 일치,
    **가로막구리 공격 77→71 · 에이스번 공격 83→88 정정** (카드 뒷면을 정본으로). */
+/* ══ 1탄 ★3 · ★2 (상대 서브용) ──── */
 const LOW3=[
  ['나로테',        '1-1-027',['풀'],           84,103, 72, 57, 55, 57, 74,[['매지컬리프','풀','특수']]],
  ['악뜨거',        '1-1-029',['불꽃'],         84,120, 51, 70, 80, 53, 46,[['불태우기','불꽃','특수']]],
@@ -1761,6 +1778,7 @@ const LOW2=[
    **도감 번호가 전부 일치했다** — 26·27·28·34·37·40·41·42·43·44·46·49·51·56·62·64·69 로
    `DEXORD['2']` 의 추론 자리와 어긋남이 없다. 추론이던 26·37·43·69 네 자리가 실측으로 확정됐다.
    기술 물리/특수는 1탄과 같은 규칙(본가 분류)을 따른다. 위력은 미상(기본 100). */
+/* ══ 2탄 ★4 · ★3 · ★2 (상대 서브용) ──── */
 const LOW4_2=[
  ['마스카나',    '1-2-026',['풀','악'],        92,103, 86, 56, 64, 56, 96,[['깜짝베기','악','물리']]],
  ['라우드본',    '1-2-027',['불꽃','고스트'],  92,123, 60, 79, 86, 60, 53,[['병상첨병','고스트','특수']]],
@@ -1823,6 +1841,7 @@ const LOW2_2=[
  ['랄토스',          '1-2-067',['에스퍼','페어리'],32, 49, 17, 17, 29, 22, 25,[['차밍보이스','페어리','특수']]]
 ];
 // 상대 서브 선택용 목록 — POOL 과 같은 모양이라 eff()·evalMove 등을 그대로 쓸 수 있다.
+/* ══ SUBS 합치기 · POOL · BOSSES ──── */
 const mkSub=(r,s='1')=>([n,code,t,e,hp,a,d,sa,sd,sp,mv])=>({
   s,r,n,code,t,cls:'스타',e,hp,a,d,sa,sd,sp,
   mv:mv.map(([mn,mt,mk])=>({n:mn,t:mt,k:mk,tagx:undefined})),g:null,
@@ -1847,6 +1866,7 @@ const POOL=[
    스페셜(S)은 아직 보스로 본 적이 없어 넣지 않았다. */
 const BOSSES=POOL.filter(p=>p.r==='6'||p.r==='5'||p.r==='R');
 
+/* ══ 기믹 · 타입 아이콘 (아직 base64) ──── */
 const GIMICON={
 "메가진화":"UklGRjAHAABXRUJQVlA4WAoAAAAQAAAALwAALwAAQUxQSF4BAAABgJztf9rmZ5CdDco3PDKsEzh1h+ACOWYJWiLH4gR07QAGyfoVXFv9l64RwTZg2zaENTo9JG9AJRGwfXawoGYJzcXB2TYQwRFfYa31wlpeWmtQcGVyRWuMrVD5Kq4mcJEXYXRPZpa12IycxvC9ummgS+aGThjNpItGzQrRpynojCUHCCsVYEDNL6E5QFC9g4n9mmzCESKvYofD2ZxO1kVQWj4GNBTAcKD80oyoKULB8scXPetCSNk0UogxznMKkXOMWO0vCyMlo5e7IZpMKUbKS+w/ZFZOmen4F9QUROvTTSsrbi1YSKrgguJo+fl3+XsOJP8dyn/n8v+R/H8q7wNqf2lkfSbGmLI+BhVNM1Gf/IBS4ud8FfZ5eIFkjojnlHQO1uTsgLRCOVuRhQm1YI7D8xFPySxz+FY/9wTXHkKjq3uINuTVBK4orLQ6rKXTWoGCKxGAk8PqHnV4groeBVZQOCCsBQAAEBwAnQEqMAAwAD4xFIdCoiEMdmcAEAGCWwAnTKEcDeT/jT+M3yCUr+k/d3dQiNdkv5v7o/fN6gPuO9RX9QOuJ5mP2X/WDsQeeZ1CHoO+WL7Jn7h/sB7VuAn7ccU3K36C/OP2Y4z7Lz7Nww++/JJ9z2W3fSv9Pxo/Uf0Lfzr/VfzXk9Jkf9E/2/3M/GJ/efcV7Zfmn/d+4F/HP5t/l/7h+63+O///1edR/+vgdw+q/X/jbZ3xfOnGqKxwPAvx54ZFcUijktKS0aJoNZQOe0yXztE2d8dUYeFaD9yMs08or6IRyj4BjGQuxkAA/hYIzRE4P/PkuY7OZnLx17E4CQrijv4bZybMTOXKONvUtM4qAdCjYXYgHHP5+IcuqEVk9gUavG+7kudTbKr/zHGhvPD74yuA3JBvTospB/hcGVA+5Nxh3696VITI1D0WHfNJ21tv/514SfNJtHE/k2G/lpaXW7CPBtrxk5d/B62rC1l+MMK2a9k9kvbnjyDRC4RHaf2tcy2WTEomLP2t+u0zD5Q2SgxNj1okIfz2fDZJ8xNhl6wACRVwfTEeQjY4PZDcvmnh9H//KQ8sB2wPuf/Rcb1TihzpAhOypk0u1kG5v7yjX96ZxQ66urv6b9wpcT6cQJZGtPwvE8sOkv88UBtZXcm7flEx0DGySfrj6FhtcPqez9r/JPgp5vf+duUhJjVB1V9FNpuU58qMLl+JDshu/sjJTDichqAbr9/uf74+0wWtcBqox3wR5zDujcbe8or5fa8NpVWQNqk7M0N+/M5Ry5z5Rvs6WlcEwkLkR7z4pifFN1eIhh+GlGJjLzhDPOY+bz0mi/WpgLcAlc98P4nJajJ9qW5f/T/708LH7MaiWaSZeD2Tlz0YK0ULJ/AIclep6y5/pNWMyg/wX3bdBHj8kxag0xyWBWgOQzFTwz8Rv2bvCnNXLE9ckMznfEZl2h6xG6JBwgl8j6a/hZBUxRESHb2GC7tmeCvlnwRxzX80wVe+0e2/LXnJf/oQcMvxhv08l88i5SBSUqpiMcWURB/Aa4exJD+A5CWQ8hjc6l/VT3qBGD5fqDswHC75msUB4jfdWXkZ0pd8Od50S1a0R5e25YiNfelSy7jH8pRSuAUN+VFt6Jyy4aTspD0TtTCJpXXFRY03tKvV+eH/H+0zqqp9A9kYptg1XFwqrNaxkSs1rZ5DESVpmXCEhIrnWHHviWfCm47MGgHMqEXIw9Wm/siNRUT1RDsxavsVY7XyRmyXwFOgIX7IoJTbcZdiiNdSCs8s71HrIU56V0k+sgOyFHRh2EOIvy09BmFi4Kz9rJ38+HHyWX67iaXoKC3k5oVojBesb0byfoY/xBZY5Ge279ilfpqog/9avzD01Kqr7q6RzRyP+lyeDy5KeESYc7EyQN/zSfw3g5Qzc3yVBqMvbTz0hPZriwozFaRwpdKf0qY5zpm66JP2qlc2RJ4991ivSvxbaiQ89wxvoXyhIf+TAM/WZ6A6eMfkZfjyenrmTYNQdpfnO4J6yn+Yx4n/SiIwmeZccTu75hUVHhB53koee8s0sG4pbeKTdj/eXy87Z8IJATlaNOcX4A4YlzUASpv1pT0BvYnTuo8X/5VZuvvfVJ0cMaxQKp9wFj86lb/vYfP7/Q3zOVvYcYQZ5T/PKDKT6ojiBpurilvVl5UcxFtGOdJC/KqLDnpmWF8LxIZnZELu7sffA+Qm1XZxR0YPfb39OlJXyrqvQeuF9Pp3scVWW9yNik+7QGQMUxQfw5CHd42fIGTIopjB8P8gb7t/IzNtrFG0j3r/hr6Du4sRiuRdEHho+/t9eHi4nvJC5Mc+9JKYszp9M/L5eM4qfHp3aCmGLUfKpFVL39oZSxC8760TtWKoAXfzuGNCcFAId0m5hHnyN1BHgwDEvAtQw5WOCX/+9o/bRGqJDtBDwcQ5vpQqEQAA",
 "Z기술":"UklGRhAEAABXRUJQVlA4WAoAAAAQAAAALwAALwAAQUxQSFwBAAABgFtbe9vmY9YGzlWqlQfiYaUd8gIqtURaQqVj6Rk0AAUC5OdIQL9jGREM3DZS1OweM7TzBtQSA1f95oaaH9DcNPtXQAxH/Agn6Y5WdukJIh+OLG5ZGVPV6ONV3C7gghdj9kSqilYqRT7NEHu23sCQLAydMAU5RMPSQoxpSjpTGo4R1irAhJoHoTlBUL8H8+owVTlrdvACDB3O5nSyIYIPzY8mNBTAcPL5/bOkCCXxThQvlZTUMo6QYM6CQhScIwlvttpIyejtTYgB9xRjzwH8zCg5KZP5Pa0piNa9C8qKFxuWkiq5oThavv93KL/5jhWfhb9DzUvx77wn/h815f9TeR+Q9xl5HxP3SXEflvd5+RwRzynpHLTk7IQ8YLIiJwjtOZ7T9YMxmrk9x+H5SJakcviGlSKXCXzPtQ6h0fV1iDbk7QKuRDhKM1rJ0iNEzi0G0G3V11GtLmx1FABWUDggjgIAAJANAJ0BKjAAMAA+MRaGQqIhDHcygBABglqAJ0zXvoPw/JS+++nDm/kDeW+YDzuvQf5zPUAbw8v4prqA7+cf5zoIc3KoH5QAu0IdxUkU+91bdE2+hA04VgDdPBNBFk3PKeVcwalCbF1hPUzpslFn3JrAk8t1AAD+/Z5znOFrVgYCvKzzSu+jDwhHlN30GXx6nQPKjrTBn18xy7CJ/wDP+2PLMzvWPswledXQ+mEsJ03Y8OMI9tozr8GfJSrz8MBjSaeB1VK8P2K/4vwmL4fxn9TY5F6FP9HR7ddRweAOscIhzQy3zvGcuxBAgYi5ah/o/6Ag/fIfoNP/O3Dfz79f+OQPTWMGlQMLfKUrtuD42pI18WETWjX2RYJVqLNA1bCjvoOUbmiyIW/hU2ElnVmeFUbhObnRvDghkiwjuDx9bzfDIl3t99zBmBXRk/sU2+r0JxDprBYBOo016tMcBk08FS2XbNLYb/quuxwGbYu3z/PmpDKtQj5jyblhBNiJQvsZAnHof4kIkXdDVtGQrdy7biChtPukHDfWrHKGLfZnvFstmLufphhwzW3crf0Zhf5CFFnHVbUcLbfrFxfThvLL/OX/xhEzbz1c95qCk/bLqUkSkzLFzJAbFcmSJ8iCsPDIK0R4l7H8WJRY0q9WtKSA/P/VfCQiYiz567RvBUZ63f5j7VgslOxt9srIQojeKEw4YO+iSSUezeHvpjFfGICNUJHzE9cqMnXd+nyjv44C6HWf5KvYWNrYdFm6K53hi0okTOUY65bpZyUw9M7NgHOvdyMFfntkBJXdU49J174AX7+o82gP7GY4MMmkEiEiD5+3avYgHsFKJsxfsmiObz6a/f0miXC1s7V3fs7ZdQQAAA==",
@@ -1929,7 +1949,7 @@ const TAGART=[
 /* 아트 키는 «탄-성급-이름» 이다 (v1.76.0). 같은 포켓몬이라도 **성급마다 그림이 다르다** —
    키에 성급이 없던 시절엔 1탄 고릴타 ★5·★4 가 같은 그림을 썼다. 성급을 빼지 말 것. */
 /* 고정 자산 — 폰트·로고·트레이너 카드. v3.52.0 에 HTML 밖으로 뺐다 (base64 53.8KB).
-   `src/index.html` 이 `asset/<이름>?v=3.54.0` 로 **정적으로** 참조하고, 이 목록은
+   `src/index.html` 이 `asset/<이름>?v=3.55.0` 로 **정적으로** 참조하고, 이 목록은
    서비스워커에 «미리 담아 둘 것» 을 알리는 데만 쓴다 (`src/boot.js` 의 warm).
    ⚠ 아트와 같은 위험이 있다 — 목록과 파일이 어긋나도 화면이 안 죽는다.
      `dev/sync.js` 가 1:1 로 대조하고, 마크업이 실제로 참조하는지까지 본다. */
@@ -1944,7 +1964,7 @@ const TAGSET=new Set(TAGART);
 const tagArt=b=>TAGSET.has(b.s+'-'+b.r+'-'+b.n)?b.s+'-'+b.r+'-'+b.n:null;
 
 const RANK_N=10;          // 순위에 보여줄 개수
-const VERSION='3.54.0';
+const VERSION='3.55.0';
 const BUILT='2026-08-22';
 
 /* ══ 자산을 CSS 로 한 번만 심는다 (DOM 에 base64 중복 방지) ══ */
@@ -2083,6 +2103,7 @@ let bossId='2-6-가이오가', setView='2', bossRank='6', rosterSet='1';
    **하이스코어는 «상대보다 낮은 등급으로 이기면 보너스»** 로 알려져 있다 (미확인) —
    B 의 추천 기준은 «화력» 이 아니라 «이길 수 있는 가장 낮은 등급» 이 되어야 한다.
    그 규칙을 넣기 전에 실측으로 보너스 폭을 확인할 것. */
+/* ══ 전투 태그 분류 A · B · C ──── */
 let tagClass='A';
 const CLASSES={
   A:{label:'전투태그A', sub:'★5·★6', ranks:['6','5','R','S']},
@@ -2116,6 +2137,7 @@ const trimClass=(bag,cl)=>{ const ok=classIds(cl);
   /* Bag 은 Map 이라 그냥 펼치면 [id,장수] 쌍이 나온다. **`ids()` 를 쓸 것** —
      `[...bag]` 로 돌리면 id 가 배열이라 아무것도 안 걸러진다 (v3.2.0 에서 당했다). */
   bag.ids().forEach(id=>{ if(!ok.has(id)) bag.delete(id); }); return bag; };
+/* ══ 화면 상태 — 안내 · 표시 단계 · 정렬 · 다이맥스 ──── */
 let guideHidden=false;
 let detail=0;
 let rankSort='score';
@@ -2132,6 +2154,7 @@ let dmaxLv=5;        // 룰렛에서 뜬 다이맥스 레벨 (꽝 0 · 1 · 5 ·
    ⚠ **이 스위치는 «상대 후보(FOEPOOL)» 에만 건다. 내 쪽에는 절대 걸지 말 것** (잭 확인) —
    기계에서 1탄이 내려가도 **내가 가진 1탄 태그는 계속 쓸 수 있다.**
    `owned` · `POOL` · 컬렉션 · 로테이션 · BEST-A25 에 `foeOn` 을 끼워 넣지 말 것. */
+/* ══ 상대 탄 · 수집 · 트레이너 ID ──── */
 let foeSets={'1':true,'2':true};
 const foeOn=c=> c.s==='공통' || foeSets[c.s]!==false;
 let colTab='battle';           // 컬렉션 서브탭: battle | dex
@@ -2149,6 +2172,7 @@ let tidCur='main';             // 플레이 화면에서 고른 칸 (기본 메�
 let myqr=null;                 // 지금 고른 칸의 QR 이미지 (기존 코드가 쓰는 이름 · 파생값)
 let dexCalcBusy=false;         // 계산 중에는 owned 를 임시로 쓴다. 클릭을 막을 것
 
+/* ══ 저장 키 · 저장 위치(backend) ──── */
 const KEY='tagstar:owned';
 // 사용자 QR 은 따로 저장한다. 본 저장값은 태그를 켤 때마다 다시 쓰이므로
 // 여기에 이미지를 섞으면 매번 수십 KB 를 재기록하게 된다.
@@ -2164,6 +2188,7 @@ let backend='memory';
    옛 저장(`owned` 하나)은 **분류마다 받는 성급만 골라 양쪽에 나눠 넣는다** —
    ★6 은 A 로, ★4 는 B 로, ★5·레귤러·스페셜은 양쪽에. 지우는 것보다 덜 놀랍고
    틀렸으면 화면에서 끄면 된다. **이관 코드를 지우지 말 것** — 옛 저장이 남아 있다. */
+/* ══ 불러오기 ──── */
 function loadOwned(saved,arr){
   const pick=(list,cl)=>trimClass(toBag((list||[]).filter(x=>{
     const id=Array.isArray(x)?x[0]:x; return MYBY.has(id)})), cl);
@@ -2229,6 +2254,7 @@ async function load(){
   seedSandbox();
   dexPrune();
 }
+/* ══ 저장하기 — 실패를 드러낸다 ──── */
 let sT;
 /* ⚠⚠ 저장이 «조용히» 실패하던 구멍을 막는다 (v3.48.3 · 잭 지적 «플레이 기록이 안 남는다»).
    `savePayload()` 가 try 밖이라, 값 하나가 상해 예외가 나면 saveWrite 가 거부되는데
@@ -2289,6 +2315,7 @@ const POWER={
 // 공격 찬스 보너스는 공격력에 가산 (조절 가능)
 // 넷 다 매판 달라지는 값의 기대값이다. 일반·메가진화·다이맥스는 룰렛,
 // Z기술은 룰렛이 아니라 플레이어의 기술 입력을 기계가 판정해 매번 다르게 준다.
+/* ══ 찬스 보너스 — 룰렛·판정 기대값 ──── */
 const CHANCE_DEFAULTS={'일반':30,'메가진화':45,'다이맥스':30,'Z기술':70};
 let chance={...CHANCE_DEFAULTS};
 // 메가진화는 기술 자체에 tagx 가 붙지 않는다. 카드 기믹이라서 두 번째 인자로 받는다.
@@ -2310,6 +2337,7 @@ function offense(card,boss,banGim){
   const mult=Math.max(...card.t.map(x=>eff(x,boss.t)));
   return {v:mult*RARITY[card.r].bonus,mult,ratio:null,move:null,pw:null,bonus:null,raw:null,atk:null,def:null,dmg:null};
 }
+/* ══ 받는 피해 · 생존 판정 ──── */
 const incoming=(card,boss)=>Math.max(...boss.mv.map(m=>eff(m.t,card.t)));
 const DW={0:1.5,.25:1.35,.5:1.2,1:1,2:.85,4:.7};
 
@@ -2357,6 +2385,7 @@ const survives3=(c,boss)=>survivesN(c,boss,3);
    그래서 1.15 를 2.0 으로 바꾸면 **이중으로 세어 과소평가**하게 된다. **바꾸지 말 것.**
    ⚠ 파트너가 세거나 약하면 이 가정이 흔들린다 — 이번 판만 해도 파트너 몫이 1턴 100% · 2턴 64% 였다.
    파트너 화력을 직접 넣게 되면 그때 hp 를 2.0 으로 올리고 파트너 피해를 빼야 한다. */
+/* ══ 배틀 모드 · 게임기 버전 ──── */
 const MODES={
   '지역'  :{n:'지역배틀',        hp:1,    note:'상대 3장 중 <b>보스 1장</b>만 잡으면 승리. 아래 <b>상대 파티</b>에 서브 2장을 넣으면 생존 판정에 반영됩니다.'},
   '다맥'  :{n:'다이맥스 포켓몬', hp:1,    note:'보스 1마리만 나오는 모드. <b>실측 표본이 없어</b> 카드 스탯 그대로 계산합니다. 지역배틀 판이어도, 보스만 노린 계산을 보려면 이 모드로 두세요.'},
@@ -2372,6 +2401,7 @@ const gverStr=()=>gver.maj+'.'+gver.min+'.'+gver.pat+'.'+(gver.build||'0')+'.ko.
 /* 지역배틀 상대 파티 — [왼쪽 서브, 오른쪽 서브]. 가운데(대상)는 `bossId` 가 맡는다.
    순서는 계산에 쓰지 않는다 (잭 확인 — 파티 구성일 뿐 턴 순서가 아니다).
    지역배틀에서만 쓰며 비워둘 수 있다. */
+/* ══ 상대 파티 · 후보 풀 (FOEPOOL · MYPOOL · 분류) ──── */
 let foes=[null,null];
 /* 상대 서브로 고를 수 있는 후보. **★6 까지 전 성급이 서브로 나온다** (2026-08-13 잭 실측 —
    ★5 는 흔하고 ★6 은 드물다). ★5·★6 은 `SUBS` 가 아니라 `POOL` 에 있으므로 합쳐 둔다.
@@ -2405,6 +2435,7 @@ const foeCount=()=>foes.filter(id=>id&&SUBBY.has(id)).length;
 const modeHp=boss=>boss.hp*(MODES[mode]?.hp??1);
 
 // 2턴에 끝낼 수 있다고 볼 기준. 빗나가면 3턴째를 맞으므로 여유를 둔다.
+/* ══ 카드 평가 · 순위 ──── */
 const KO_SAFE=1.15;
 const koIn2=(dmg,boss)=>dmg*KHP >= modeHp(boss)*KO_SAFE;
 function evalCard(card,boss,banGim){
@@ -2418,6 +2449,7 @@ const ranked=(boss,banGim,skip)=>classPool().filter(p=>owned.has(p.id)&&p.id!==b
   .map(c=>evalCard(c,boss,banGim)).filter(Boolean).sort((a,b)=>b.s-a.s||b.mult-a.mult);
 
 // 한 장을 특정 기술로 썼을 때의 평가
+/* ══ 기술 평가 — 기믹 포함 ──── */
 function evalMove(card,boss,m,megaOn){
   const M=megaOn?megaOf(card):null;
   const mult=eff(m.t,boss.t);
@@ -2461,6 +2493,7 @@ const RANDOM={c:{id:'__rand',n:'랜덤 태그',s:'랜덤',r:'?',t:[],mv:[],g:nul
 
    되돌리지 말 것 — v1.39 까지 «자기 턴에만 맞는다», v1.41 까지 «세 칸이 한 번씩 공격»
    으로 봤는데 둘 다 틀렸다. */
+/* ══ 3턴 로테이션 완전탐색 ──── */
 function buildSeq(boss){
   const all=classPool().filter(p=>owned.has(p.id)&&p.id!==boss.id);
   if(!all.length) return [];
@@ -2607,6 +2640,7 @@ function bossTag(b,sel){
 }
 
 /* 상태바·베젤이 콘텐츠 위에 겹치므로 그만큼 위를 비워 두고 멈춘다 */
+/* ══ 스크롤 · 하단 dock ──── */
 function topInset(){
   try{
     const bz=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--bz'))||0;
@@ -2633,6 +2667,7 @@ function renderDock(){
 
    기믹(메가·Z·다이맥스)은 배틀당 1회뿐이라 **서브에는 쓰지 않는다** — 대상에 남겨야 한다.
    같은 값이면 **대상 화력이 낮은 태그**를 고른다. 센 카드를 서브에 소모하지 않기 위해서다. */
+/* ══ 여파(splash) 계산 ──── */
 const foeHitOne=(c,f)=>Math.max(0,...f.mv.map(m=>bossHit(c,f,m)));   // 그 장에게 한 대 맞을 때 비율
 /* **여파** — 활성인 상대를 때리면 **대기 중인 보스와 다른 서브도 맞는다** (2026-08-14 잭 관찰).
 
@@ -2675,6 +2710,7 @@ const splashRate=(pw,atk,mult)=>
    (그 카드의 방어·특방과 그 카드에 대한 상성). 그대로 따른다.
    ⚠ 다른 서브가 그 시점에 살아 있는지는 **순서를 알아야** 아는데 이 화면은 «순서 없음» 이다 —
    **가장 이른 턴(둘 다 살아 있음)을 가정한다.** 실제로는 이보다 작을 수 있다. */
+/* ══ 상대별 매치 — 후보 뽑기 · 세 열 배정 ──── */
 function foeCands(foe,boss,isBoss,waiters){
   const mine=classPool().filter(p=>owned.has(p.id)&&p.id!==boss.id);
   if(!mine.length||!foe) return [];
@@ -2769,6 +2805,7 @@ function assignPlans(cols, foeOf, boss){
 }
 
 /* 상대 파티 3슬롯. 가운데는 보스 선택과 연동되고, 양옆만 여기서 고른다. */
+/* ══ 서브 픽커 상태 · 초성 검색 ──── */
 let foePickAt=-1, foeRank='5', foeSet='1';
 /* foeChain — 둘 다 빈 상태에서 열었나. 켜져 있으면 한 장 고른 뒤 남은 칸으로 넘어간다 */
 let foeChain=false;
@@ -2788,6 +2825,7 @@ const foeMatch=(name,q)=>{
 };
 /* 지역배틀 출력은 «턴 순서»가 아니라 «상대 한 장마다 무엇을 낼지»다 (잭 지적).
    순서가 없으므로 «로테이션 1·2·3» 처럼 번호를 매기면 턴으로 오해된다. 명칭을 모드별로 가른다. */
+/* ══ 상대별 매치 렌더 (renderFoes 가 240줄이다) ──── */
 function renderRotTitle(){
   const local = mode==='지역';
   const h2=document.getElementById('rotH2'), hint=document.getElementById('rotHint'),
@@ -2815,6 +2853,7 @@ function renderFoes(){
 
   /* 위 줄 = 상대 3장(서브·대상·서브), 아래 줄 = 그에 매칭되는 내 태그 3장.
      한 그리드에 6칸을 넣어야 열이 정확히 맞는다. */
+  /* ══ 매치 ① 세 열 정의 · 상대 칸 그리기 ──── */
   const cols=[0,'B',1];
   const foeOf=at=> at==='B' ? boss : (foes[at]&&SUBBY.get(foes[at]));
 
@@ -2855,6 +2894,7 @@ function renderFoes(){
   };
   /* 세 열을 **한꺼번에** 푼다. 열마다 따로 풀면 같은 카드가 두 칸에 앉는다 (v1.99.0).
      세로 칸과 가로 슬롯이 같은 결과를 나눠 쓰므로 계산은 한 번뿐이다. */
+  /* ══ 매치 ② 내 태그 칸 배정 (assignPlans) ──── */
   const assigned = assignPlans(cols, foeOf, boss);
   const plan=(at)=> assigned[cols.indexOf(at)] || null;
 
@@ -2942,6 +2982,7 @@ function renderFoes(){
   };
 
   wrap.className='fl-grid';
+  /* ══ 매치 ③ 그리드 그리기 — 위 3칸 · 연결선 · 아래 3칸 ──── */
   wrap.innerHTML = cols.map(foeCell).join('')
     + cols.map(at=>`<div class="fl-link${at==='B'?' mid':''}">▼</div>`).join('')
     + cols.map(meCell).join('');
@@ -2963,6 +3004,7 @@ function renderFoes(){
       renderFoes();
     });
   });
+  /* ══ 매치 ④ 서브 픽커 모달 ──── */
   const pick=document.getElementById('foeModal');
   pick.hidden = foePickAt<0;
   if(foePickAt>=0){
@@ -3038,6 +3080,7 @@ function renderFoes(){
    맞춘 추천이 새 보스 화면에 그대로 떠서 **틀린 답을 맞는 답처럼 보여 준다.**
    **같은 보스를 다시 눌렀을 때는 건드리지 않는다** — 그건 바꾼 게 아니다.
    `foes` 는 저장되므로 비운 뒤 `save()` 를 꼭 부를 것. */
+/* ══ 보스 선택 · 보스 그리드 ──── */
 function setBoss(id){
   if(bossId===id) return false;
   bossId=id; foes=[null,null]; foePickAt=-1; foeChain=false;
@@ -3077,6 +3120,7 @@ function renderBosses(){
     : `${lab} 데이터 없음`;
 }
 
+/* ══ 보스 정보박스 ──── */
 function renderReadout(){
   const ro=document.getElementById('readout');
   /* 지역배틀에서는 이 큰 보스 정보박스를 내지 않는다 (v1.67.0 · 잭 지정).
@@ -3137,6 +3181,7 @@ function renderReadout(){
   </div></div>`;
 }
 
+/* ══ 로테이션 슬롯 카드 ──── */
 function slotHTML(r,i,reuse,boss,spare){
   if(r.rand) return `<div class="slot rand${spare?' spare':''}">
     <div class="head">
@@ -3181,6 +3226,7 @@ function slotHTML(r,i,reuse,boss,spare){
   </div>`;
 }
 
+/* ══ 로테이션 렌더 ──── */
 function renderRotation(){
   const box=document.getElementById('rotBox');
   /* 지역배틀에서는 턴별 카드 목록을 통째로 내지 않는다 (v1.72.0 · 잭 지정).
@@ -3288,6 +3334,7 @@ function renderRotation(){
   note.innerHTML = lead ? `${lead} ${gtxt}` : `${surv} ${gtxt}`;
 }
 
+/* ══ 작은 헬퍼 (bat · jo) ──── */
 const bat=w=>{const c=w.charCodeAt(w.length-1);
   return c>=0xAC00&&c<=0xD7A3&&(c-0xAC00)%28!==0};      // 끝 글자에 받침이 있나
 const jo=(w,a,b)=>w+(bat(w)?a:b);                        // jo('거북왕','이','가') → 거북왕이
@@ -3396,6 +3443,7 @@ function qrProcess(img){
   if(url.slice(0,15)!=='data:image/webp') url=o.toDataURL('image/png');
   return url;
 }
+/* ══ QR 저장 · 불러오기 ──── */
 function tidSync(){ myqr = (tidBag[tidCur] && tidBag[tidCur].d) || null; }
 async function qrSave(){
   try{
@@ -3424,6 +3472,7 @@ async function qrLoad(){
   }
   tidSync();
 }
+/* ══ 트레이너 ID 5칸 ──── */
 function tidCard(){
   const inner = myqr
     ? `<span class="q"><img src="${myqr}" alt="트레이너 ID QR코드"></span>`
@@ -3505,6 +3554,7 @@ document.querySelectorAll('#tdxSet button').forEach(b=>
   b.addEventListener('click',()=>{ tdxSet=b.dataset.s; renderTidDex(); }));
 
 /* 설정의 5칸 목록 — 별명 고치기 · 등록/교체 · 삭제 */
+/* ══ 트레이너 ID 설정 화면 · 도감 모달 ──── */
 function renderTidSet(){
   const host=document.getElementById('tidSet'); if(!host)return;
   host.innerHTML='';
@@ -3555,6 +3605,7 @@ function renderTidPick(){
     box.appendChild(b);
   });
 }
+/* ══ 내 QR 화면 · QR 모달 ──── */
 function renderMyQR(){
   renderTidPick();
   const host=document.getElementById('myqr'); if(!host)return;
@@ -3603,6 +3654,7 @@ function openQR(s){
 }
 function closeQR(){const m=document.getElementById('qrModal'); if(m) m.hidden=true}
 
+/* ══ 서포트 티켓 ──── */
 function renderSupport(){
   const host=document.getElementById('sup'); if(!host)return;
   const boss=POOL.find(p=>p.id===bossId);
@@ -3636,6 +3688,7 @@ function renderSupport(){
     :          `세 장 다 반감됩니다. 그중 덜 깎이는 ${wrap(bat(raw)?'이':'가')} 낫습니다.`;
 }
 
+/* ══ 보유 태그 순위 ──── */
 function renderRank(){
   const ct=document.getElementById('rankCt');
   if(ct) ct.textContent='상위 '+RANK_N;
@@ -3687,6 +3740,7 @@ function renderRank(){
    후보가 20장 이하면 계산 없이 전부가 답이다.
    지연 탐욕(lazy greedy)은 쓰지 말 것 — 탈진·기믹 제약 탓에 한계이득 감소가
    성립하지 않아 결과가 7% 나빠진다. 실제로 재봤다. */
+/* ══ 수집 기준 추천-25 (BEST-A25 의 «내가 가진 것만» 판) ──── */
 const DEXBEST_N=25, DEXBEST_SHORT=38;   // 추림 폭은 목표 장수보다 넉넉해야 한다
 /* 고정 BEST-A25 와 **같은 기준을 써야 한다** — 한쪽만 바꾸면 두 추천이 말없이 어긋난다.
    v3.3.0 에 1탄 ★5 를 되돌려 50보스 전체가 됐다 (잭 지정). */
@@ -3735,6 +3789,7 @@ function renderDexBestMsg(txt){
     const b=document.getElementById(id); if(b) b.hidden=!dexBest; });
 }
 
+/* ══ 전투 태그 목록 (roster) ──── */
 function renderRoster(){
   const host=document.getElementById('roster'); host.innerHTML='';
   const inSet=MYPOOL.filter(p=>p.s===rosterSet||p.s==='공통');
@@ -3776,6 +3831,7 @@ const dexOn=(r,it)=>dex.has(dexKey(rosterSet,r,it.no,it.n));
 const dexCnt=(r,it)=>dex.cnt(dexKey(rosterSet,r,it.no,it.n));
 function dexToggle(r,it){ const k=dexKey(rosterSet,r,it.no,it.n);
   dex.has(k)?dex.delete(k):dex.setCnt(k,1); }
+/* ══ 수집 탭 렌더 ──── */
 function renderDex(){
   const host=document.getElementById('dexHost'); if(!host)return;
   host.innerHTML='';
@@ -3814,6 +3870,7 @@ function renderDex(){
   host.dataset.keys=JSON.stringify(rows.map(keyOf));
 }
 /* 분류를 바꿔도 **보유는 그대로다** — 보는 창만 바뀐다. 저장까지 해서 다음에도 그 창으로 연다. */
+/* ══ 전투 분류 스위치 (두 군데를 함께 갱신한다) ──── */
 function setTagClass(v){ tagClass=v; useClass(); save(); renderAll(); }
 function renderTagClass(){
   /* 스위치가 두 군데(컬렉션·매치)다. **둘 다 갱신할 것** — 한쪽만 하면
@@ -3847,6 +3904,7 @@ function renderTagClass(){
           + ` 뜨지만 <b>보유는 별개</b>예요 — 한쪽에서 켜도 다른 쪽에 안 켜집니다.`
         : ` 이 분류의 성급은 다른 분류와 겹치지 않습니다.`);
 }
+/* ══ 컬렉션 서브탭 · 뷰 전환 ──── */
 function setColTab(v){
   colTab=v;
   document.getElementById('colBattle').hidden = v!=='battle';
@@ -3895,6 +3953,7 @@ document.querySelectorAll('.ranksort button').forEach(b=>
   b.addEventListener('click',()=>{rankSort=b.dataset.sort; save(); renderRank()}));
 document.querySelectorAll('.seg button').forEach(b=>
   b.addEventListener('click',()=>{detail=Number(b.dataset.lv); save(); renderDetail()}));
+/* ══ 버전 표시 · 초기화 · 갱신 감지 ──── */
 const verEl=document.getElementById('ver');
 const VLABEL='v'+VERSION+' · '+BUILT;
 { const v=document.getElementById('ver'); if(v) v.textContent=VLABEL; }
@@ -4014,6 +4073,7 @@ document.getElementById('qrModal').addEventListener('click',closeQR);
 
 /* 서브 선택 팝업 닫기 (v1.82.0). 바깥·✕·Esc 셋 다 먹는다.
    시트 안쪽 클릭은 막아야 한다 — 안 막으면 성급 단추를 눌러도 팝업이 닫힌다. */
+/* ══ 픽커 닫기 · 사용법 안내 · 프리셋 ──── */
 function closeFoePick(){ if(foePickAt<0) return; foePickAt=-1; foeChain=false; clearFoeQ(); renderFoes(); }
 /* 검색어는 팝업을 여닫을 때마다 비운다. 남겨 두면 다음에 열었을 때
    **엉뚱하게 걸러진 목록**이 떠서 «태그가 사라졌다» 로 보인다. */
@@ -4065,6 +4125,7 @@ Object.entries(VIEWS).forEach(([k,ids])=>
    형식은 잭의 신형식(2026-08-19 확립)과 같아, «전체 복사» 결과를 채팅·분석에
    그대로 붙일 수 있다. 저장 키는 HKEY 하나이고 save()/wipe() 와 **무관하다** —
    현장 데이터는 다시 만들 수 없어서 전체 초기화에 딸려 지워지면 안 된다. */
+/* ══ 기록 저장 — localStorage 전용 · wipe 와 무관 ──── */
 const HKEY=KEY+':hist';
 let hist=[];
 try{ const r=localStorage.getItem(HKEY); if(r) hist=JSON.parse(r)||[]; }catch(e){}
@@ -4093,6 +4154,7 @@ const hEsc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;
    그래서 위치마다 «작성 중» 드래프트를 따로 쥐고, L/R 버튼은 값이 아니라
    **드래프트 전환기**다. 드래프트는 localStorage 에도 적어 두어(HDKEY)
    현장에서 앱이 새로고침돼도 살아남는다. LR 드래프트는 스페셜 전용이다. */
+/* ══ 드래프트 (판 3개) ──── */
 const HDKEY=HKEY+':draft';
 /* src: 'play' = 내가 한 판(플레이 화면에서 가져옴) · 'watch' = 남의 판을 옆에서 본 것(관전).
    기본은 관전이다 — 기록 탭에서 손으로 넣는 판은 대개 남의 판이기 때문이다 (v3.34.0 · 잭 지정). */
@@ -4117,6 +4179,7 @@ let hSlot=null, hWipeT=null;
 /* 내보낼 때 이름의 **공백을 없앤다** (v3.46.0 · 잭 지정) — «가라르 직구리3» → «가라르직구리3».
    줄이 공백으로 갈리는 형식이라 이름 안의 공백은 자리를 흐트러뜨린다.
    ⚠ 앱 안에 저장된 이름은 그대로 두고 **내보낼 때만** 지운다 — 도감 대조는 원래 이름으로 한다. */
+/* ══ 한 줄 만들기 · 현재 판 렌더 ──── */
 const hFmt=t=> t ? String(t.n).replace(/\s+/g,'')+(t.r||'') : '?';
 function hLine(e){
   const got=e.got?' 겟':'';
@@ -4182,6 +4245,7 @@ function renderHCur(){
   document.querySelectorAll('#playRecSw button').forEach(b=>
     b.setAttribute('aria-pressed', (b.dataset.pr==='1')===playRec));
 }
+/* ══ 목록 렌더 · 빈 판 확인 ──── */
 function renderHList(){
   renderHStat();                     // 목록이 바뀌면 분석도 함께 다시 센다
   const box=document.getElementById('hList'), ct=document.getElementById('hCt'),
@@ -4255,6 +4319,7 @@ document.getElementById('hSaveBtn').addEventListener('click',()=>{
 });
 /* 수정 모드 — 목록의 판을 눌러 진입한다. 작성 중이던 L/R 드래프트는 건드리지 않고
    별도 버퍼(hEditBuf)에서 고친다. 취소하면 원래 드래프트 화면으로 돌아온다. */
+/* ══ 수정 진입 · 이탈 ──── */
 function hEditStart(i){
   hEditIdx=i;
   hEditBuf=JSON.parse(JSON.stringify(hist[i]));
@@ -4309,6 +4374,7 @@ document.querySelectorAll('#hSrc button').forEach(b=>b.addEventListener('click',
 /* 플레이 화면에서 가져오기 (v3.34.0 · 잭 지정) — 내가 플레이할 때는 이미 «플레이» 탭에서
    보스와 서브를 고른 뒤다. 그것을 다시 치지 않도록 그대로 끌어온다.
    선물·겟은 화면에 없는 값이라 건드리지 않는다 (직접 넣는다). 출처는 «플레이» 로 바뀐다. */
+/* ══ 플레이 화면에서 가져오기 · 게임기 버전 ──── */
 function hPullPlay(note){
   const boss=BOSSES.find(x=>x.id===bossId);
   if(!boss){ if(note) note.textContent='플레이 탭에서 보스를 먼저 고르세요.'; return false; }
@@ -4366,6 +4432,7 @@ renderGver();
 
 /* 픽커 — foeModal 과 같은 시트. 초성 검색(foeMatch)을 그대로 쓴다.
    정확히 일치하는 도감 이름이 없으면 «그대로 쓰기» 줄이 성급 후보와 함께 뜬다. */
+/* ══ 픽커 — 태그 고르기 ──── */
 const hQ=document.getElementById('hQ');
 /* 픽커 v3.31.5 — **상대 서브 픽커와 같은 컴포넌트 문법** (잭 지정):
    성급 거르개 한 줄 + 이름만 적힌 foegrid + «이어 고르기»(고르면 남은 칸으로 넘어감)
@@ -4467,6 +4534,7 @@ function renderHPick(){
    쓸 수치만 계산한다. 근거는 CLAUDE.md «건조 구간 진입 감지» · «★6 겟 전략» ·
    «10줄 구조 모델» 절이다. **여기 수치를 새 발견의 근거로 쓰지 말 것** —
    화면은 잭 기계 표본이 아니라 «지금 이 기계» 만 본다. */
+/* ══ 분석 — ★6 판 vs 그 밖 ──── */
 const hIs6=t=>!!t&&t.r==='6';
 function hAnalyze(){
   const n=hist.length;
@@ -4507,6 +4575,7 @@ function hAnalyze(){
     six:six.length, six6got:six.filter(e=>e.got).length, got:gotAll.length,
     dry, kinds, slots:slots.length, subs:subs.length, r2, strong, gift6, lastGift6, chain};
 }
+/* ══ 통계 렌더 ──── */
 function renderHStat(){
   const box=document.getElementById('hStat'); if(!box) return;
   const a=hAnalyze();
@@ -4551,6 +4620,7 @@ document.getElementById('hList').addEventListener('click',ev=>{
 /* 내보내기 (v3.38.0 · 잭 지정) — 날짜와 기기 버전은 **바뀔 때만 «# » 헤더 한 줄**로 넣는다.
    판마다 붙이면 줄이 번잡하고, 둘 다 며칠에 한 번 바뀌는 값이라 헤더가 읽기 쉽다.
    시각(ts)·버전(gver)은 저장할 때 이미 자동으로 들어간다 — 손으로 넣는 값이 아니다. */
+/* ══ 내보내기 · 기록 초기화 ──── */
 const hDay=ts=>{const d=new Date(ts); return (d.getMonth()+1)+'/'+d.getDate()};
 const hClock=ts=>{const d=new Date(ts);
   return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')};
@@ -4598,6 +4668,7 @@ document.getElementById('hWipeYes').addEventListener('click',()=>{
 });
 renderHCur(); renderHList();
 
+/* ══ 남은 렌더 — 표시 단계 · 안내 · 다이맥스 · 메가 · 찬스 ──── */
 function renderDetail(){
   const v=document.getElementById('viewBattle'); if(!v)return;
   v.dataset.d=detail;
@@ -4680,6 +4751,7 @@ function renderChance(){
    true 로 복원해도 **아무도 다시 그려 주지 않아** 탭이 감춰진 채로 남았다 —
    토글을 누르면 나타나고 새로고침하면 사라지는 증상이 이것이다.
    저장·복원은 처음부터 정상이었다 (저장값 playRec:true 를 잭이 콘솔로 확인). */
+/* ══ renderAll — 전체 갱신 ──── */
 function renderAll(){
   renderTagClass();renderFoeSets();renderBosses();renderFoes();renderReadout();renderRotation();renderSupport();renderRank();renderRoster();renderDex();renderMyQR();renderTidSet();renderBackend();renderChance();renderDmax();renderMega();renderGuide();renderDetail();renderDock();renderHCur();
   document.getElementById('vCct').innerHTML=
@@ -4693,6 +4765,7 @@ function renderAll(){
       + (tagClass==='B' ? ' — 후보가 ★5 30장뿐이라 21위부터는 보탬이 없습니다'
        : tagClass==='C' ? ' — ★4 는 기술 위력이 대부분 미표기라 순위를 크게 믿지 마세요' : ''); }
 }
+/* ══ 이벤트 바인딩 ──── */
 const pickBoss=()=>{                       // 탄·등급을 바꾸면 그 그룹의 첫 보스로
   const f=bossRank==='R' ? BOSSES.find(b=>b.r==='R')
                          : BOSSES.find(b=>b.s===setView&&b.r===bossRank);
@@ -4746,6 +4819,7 @@ document.getElementById('dexBestClr').addEventListener('click',()=>{
 /* 어디서 막히는지 알 수 있게 단계마다 문구를 남긴다.
    아티팩트 샌드박스에서는 파일 선택창 자체가 안 열릴 수 있다 (alert 이 막히는 것과 같은 이유).
    그 경우 «선택창이 열리지 않았습니다» 에서 멈춘다. */
+/* ══ QR 파일 고르기 ──── */
 let qrPicked=false;
 const qrNote=t=>{ const n=document.getElementById('myqrNote'); if(n) n.textContent=t; };
 function qrPick(){

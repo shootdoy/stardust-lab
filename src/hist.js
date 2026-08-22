@@ -1,3 +1,4 @@
+/* ══ 기록 저장 — localStorage 전용 · wipe 와 무관 ──── */
 const HKEY=KEY+':hist';
 let hist=[];
 try{ const r=localStorage.getItem(HKEY); if(r) hist=JSON.parse(r)||[]; }catch(e){}
@@ -26,6 +27,7 @@ const hEsc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;
    그래서 위치마다 «작성 중» 드래프트를 따로 쥐고, L/R 버튼은 값이 아니라
    **드래프트 전환기**다. 드래프트는 localStorage 에도 적어 두어(HDKEY)
    현장에서 앱이 새로고침돼도 살아남는다. LR 드래프트는 스페셜 전용이다. */
+/* ══ 드래프트 (판 3개) ──── */
 const HDKEY=HKEY+':draft';
 /* src: 'play' = 내가 한 판(플레이 화면에서 가져옴) · 'watch' = 남의 판을 옆에서 본 것(관전).
    기본은 관전이다 — 기록 탭에서 손으로 넣는 판은 대개 남의 판이기 때문이다 (v3.34.0 · 잭 지정). */
@@ -50,6 +52,7 @@ let hSlot=null, hWipeT=null;
 /* 내보낼 때 이름의 **공백을 없앤다** (v3.46.0 · 잭 지정) — «가라르 직구리3» → «가라르직구리3».
    줄이 공백으로 갈리는 형식이라 이름 안의 공백은 자리를 흐트러뜨린다.
    ⚠ 앱 안에 저장된 이름은 그대로 두고 **내보낼 때만** 지운다 — 도감 대조는 원래 이름으로 한다. */
+/* ══ 한 줄 만들기 · 현재 판 렌더 ──── */
 const hFmt=t=> t ? String(t.n).replace(/\s+/g,'')+(t.r||'') : '?';
 function hLine(e){
   const got=e.got?' 겟':'';
@@ -115,6 +118,7 @@ function renderHCur(){
   document.querySelectorAll('#playRecSw button').forEach(b=>
     b.setAttribute('aria-pressed', (b.dataset.pr==='1')===playRec));
 }
+/* ══ 목록 렌더 · 빈 판 확인 ──── */
 function renderHList(){
   renderHStat();                     // 목록이 바뀌면 분석도 함께 다시 센다
   const box=document.getElementById('hList'), ct=document.getElementById('hCt'),
@@ -188,6 +192,7 @@ document.getElementById('hSaveBtn').addEventListener('click',()=>{
 });
 /* 수정 모드 — 목록의 판을 눌러 진입한다. 작성 중이던 L/R 드래프트는 건드리지 않고
    별도 버퍼(hEditBuf)에서 고친다. 취소하면 원래 드래프트 화면으로 돌아온다. */
+/* ══ 수정 진입 · 이탈 ──── */
 function hEditStart(i){
   hEditIdx=i;
   hEditBuf=JSON.parse(JSON.stringify(hist[i]));
@@ -242,6 +247,7 @@ document.querySelectorAll('#hSrc button').forEach(b=>b.addEventListener('click',
 /* 플레이 화면에서 가져오기 (v3.34.0 · 잭 지정) — 내가 플레이할 때는 이미 «플레이» 탭에서
    보스와 서브를 고른 뒤다. 그것을 다시 치지 않도록 그대로 끌어온다.
    선물·겟은 화면에 없는 값이라 건드리지 않는다 (직접 넣는다). 출처는 «플레이» 로 바뀐다. */
+/* ══ 플레이 화면에서 가져오기 · 게임기 버전 ──── */
 function hPullPlay(note){
   const boss=BOSSES.find(x=>x.id===bossId);
   if(!boss){ if(note) note.textContent='플레이 탭에서 보스를 먼저 고르세요.'; return false; }
@@ -299,6 +305,7 @@ renderGver();
 
 /* 픽커 — foeModal 과 같은 시트. 초성 검색(foeMatch)을 그대로 쓴다.
    정확히 일치하는 도감 이름이 없으면 «그대로 쓰기» 줄이 성급 후보와 함께 뜬다. */
+/* ══ 픽커 — 태그 고르기 ──── */
 const hQ=document.getElementById('hQ');
 /* 픽커 v3.31.5 — **상대 서브 픽커와 같은 컴포넌트 문법** (잭 지정):
    성급 거르개 한 줄 + 이름만 적힌 foegrid + «이어 고르기»(고르면 남은 칸으로 넘어감)
@@ -400,6 +407,7 @@ function renderHPick(){
    쓸 수치만 계산한다. 근거는 CLAUDE.md «건조 구간 진입 감지» · «★6 겟 전략» ·
    «10줄 구조 모델» 절이다. **여기 수치를 새 발견의 근거로 쓰지 말 것** —
    화면은 잭 기계 표본이 아니라 «지금 이 기계» 만 본다. */
+/* ══ 분석 — ★6 판 vs 그 밖 ──── */
 const hIs6=t=>!!t&&t.r==='6';
 function hAnalyze(){
   const n=hist.length;
@@ -440,6 +448,7 @@ function hAnalyze(){
     six:six.length, six6got:six.filter(e=>e.got).length, got:gotAll.length,
     dry, kinds, slots:slots.length, subs:subs.length, r2, strong, gift6, lastGift6, chain};
 }
+/* ══ 통계 렌더 ──── */
 function renderHStat(){
   const box=document.getElementById('hStat'); if(!box) return;
   const a=hAnalyze();
@@ -484,6 +493,7 @@ document.getElementById('hList').addEventListener('click',ev=>{
 /* 내보내기 (v3.38.0 · 잭 지정) — 날짜와 기기 버전은 **바뀔 때만 «# » 헤더 한 줄**로 넣는다.
    판마다 붙이면 줄이 번잡하고, 둘 다 며칠에 한 번 바뀌는 값이라 헤더가 읽기 쉽다.
    시각(ts)·버전(gver)은 저장할 때 이미 자동으로 들어간다 — 손으로 넣는 값이 아니다. */
+/* ══ 내보내기 · 기록 초기화 ──── */
 const hDay=ts=>{const d=new Date(ts); return (d.getMonth()+1)+'/'+d.getDate()};
 const hClock=ts=>{const d=new Date(ts);
   return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')};

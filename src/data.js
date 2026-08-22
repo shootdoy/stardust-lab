@@ -166,6 +166,7 @@ const LOW4=[
    처음엔 스크롤 화면에서 앞뒷면이 어긋난 3건을 뺐다가, 재촬영본으로 채웠다 (전 14장 완비).
    ★4 는 2026-08-12 카드 뒷면 화면으로 재검증했다 — 17장 중 15장 완전 일치,
    **가로막구리 공격 77→71 · 에이스번 공격 83→88 정정** (카드 뒷면을 정본으로). */
+/* ══ 1탄 ★3 · ★2 (상대 서브용) ──── */
 const LOW3=[
  ['나로테',        '1-1-027',['풀'],           84,103, 72, 57, 55, 57, 74,[['매지컬리프','풀','특수']]],
  ['악뜨거',        '1-1-029',['불꽃'],         84,120, 51, 70, 80, 53, 46,[['불태우기','불꽃','특수']]],
@@ -202,6 +203,7 @@ const LOW2=[
    **도감 번호가 전부 일치했다** — 26·27·28·34·37·40·41·42·43·44·46·49·51·56·62·64·69 로
    `DEXORD['2']` 의 추론 자리와 어긋남이 없다. 추론이던 26·37·43·69 네 자리가 실측으로 확정됐다.
    기술 물리/특수는 1탄과 같은 규칙(본가 분류)을 따른다. 위력은 미상(기본 100). */
+/* ══ 2탄 ★4 · ★3 · ★2 (상대 서브용) ──── */
 const LOW4_2=[
  ['마스카나',    '1-2-026',['풀','악'],        92,103, 86, 56, 64, 56, 96,[['깜짝베기','악','물리']]],
  ['라우드본',    '1-2-027',['불꽃','고스트'],  92,123, 60, 79, 86, 60, 53,[['병상첨병','고스트','특수']]],
@@ -264,6 +266,7 @@ const LOW2_2=[
  ['랄토스',          '1-2-067',['에스퍼','페어리'],32, 49, 17, 17, 29, 22, 25,[['차밍보이스','페어리','특수']]]
 ];
 // 상대 서브 선택용 목록 — POOL 과 같은 모양이라 eff()·evalMove 등을 그대로 쓸 수 있다.
+/* ══ SUBS 합치기 · POOL · BOSSES ──── */
 const mkSub=(r,s='1')=>([n,code,t,e,hp,a,d,sa,sd,sp,mv])=>({
   s,r,n,code,t,cls:'스타',e,hp,a,d,sa,sd,sp,
   mv:mv.map(([mn,mt,mk])=>({n:mn,t:mt,k:mk,tagx:undefined})),g:null,
@@ -288,6 +291,7 @@ const POOL=[
    스페셜(S)은 아직 보스로 본 적이 없어 넣지 않았다. */
 const BOSSES=POOL.filter(p=>p.r==='6'||p.r==='5'||p.r==='R');
 
+/* ══ 기믹 · 타입 아이콘 (아직 base64) ──── */
 const GIMICON={
 "메가진화":"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",
 "Z기술":"UklGRhAEAABXRUJQVlA4WAoAAAAQAAAALwAALwAAQUxQSFwBAAABgFtbe9vmY9YGzlWqlQfiYaUd8gIqtURaQqVj6Rk0AAUC5OdIQL9jGREM3DZS1OweM7TzBtQSA1f95oaaH9DcNPtXQAxH/Agn6Y5WdukJIh+OLG5ZGVPV6ONV3C7gghdj9kSqilYqRT7NEHu23sCQLAydMAU5RMPSQoxpSjpTGo4R1irAhJoHoTlBUL8H8+owVTlrdvACDB3O5nSyIYIPzY8mNBTAcPL5/bOkCCXxThQvlZTUMo6QYM6CQhScIwlvttpIyejtTYgB9xRjzwH8zCg5KZP5Pa0piNa9C8qKFxuWkiq5oThavv93KL/5jhWfhb9DzUvx77wn/h815f9TeR+Q9xl5HxP3SXEflvd5+RwRzynpHLTk7IQ8YLIiJwjtOZ7T9YMxmrk9x+H5SJakcviGlSKXCXzPtQ6h0fV1iDbk7QKuRDhKM1rJ0iNEzi0G0G3V11GtLmx1FABWUDggjgIAAJANAJ0BKjAAMAA+MRaGQqIhDHcygBABglqAJ0zXvoPw/JS+++nDm/kDeW+YDzuvQf5zPUAbw8v4prqA7+cf5zoIc3KoH5QAu0IdxUkU+91bdE2+hA04VgDdPBNBFk3PKeVcwalCbF1hPUzpslFn3JrAk8t1AAD+/Z5znOFrVgYCvKzzSu+jDwhHlN30GXx6nQPKjrTBn18xy7CJ/wDP+2PLMzvWPswledXQ+mEsJ03Y8OMI9tozr8GfJSrz8MBjSaeB1VK8P2K/4vwmL4fxn9TY5F6FP9HR7ddRweAOscIhzQy3zvGcuxBAgYi5ah/o/6Ag/fIfoNP/O3Dfz79f+OQPTWMGlQMLfKUrtuD42pI18WETWjX2RYJVqLNA1bCjvoOUbmiyIW/hU2ElnVmeFUbhObnRvDghkiwjuDx9bzfDIl3t99zBmBXRk/sU2+r0JxDprBYBOo016tMcBk08FS2XbNLYb/quuxwGbYu3z/PmpDKtQj5jyblhBNiJQvsZAnHof4kIkXdDVtGQrdy7biChtPukHDfWrHKGLfZnvFstmLufphhwzW3crf0Zhf5CFFnHVbUcLbfrFxfThvLL/OX/xhEzbz1c95qCk/bLqUkSkzLFzJAbFcmSJ8iCsPDIK0R4l7H8WJRY0q9WtKSA/P/VfCQiYiz567RvBUZ63f5j7VgslOxt9srIQojeKEw4YO+iSSUezeHvpjFfGICNUJHzE9cqMnXd+nyjv44C6HWf5KvYWNrYdFm6K53hi0okTOUY65bpZyUw9M7NgHOvdyMFfntkBJXdU49J174AX7+o82gP7GY4MMmkEiEiD5+3avYgHsFKJsxfsmiObz6a/f0miXC1s7V3fs7ZdQQAAA==",
@@ -385,7 +389,7 @@ const TAGSET=new Set(TAGART);
 const tagArt=b=>TAGSET.has(b.s+'-'+b.r+'-'+b.n)?b.s+'-'+b.r+'-'+b.n:null;
 
 const RANK_N=10;          // 순위에 보여줄 개수
-const VERSION='3.54.0';
+const VERSION='3.55.0';
 const BUILT='2026-08-22';
 
 /* ══ 자산을 CSS 로 한 번만 심는다 (DOM 에 base64 중복 방지) ══ */

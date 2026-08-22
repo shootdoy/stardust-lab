@@ -66,6 +66,7 @@ function bossTag(b,sel){
 }
 
 /* 상태바·베젤이 콘텐츠 위에 겹치므로 그만큼 위를 비워 두고 멈춘다 */
+/* ══ 스크롤 · 하단 dock ──── */
 function topInset(){
   try{
     const bz=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--bz'))||0;
@@ -92,6 +93,7 @@ function renderDock(){
 
    기믹(메가·Z·다이맥스)은 배틀당 1회뿐이라 **서브에는 쓰지 않는다** — 대상에 남겨야 한다.
    같은 값이면 **대상 화력이 낮은 태그**를 고른다. 센 카드를 서브에 소모하지 않기 위해서다. */
+/* ══ 여파(splash) 계산 ──── */
 const foeHitOne=(c,f)=>Math.max(0,...f.mv.map(m=>bossHit(c,f,m)));   // 그 장에게 한 대 맞을 때 비율
 /* **여파** — 활성인 상대를 때리면 **대기 중인 보스와 다른 서브도 맞는다** (2026-08-14 잭 관찰).
 
@@ -134,6 +136,7 @@ const splashRate=(pw,atk,mult)=>
    (그 카드의 방어·특방과 그 카드에 대한 상성). 그대로 따른다.
    ⚠ 다른 서브가 그 시점에 살아 있는지는 **순서를 알아야** 아는데 이 화면은 «순서 없음» 이다 —
    **가장 이른 턴(둘 다 살아 있음)을 가정한다.** 실제로는 이보다 작을 수 있다. */
+/* ══ 상대별 매치 — 후보 뽑기 · 세 열 배정 ──── */
 function foeCands(foe,boss,isBoss,waiters){
   const mine=classPool().filter(p=>owned.has(p.id)&&p.id!==boss.id);
   if(!mine.length||!foe) return [];
@@ -228,6 +231,7 @@ function assignPlans(cols, foeOf, boss){
 }
 
 /* 상대 파티 3슬롯. 가운데는 보스 선택과 연동되고, 양옆만 여기서 고른다. */
+/* ══ 서브 픽커 상태 · 초성 검색 ──── */
 let foePickAt=-1, foeRank='5', foeSet='1';
 /* foeChain — 둘 다 빈 상태에서 열었나. 켜져 있으면 한 장 고른 뒤 남은 칸으로 넘어간다 */
 let foeChain=false;
@@ -247,6 +251,7 @@ const foeMatch=(name,q)=>{
 };
 /* 지역배틀 출력은 «턴 순서»가 아니라 «상대 한 장마다 무엇을 낼지»다 (잭 지적).
    순서가 없으므로 «로테이션 1·2·3» 처럼 번호를 매기면 턴으로 오해된다. 명칭을 모드별로 가른다. */
+/* ══ 상대별 매치 렌더 (renderFoes 가 240줄이다) ──── */
 function renderRotTitle(){
   const local = mode==='지역';
   const h2=document.getElementById('rotH2'), hint=document.getElementById('rotHint'),
@@ -274,6 +279,7 @@ function renderFoes(){
 
   /* 위 줄 = 상대 3장(서브·대상·서브), 아래 줄 = 그에 매칭되는 내 태그 3장.
      한 그리드에 6칸을 넣어야 열이 정확히 맞는다. */
+  /* ══ 매치 ① 세 열 정의 · 상대 칸 그리기 ──── */
   const cols=[0,'B',1];
   const foeOf=at=> at==='B' ? boss : (foes[at]&&SUBBY.get(foes[at]));
 
@@ -314,6 +320,7 @@ function renderFoes(){
   };
   /* 세 열을 **한꺼번에** 푼다. 열마다 따로 풀면 같은 카드가 두 칸에 앉는다 (v1.99.0).
      세로 칸과 가로 슬롯이 같은 결과를 나눠 쓰므로 계산은 한 번뿐이다. */
+  /* ══ 매치 ② 내 태그 칸 배정 (assignPlans) ──── */
   const assigned = assignPlans(cols, foeOf, boss);
   const plan=(at)=> assigned[cols.indexOf(at)] || null;
 
@@ -401,6 +408,7 @@ function renderFoes(){
   };
 
   wrap.className='fl-grid';
+  /* ══ 매치 ③ 그리드 그리기 — 위 3칸 · 연결선 · 아래 3칸 ──── */
   wrap.innerHTML = cols.map(foeCell).join('')
     + cols.map(at=>`<div class="fl-link${at==='B'?' mid':''}">▼</div>`).join('')
     + cols.map(meCell).join('');
@@ -422,6 +430,7 @@ function renderFoes(){
       renderFoes();
     });
   });
+  /* ══ 매치 ④ 서브 픽커 모달 ──── */
   const pick=document.getElementById('foeModal');
   pick.hidden = foePickAt<0;
   if(foePickAt>=0){
@@ -497,6 +506,7 @@ function renderFoes(){
    맞춘 추천이 새 보스 화면에 그대로 떠서 **틀린 답을 맞는 답처럼 보여 준다.**
    **같은 보스를 다시 눌렀을 때는 건드리지 않는다** — 그건 바꾼 게 아니다.
    `foes` 는 저장되므로 비운 뒤 `save()` 를 꼭 부를 것. */
+/* ══ 보스 선택 · 보스 그리드 ──── */
 function setBoss(id){
   if(bossId===id) return false;
   bossId=id; foes=[null,null]; foePickAt=-1; foeChain=false;
@@ -536,6 +546,7 @@ function renderBosses(){
     : `${lab} 데이터 없음`;
 }
 
+/* ══ 보스 정보박스 ──── */
 function renderReadout(){
   const ro=document.getElementById('readout');
   /* 지역배틀에서는 이 큰 보스 정보박스를 내지 않는다 (v1.67.0 · 잭 지정).
@@ -596,6 +607,7 @@ function renderReadout(){
   </div></div>`;
 }
 
+/* ══ 로테이션 슬롯 카드 ──── */
 function slotHTML(r,i,reuse,boss,spare){
   if(r.rand) return `<div class="slot rand${spare?' spare':''}">
     <div class="head">
@@ -640,6 +652,7 @@ function slotHTML(r,i,reuse,boss,spare){
   </div>`;
 }
 
+/* ══ 로테이션 렌더 ──── */
 function renderRotation(){
   const box=document.getElementById('rotBox');
   /* 지역배틀에서는 턴별 카드 목록을 통째로 내지 않는다 (v1.72.0 · 잭 지정).
@@ -747,6 +760,7 @@ function renderRotation(){
   note.innerHTML = lead ? `${lead} ${gtxt}` : `${surv} ${gtxt}`;
 }
 
+/* ══ 작은 헬퍼 (bat · jo) ──── */
 const bat=w=>{const c=w.charCodeAt(w.length-1);
   return c>=0xAC00&&c<=0xD7A3&&(c-0xAC00)%28!==0};      // 끝 글자에 받침이 있나
 const jo=(w,a,b)=>w+(bat(w)?a:b);                        // jo('거북왕','이','가') → 거북왕이
