@@ -50,6 +50,7 @@ sb.globalThis=sb; vm.createContext(sb);
 vm.runInContext(js+`
 globalThis.__load=load;
 globalThis.__peek=()=>({cur:hCur, active:hActiveP, drafts:Object.keys(hDrafts)});
+globalThis.__cat=()=>hCat();
 globalThis.__set=(k,v)=>{ hCur[k]=v; };
 `,sb);
 (async()=>{
@@ -83,6 +84,23 @@ globalThis.__set=(k,v)=>{ hCur[k]=v; };
   hModeBtns.find(b=>b.attrs.m==='지역').click();
   const back=sb.__peek().cur;
   t('되돌려도 선물 유지', back.m==='지역' && back.g && back.g.n==='따라큐', back);
+
+  // ── 다이맥스포켓몬 판의 보스 후보 (v3.57.0) — 다이맥스 기술이 있는 태그만
+  const cat=sb.__cat();
+  const dmax=cat.filter(x=>x.g==='다이맥스');
+  t('hCat 이 기믹을 담는다', cat.every(x=>'g' in x), cat[0]);
+  /* 12장 = 1탄 ★6 2 · ★5 2 · 2탄 ★6 2 · ★5 2 · 공통 레귤러 3 · 공통 스페셜 1
+     ⚠ **스페셜 배포 태그(피카츄 밴드증정)도 다이맥스다** — 소스를 눈으로 세다 놓쳤다.
+       세려면 이 시험처럼 앱의 hCat() 을 쓸 것. 3탄이 들어오면 이 숫자를 올린다. */
+  t('다이맥스 태그 12장', dmax.length===12, dmax.length);
+  t('스페셜 배포 태그도 들어간다', dmax.some(x=>x.r==='S'), dmax.filter(x=>x.r==='S'));
+  t('★4 이하는 기믹이 없다', cat.filter(x=>'432'.includes(x.r)).every(x=>x.g===null), '있음');
+  t('마기라스가 두 판 다 있다',
+    dmax.filter(x=>x.n==='마기라스').length===2, dmax.filter(x=>x.n==='마기라스'));
+  t('뮤츠는 없다 (기믹 없음)', !dmax.some(x=>x.n==='뮤츠'), '있음');
+  t('레귤러 3장이 들어간다',
+    ['피카츄','루카리오','잠만보'].every(n=>dmax.some(x=>x.s==='공통'&&x.n===n)),
+    dmax.filter(x=>x.s==='공통').map(x=>x.n));
 
   ok.forEach(n=>console.log('  통과  '+n));
   bad.forEach(n=>console.log('  ★ 실패 '+n));

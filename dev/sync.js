@@ -452,10 +452,19 @@ const checks=[
   ['이어 고르기',                     html, true,  'const next=hOrder().find(k=>!hCur[k])'],
   // v3.31.6 — 탄 스위치 복원 (컴포넌트 동일성 · 잭 지적)
   ['픽커 탄 스위치',                  html, true,  'id="hSet"'],
-  ['탄 스위치 표시 규칙',             html, true,  "hs.hidden = searching || hRank==='R' || onSets.length<2"],
-  ['목록이 탄을 보존한다',            html, true,  'out.push({n:String(n), r:String(r), s:String(s)})'],
+  ['탄 스위치 표시 규칙',             html, true,  "hs.hidden = searching || dmaxBoss || hRank==='R' || onSets.length<2"],
+  ['목록이 탄을 보존한다',            html, true,  'out.push({n:String(n), r:String(r), s:String(s), g:g||null})'],
   // v3.32.0 — 동시 진행 드래프트 + 수정
   /* v3.56.0 — 드래프트는 **자리마다 하나(L·R)** 다. 스페셜 전용 LR 을 없앴다 (잭 지정). */
+  /* ── 다이맥스포켓몬 판의 보스 후보 (v3.57.0 · 잭 지정) ────────────────────
+     «다이맥스 기술이 있는 태그만» 나온다 (12장). ⚠ 검색에도 똑같이 걸어야 한다 —
+     안 걸면 검색으로 우회해 넣을 수 있어 거른 의미가 없다. */
+  ['다맥 보스는 다이맥스 태그만',   html, true,  "const dmaxBoss = hSlot==='b' && hCur.m==='다맥'"],
+  ['검색에도 같은 거르개',          html, true,  "const pool = dmaxBoss ? cat.filter(t=>t.g==='다이맥스') : cat"],
+  ['거른 목록은 한 벌로 보여 준다',  html, true,  '} else if(dmaxBoss){'],
+  ['거를 때 성급 스위치를 감춘다',   html, true,  "'hRank').hidden = searching || dmaxBoss"],
+  ['거른 목록에 성급·탄을 적는다',   html, true,  'b.innerHTML = (searching||dmaxBoss)'],
+  ['선물 칸은 안 거른다',           html, true,  "hSlot==='b' && hCur.m==='다맥'"],
   ['드래프트는 자리마다 하나',        html, true,  "let hDrafts={L:hFresh('L'),R:hFresh('R')}"],
   ['LR 드래프트를 안 만든다',         html, false, "LR:hFresh('LR')"],
   ['옛 LR 드래프트를 이관한다',       html, true,  'o.drafts.LR'],
