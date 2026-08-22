@@ -43,11 +43,11 @@ git rev-parse --abbrev-ref HEAD
 
 이 프로젝트에서 스테이징 실수가 잦은 곳:
 - `backup-v*.html` · `art_in/` · 잭의 실측 캡처 스샷 → 대개 커밋 대상이 아니다
-- `index.html` 하나만 고쳤을 때는 그 한 파일만 넣는다
+- `release/index.html` 하나만 고쳤을 때는 그 한 파일만 넣는다
 
 ### 3. 검증 (index.html 을 고쳤을 때만)
 
-`git diff --cached --name-only` 에 `index.html` 이 있으면 **커밋 전에** 확인한다.
+`git diff --cached --name-only` 에 `release/index.html` 이 있으면 **커밋 전에** 확인한다.
 
 - `.claude/settings.json` 의 PostToolUse 훅이 이미 `dev/check.js` 를 돌려 뒀다 —
   훅이 exit 0 이었다면 통과다. 훅을 껐거나 못 미더우면 손으로 다시 돈다:

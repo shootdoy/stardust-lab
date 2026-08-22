@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "d=\"$CLAUDE_PROJECT_DIR\"; [ -n \"$d\" ] || d=\"$(pwd)\"; { [ -f \"$d/index.html\" ] && [ -f \"$d/dev/check.js\" ]; } || exit 0; s=\"$d/.claude/.idxhash\"; h=$(shasum -a1 \"$d/index.html\" | cut -d' ' -f1); [ \"$h\" = \"$(cat \"$s\" 2>/dev/null)\" ] && exit 0; printf %s \"$h\" > \"$s\"; out=$(node \"$d/dev/check.js\" 2>&1) || { rm -f \"$s\"; echo \"$out\" >&2; exit 2; }; exit 0",
+            "command": "d=\"$CLAUDE_PROJECT_DIR\"; [ -n \"$d\" ] || d=\"$(pwd)\"; { [ -f \"$d/release/index.html\" ] && [ -f \"$d/dev/check.js\" ]; } || exit 0; s=\"$d/.claude/.idxhash\"; h=$(shasum -a1 \"$d/release/index.html\" | cut -d' ' -f1); [ \"$h\" = \"$(cat \"$s\" 2>/dev/null)\" ] && exit 0; printf %s \"$h\" > \"$s\"; out=$(node \"$d/dev/check.js\" 2>&1) || { rm -f \"$s\"; echo \"$out\" >&2; exit 2; }; exit 0",
             "timeout": 120,
             "statusMessage": "index.html 검증 중"
           }

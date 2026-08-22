@@ -33,7 +33,7 @@ from PIL import Image
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.normpath(os.path.join(HERE, '..'))
-HTML = os.path.join(ROOT, 'index.html')
+HTML = os.path.join(ROOT, 'release', 'index.html')
 SRC  = os.path.join(ROOT, 'art_src')
 
 # 카드 원본은 300x169. 아래 창은 그 좌표계다 (좌, 상, 우+1, 하+1).

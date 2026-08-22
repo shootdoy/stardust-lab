@@ -277,7 +277,7 @@ const MODELS={
  'E 완충  위력x(공+보)x배율/(방+100)': d=>d.pw*(d.atk+d.bonus)*d.mult/(d.def+100),
 };
  
-const html=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
+const html=fs.readFileSync(path.join(__dirname,'..','release','index.html'),'utf8');
 const js=html.split('<script>')[1].split('</script>')[0];
 const head=js.split('const KEY=')[0];
 const evalSec=js.split('/* ══ 평가 ══ */')[1].split('/* ══ 렌더 ══ */')[0];
