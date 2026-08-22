@@ -18,6 +18,8 @@ const fart =rd('fetch-art.sh');      // 공식 카드 원본 받기
 const sw   =(()=>{ try{ return fs.readFileSync(__dirname+'/../docs/sw.js','utf8') }
                    catch(e){ return '' } })();   // 서비스워커 (v3.51.0)
 const astore=rd('artstore.py');      // 아트 저장소 공용 모듈 (v3.51.0)
+const shell=(()=>{ try{ return fs.readFileSync(__dirname+'/../src/index.html','utf8') }
+                   catch(e){ return '' } })();   // 소스 껍데기 (v3.52.0)
 /* 아트를 다루는 도구 다섯 — 한 덩어리로 묶어 «옛 base64 방식이 되살아났는지» 를 본다.
    v3.50.0 까지는 다섯이 각자 TAGIMG 블록을 정규식으로 다시 썼다. */
 const tools=['artgen.py','artcrop.py','cardcrop.py','recompress.py','cardshot.py']
@@ -608,6 +610,30 @@ const checks=[
   ['워커 캐시 이름에 버전',           sw,    true,  "'stardust-' + V"],
   ['워커에 아트 목록을 안 박았다',    sw,    false, '.webp",'],
 
+  /* ── 고정 자산을 파일로 (v3.52.0) ─────────────────────────────────────────
+     폰트·로고·카드 53.8KB(base64)를 `docs/asset/` 로 뺐다. 아트와 같은 위험이 있다 —
+     참조가 어긋나도 화면이 죽지 않는다 (제목만 대체 글꼴, 이미지만 빈 칸). */
+  ['자산 목록 상수',                  html, true,  "const ASSETS=["],
+  ['폰트를 파일로 참조',              html, true,  "src:url(asset/blackhansans.woff2?v="],
+  ['폰트 preload',                    html, true,  'rel="preload" as="font"'],
+  ['로고를 파일로 참조',              html, true,  'src="asset/logo.webp?v='],
+  ['카드를 파일로 참조',              html, true,  'src="asset/tagcard.webp?v='],
+  ['폰트 base64 를 뺐다',             html, false, 'data:font/woff2;base64'],
+  ['빌드 토큰이 안 남았다',           html, false, '@V@'],
+
+  /* ── 굽는 자산 (v3.52.0) ──────────────────────────────────────────────────
+     파비콘·앱아이콘은 **소스에서 빼고 빌드가 구워 넣는다** (`src/inline/`).
+     첫 페인트와 무관하고 합쳐 5.9KB 라 따로 받게 하면 요청만 늘기 때문이다 —
+     특히 파비콘은 data URI 면 요청이 **아예 안 난다**. 소스 가독성만 얻은 셈이다.
+     ⚠ `src/inline/`(구워 넣는 것)과 `docs/asset/`(따로 받는 것)을 헷갈리지 말 것. */
+  ['굽는 자산 토큰이 안 남았다',      html, false, '@B64:'],
+  ['파비콘이 구워졌다',               html, true,  'sizes="32x32" href="data:image/png;base64,'],
+  ['앱아이콘이 구워졌다',             html, true,  'rel="apple-touch-icon" href="data:image/webp;base64,'],
+  ['소스에는 파비콘 base64 가 없다',  shell, false, 'sizes="32x32" href="data:image/png;base64,'],
+  ['소스는 토큰으로 참조한다',        shell, true,  '@B64:favicon.png@'],
+  ['워커가 asset/ 도 cache-first',    sw,   true,  "/\\/asset\\/[^/]+$/"],
+  ['warm 에 자산도 넣는다',           html, true,  "ASSETS.map(f=>'asset/'"],
+
   /* ── 아트 도구를 파일 기반으로 (v3.51.0) ───────────────────────────────────
      아트가 파일이 됐으니 도구도 파일을 써야 한다. 다섯이 각자 base64 를 만지던 것을
      `artstore.py` 하나로 모았다 — 그 구조가 풀리는 것을 여기서 막는다. */
@@ -688,10 +714,15 @@ const KB=fs.statSync(__dirname+'/../docs/index.html').size/1024;
 const artKB=(()=>{ try{ const d=__dirname+'/../docs/art';
     return fs.readdirSync(d).reduce((s,f)=>s+fs.statSync(d+'/'+f).size,0)/1024 }catch(e){ return 0 } })();
 const swKB=(()=>{ try{ return fs.statSync(__dirname+'/../docs/sw.js').size/1024 }catch(e){ return 0 } })();
-console.log(`용량  index.html ${KB.toFixed(0)}KB / 480 · 아트 ${artKB.toFixed(0)}KB · 워커 ${swKB.toFixed(1)}KB`
-  +` · 합계 ${(KB+artKB+swKB).toFixed(0)}KB / 900`);
-if(KB>480){ console.log('  ★ index.html 이 예산 초과 — 아트가 다시 HTML 에 박혔는지 먼저 볼 것'); bad++; }
-else if(KB+artKB+swKB>900){ console.log('  ★ 합계 예산 초과 — 아트 재압축 또는 감량 필요'); bad++; }
+const asKB=(()=>{ try{ const d=__dirname+'/../docs/asset';
+    return fs.readdirSync(d).reduce((s,f)=>s+fs.statSync(d+'/'+f).size,0)/1024 }catch(e){ return 0 } })();
+const totKB=KB+artKB+swKB+asKB;
+console.log(`용량  index.html ${KB.toFixed(0)}KB / 400 · 아트 ${artKB.toFixed(0)}KB`
+  +` · 자산 ${asKB.toFixed(0)}KB · 워커 ${swKB.toFixed(1)}KB · 합계 ${totKB.toFixed(0)}KB / 900`);
+/* ⚠ HTML 상한을 480 → **400** 으로 조였다 (v3.52.0 에서 폰트·로고를 빼 357KB 가 됐다).
+   상한을 실제 크기 바로 위에 두는 것이 요점이다 — 헐렁하면 base64 가 다시 기어들어와도 모른다. */
+if(KB>400){ console.log('  ★ index.html 이 예산 초과 — base64 자산이 다시 박혔는지 먼저 볼 것'); bad++; }
+else if(totKB>900){ console.log('  ★ 합계 예산 초과 — 아트 재압축 또는 감량 필요'); bad++; }
 else console.log('  OK');
 
 /* 아트 키 수·규격 — v1.76.0 사고(시험 삽입한 ★4 4장이 원복 뒤에도 남아 가로 144x81 인 채
@@ -741,6 +772,19 @@ const LOW_KB_MAX=175, HI_KB_MIN=120;
     console.log('  ★ 목록과 파일이 어긋난다 — 그 태그는 그림 없이 뜬다(404). '
       +(missing[0]?'파일 없음 예: '+missing[0]:'')+(orphan[0]?' / 목록 없음 예: '+orphan[0]:''));
     bad++;
+  } else console.log('  OK');
+
+  /* 고정 자산도 목록↔파일을 대조한다 (v3.52.0). 아트와 같은 조용한 실패를 막는다. */
+  const am=html.match(/const ASSETS=\[([^\]]*)\]/);
+  const alist=am ? (am[1].match(/'[^']+'/g)||[]).map(x=>x.slice(1,-1)) : [];
+  let afiles=[];
+  try{ afiles=fs.readdirSync(__dirname+'/../docs/asset') }catch(e){}
+  const amiss=alist.filter(f=>!afiles.includes(f));
+  const aorph=afiles.filter(f=>!alist.includes(f));
+  console.log(`      자산 목록 ${alist.length}개 ↔ 파일 ${afiles.length}개 · 파일 없음 ${amiss.length} · 목록 없음 ${aorph.length}`);
+  if(!alist.length||amiss.length||aorph.length){
+    console.log('  ★ ASSETS 와 docs/asset/ 이 어긋난다 — '
+      +(amiss[0]?'파일 없음: '+amiss[0]:'')+(aorph[0]?' / 목록 없음: '+aorph[0]:'')); bad++;
   } else console.log('  OK');
 
   /* ⚠ 파일 이름은 NFC 여야 한다. macOS 는 NFD 로 저장하는데 CSS 는 NFC 를

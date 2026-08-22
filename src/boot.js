@@ -213,7 +213,10 @@ if(location.protocol==='https:' && 'serviceWorker' in navigator){
     navigator.serviceWorker.register('sw.js?v='+VERSION)
       .then(()=>navigator.serviceWorker.ready)
       .then(reg=>{ if(reg && reg.active) reg.active.postMessage({type:'warm',
-          urls:TAGART.map(k=>'art/'+encodeURIComponent(k)+'.webp?v='+VERSION)}); })
+          /* 아트 146장 + 고정 자산 3개. **목록의 정본은 여기 하나다** —
+             워커에 베껴 적으면 갈라진다 (`docs/sw.js` 머리말 참고). */
+          urls:TAGART.map(k=>'art/'+encodeURIComponent(k)+'.webp?v='+VERSION)
+               .concat(ASSETS.map(f=>'asset/'+f+'?v='+VERSION))}); })
       .catch(()=>{});          // 등록 실패는 조용히 넘긴다 — 앱은 워커 없이도 다 동작한다
   });
 }

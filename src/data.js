@@ -369,13 +369,19 @@ const TAGART=[
 
 /* 아트 키는 «탄-성급-이름» 이다 (v1.76.0). 같은 포켓몬이라도 **성급마다 그림이 다르다** —
    키에 성급이 없던 시절엔 1탄 고릴타 ★5·★4 가 같은 그림을 썼다. 성급을 빼지 말 것. */
+/* 고정 자산 — 폰트·로고·트레이너 카드. v3.52.0 에 HTML 밖으로 뺐다 (base64 53.8KB).
+   `src/index.html` 이 `asset/<이름>?v=@V@` 로 **정적으로** 참조하고, 이 목록은
+   서비스워커에 «미리 담아 둘 것» 을 알리는 데만 쓴다 (`src/boot.js` 의 warm).
+   ⚠ 아트와 같은 위험이 있다 — 목록과 파일이 어긋나도 화면이 안 죽는다.
+     `dev/sync.js` 가 1:1 로 대조하고, 마크업이 실제로 참조하는지까지 본다. */
+const ASSETS=['blackhansans.woff2','logo.webp','tagcard.webp'];
 const TAGSET=new Set(TAGART);
 /* 반환값은 «아트가 있는가» 판정에만 쓴다. url() 에 넣지 말 것 —
    실제 그림은 artCls(c) 가 주는 클래스의 var(--art) 로 들어간다. */
 const tagArt=b=>TAGSET.has(b.s+'-'+b.r+'-'+b.n)?b.s+'-'+b.r+'-'+b.n:null;
 
 const RANK_N=10;          // 순위에 보여줄 개수
-const VERSION='3.51.0';
+const VERSION='3.52.0';
 const BUILT='2026-08-22';
 
 /* ══ 자산을 CSS 로 한 번만 심는다 (DOM 에 base64 중복 방지) ══ */
