@@ -26,6 +26,7 @@ const JOBS = [
   { id: 'interact', quick: true,  why: '가짜 DOM 에 올려 모든 클릭 발화' },
   { id: 'fixture',  quick: false, why: '기준 컬렉션으로 규칙 위반 검사' },
   { id: 'glyph',    quick: false, why: '제목이 서브셋 폰트에 없는 글자를 쓰는지' },
+  { id: 'histmode', quick: false, why: '판 종류를 바꿔도 기록 값이 사는지' },
   { id: 'sync',     quick: false, why: '문서에 적힌 내용이 실제 코드에 있는지' },
 ];
 
@@ -36,6 +37,7 @@ const GIST = {
   interact: /오류: .*/,
   fixture:  /기믹 중복 .*/,
   glyph:    /제목 글리프.*|★.*/,
+  histmode: /\d+통과 · \d+실패/,
   sync:     /문서와 코드가 일치한다|★.*/,
 };
 

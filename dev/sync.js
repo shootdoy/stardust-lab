@@ -455,7 +455,10 @@ const checks=[
   ['탄 스위치 표시 규칙',             html, true,  "hs.hidden = searching || hRank==='R' || onSets.length<2"],
   ['목록이 탄을 보존한다',            html, true,  'out.push({n:String(n), r:String(r), s:String(s)})'],
   // v3.32.0 — 동시 진행 드래프트 + 수정
-  ['드래프트 3개',                    html, true,  'let hDrafts={L:hFresh('],
+  /* v3.56.0 — 드래프트는 **자리마다 하나(L·R)** 다. 스페셜 전용 LR 을 없앴다 (잭 지정). */
+  ['드래프트는 자리마다 하나',        html, true,  "let hDrafts={L:hFresh('L'),R:hFresh('R')}"],
+  ['LR 드래프트를 안 만든다',         html, false, "LR:hFresh('LR')"],
+  ['옛 LR 드래프트를 이관한다',       html, true,  'o.drafts.LR'],
   ['드래프트 영속화',                 html, true,  "const HDKEY=HKEY+':draft'"],
   ['자동 교대 제거',                  html, false, "hCur.p = hCur.p==='L'?'R':'L'"],
   ['목록 줄 수정 진입',               html, true,  'function hEditStart('],
@@ -464,6 +467,9 @@ const checks=[
   ['보스 필수 제거',                  html, false, '보스는 비울 수 없습니다'],
   ['빈 판 두 번 탭 확인',             html, true,  '그래도 남기려면 한 번 더 누르세요'],
   // v3.33.0 — 일괄 입력 제거 · 분석 패널
+  /* 화면 문구는 «마의 구간» 이다 (v3.56.0 · 잭 지정). 내부 이름 dry 는 그대로다. */
+  ['★6 미출현 문구는 마의 구간',    html, true,  '마의 구간 한복판일 수 있습니다'],
+  ['옛 «건조» 문구 제거',           html, false, '건조 한복판일 수 있습니다'],
   ['분석 패널',                       html, true,  'function hAnalyze('],
   ['분석 제목이 글리프 안 (석 회피)', html, true,  '<h2>기록 통계</h2>'],
   ['목록 갱신 시 분석도 갱신',        html, true,  'renderHStat();'],
@@ -473,7 +479,8 @@ const checks=[
   ['출처 토글',                       html, true,  'id="hSrc"'],
   ['출처 기본값은 관전',              html, true,  "src:'watch'"],
   ['플레이 화면에서 가져오기',        html, true,  'function hPullPlay('],
-  ['연동이 스페셜=LR 을 지킨다',      html, true,  "if(mode==='스페셜' && hActiveP!=='LR')"],
+  /* ⚠⚠ 연동도 **판 종류만** 옮긴다. 드래프트를 갈아치우면 넣어 둔 선물이 사라진다. */
+  ['연동은 판 종류만 옮긴다',         html, false, "hActiveP='LR'"],
   ['내보내기에 출처 표시',            html, true,  "e.src==='play'?' [플레이]':' [관전]'"],
   // v3.35.0 — 플레이 기록 토글 + 인라인 블록
   ['플레이 기록 토글',                html, true,  'id="playRecSw"'],
@@ -489,7 +496,7 @@ const checks=[
   // v3.35.1 — 픽커는 뷰 밖 최상위 (플레이 화면에서도 보여야)
   ['픽커가 뷰 밖에 있다',             html, true,  '뷰 밖(최상위)에 둔다'],
   // v3.36.0 — 선물은 이어 고르기에서 분리 (선물↔상대 사이 텀)
-  ['선물은 이어 고르기 밖',           html, true,  "(hSlot==='g'||hSlot==='g2') ? [hSlot] : (hCur.m==='지역'"],
+  ['선물은 이어 고르기 밖',           html, true,  "hSlot==='g' ? ['g'] : (hCur.m==='지역'"],
   ['옛 4칸 연쇄 제거',                html, false, "['g','s1','b','s2']"],
   // v3.36.1 — 플레이 화면 L/R 은 값 전용 (한쪽에서만 플레이)
   ['플레이 위치는 값 전용 클래스',    html, true,  'hposg hposval'],
@@ -532,16 +539,19 @@ const checks=[
   ['저장 시 선물 유지',               html, true,  "if(e.m!=='지역'){ e.s1=e.s2=null; }"],
   ['내보내기에 선물 자리',            html, true,  "' 스페셜태그배틀 '+hFmt(e.b)"],
   // v3.44.0 — 스페셜은 선물 두 장
-  ['선물 R 칸',                       html, true,  'data-k="g2"'],
-  ['스페셜에서만 노출',               html, true,  "el.hidden=!sp"],
-  ['스페셜 아니면 g2 비움',           html, true,  "if(e.m!=='스페셜') e.g2=null;"],
+  /* ⚠⚠ **선물 칸은 하나다.** v3.47~3.55 는 스페셜일 때 «선물 L / 선물 R» 두 칸을 받아
+     한 드래프트에서 두 줄을 만들었다. 그 모델이 «판 종류를 바꾸면 드래프트가
+     갈아치워지는» 버그의 뿌리였다 — v3.56.0 에 걷어냈다 (잭 지적). 되살리지 말 것. */
+  ['선물 R 칸이 없다',               html, false, 'data-k="g2"'],
+  ['g2 필드가 없다',                 html, false, 'g2:hCur.g2'],
   // v3.45.0 — 판 종류를 모든 줄에
   ['지역배틀도 판 종류 표기',         html, true,  "' 지역배틀 '+hFmt(e.s1)"],
   ['다맥은 정식 명칭',                html, true,  "' 다이맥스포켓몬 '+hFmt(e.b)"],
   ['내보내기 이름 공백 제거',         html, true,  "String(t.n).replace(/\\s+/g,'')"],
   // v3.47.0 — 스페셜은 L·R 두 줄
-  ['스페셜 두 줄 저장',               html, true,  "hist.push(...rows)"],
-  ['스페셜 저장 블록은 한 벌만',      html, 1,     '스페셜 2줄 저장됨'],
+  ['스페셜도 한 줄로 저장',           html, false, 'hist.push(...rows)'],
+  ['옛 2줄 안내 문구 제거',           html, false, '스페셜 2줄 저장됨'],
+  ['판 종류는 드래프트를 안 바꾼다',  html, true,  '판 종류는 그 판의 한 칸일 뿐이다'],
   ['LR 위치 값 제거',                 html, false, "hCur.p='LR'"],
   ['스페셜도 한쪽 선물만 내보냄',     html, true,  "e.p+' '+hFmt(e.g)+' 스페셜태그배틀 '"],
   // v3.48.0 — 저장 유실 방지
