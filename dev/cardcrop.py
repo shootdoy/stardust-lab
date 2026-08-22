@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""cardcrop.py — 공식 카드 원본에서 «그림만» 잘라 `TAGIMG` 의 기존 키를 **제자리 교체**한다.
+"""cardcrop.py — 공식 카드 원본에서 «그림만» 잘라 기존 아트 파일을 **덮어쓴다**.
 
   python3 dev/cardcrop.py                 미리보기 (쓰지 않음)
   python3 dev/cardcrop.py --write         실제 교체
@@ -9,11 +9,13 @@
 `art_src/` 는 `.gitignore` 대상이다 — 원본을 저장소에 커밋하지 않는다.
 
 ────────────────────────────────────────────────────────────────────────
-⚠⚠ **`artgen.py --force` 를 쓰지 말 것.** 그쪽은 기존 키를 건너뛰지 않으면서
-   닫는 괄호 앞에 **덧붙이기만** 해서 키가 중복된다 (옛 항목이 남는다).
-   JS 는 뒤 값이 이겨 화면은 맞지만 `TAGIMG` 키 수가 늘어 `sync.js` 가 막고
-   용량도 헛되게 커진다. 그래서 이 스크립트는 정규식으로 **그 키의 값만** 바꾸고,
-   치환이 정확히 1회가 아니면 멈춘다.
+⚠ **HTML 을 건드리지 않는다.** v3.51.0 부터 아트는 `docs/art/<키>.webp` 파일이고
+  `index.html` 에는 **키 목록(`TAGART`)만** 있다. 이 스크립트는 기존 키의 그림만
+  갈아 끼우므로 목록이 바뀌지 않는다 — 파일만 덮어쓰면 끝이다.
+  (v3.50.0 까지는 base64 를 정규식으로 제자리 치환했다. 그 복잡함이 사라졌다.)
+
+⚠⚠ **버전을 반드시 올릴 것.** 아트는 `art/키.webp?v=VERSION` 으로 요청되고
+   서비스워커가 cache-first 로 담는다. 버전이 그대로면 **바뀐 그림이 영구히 안 보인다.**
 
 ⚠⚠ **성급마다 «그림만» 창이 다르다** (2026-08-22 실측). 카드 장식의 위치가 다르다.
       ★6 — 별·에너지가 **아래 왼쪽**, 이름띠가 아래 가운데
@@ -28,13 +30,12 @@
   흰색으로 바뀌어 검출과 크롭이 어긋난다. 검정으로 합성한 뒤 쓴다.
 ────────────────────────────────────────────────────────────────────────
 """
-import io, os, re, sys, base64, argparse, unicodedata as ud
+import io, os, re, sys, argparse, unicodedata as ud
 from PIL import Image
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import artstore
 
-HERE = os.path.dirname(os.path.abspath(__file__))
-ROOT = os.path.normpath(os.path.join(HERE, '..'))
-HTML = os.path.join(ROOT, 'docs', 'index.html')
-SRC  = os.path.join(ROOT, 'art_src')
+SRC = os.path.join(artstore.ROOT, 'art_src')
 
 # 카드 원본은 300x169. 아래 창은 그 좌표계다 (좌, 상, 우+1, 하+1).
 WIN = {
@@ -89,9 +90,8 @@ def main():
     ap.add_argument('--only', help='코드(1-1-007) 또는 이름 일부')
     a = ap.parse_args()
 
-    src = io.open(HTML, encoding='utf-8').read()
-    i = src.index('const TAGIMG={'); j = src.index('\n};', i)
-    have = dict(re.findall(r'"([^"]+)":"([A-Za-z0-9+/=]+)"', src[i:j]))
+    src  = artstore.load_html()
+    have = set(artstore.keys(src))
     byc  = app_index(src)
 
     rows, skip = [], []
@@ -114,15 +114,14 @@ def main():
                 skip.append((n, f'★{rk} 는 가로 창이 없다 — 세로는 artcrop.py')); continue
             key = f'{st}-{rk}-{nm}'
             if key not in have:
-                skip.append((n, f'TAGIMG 에 없는 키 {key}')); continue
+                skip.append((n, f'TAGART 에 없는 키 {key}')); continue
             if a.only and a.only not in code and a.only not in nm:
                 continue
             im = load_flat(os.path.join(dp, fn))
             if im.size != CARD:
                 skip.append((n, f'카드 크기가 다르다 {im.size}')); continue
             data, q = encode(cover(im.crop(WIN[rk]), *LAND))
-            rows.append((key, code, len(base64.b64decode(have[key])), len(data), q,
-                         base64.b64encode(data).decode()))
+            rows.append((key, code, artstore.size(key), len(data), q, data))
 
     for n, why in skip:
         print(f'  · 건너뜀 {n} — {why}')
@@ -142,15 +141,10 @@ def main():
         print('\n미리보기만 했다. 실제 교체는 --write')
         return
 
-    out = src
-    for key, code, _, _, _, b64 in rows:
-        pat = '"' + re.escape(key) + '":"[A-Za-z0-9+/=]+"'
-        out, cnt = re.subn(pat, lambda m: '"' + key + '":"' + b64 + '"', out)
-        if cnt != 1:
-            sys.exit(f'★ {key}: 치환 {cnt}회 (1이어야 한다) — 아무것도 쓰지 않고 멈춘다')
-    io.open(HTML, 'w', encoding='utf-8').write(out)
-    print(f'\nindex.html 에 {len(rows)}장 제자리 교체했다.')
-    print('  버전을 올리고 `node dev/check.js` 를 돌릴 것. TAGIMG 키 수는 그대로여야 한다.')
+    for key, _, _, _, _, data in rows:
+        artstore.write(key, data)
+    print(f'\n{len(rows)}장 덮어썼다 (목록은 그대로 — HTML 은 안 건드렸다).')
+    artstore.report()
 
 
 if __name__ == '__main__':
