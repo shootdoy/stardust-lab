@@ -12,6 +12,7 @@ for(const m of js.matchAll(/^\s{2}(?:get\s+|static\s+)?([A-Za-z_$][\w$]*)\s*\([^
 ['has','get','set','delete','forEach','keys','values','entries'].forEach(n=>defined.add(n));
 for(const m of js.matchAll(/(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=/g)) defined.add(m[1]);
 const builtins=new Set(['Math','JSON','Object','Array','String','Number','Set','Map','Boolean',
+  'encodeURIComponent','decodeURIComponent',   // v3.51.0 아트 URL 을 만들 때 쓴다
  'parseInt','parseFloat','isNaN','setTimeout','clearTimeout','requestAnimationFrame','Promise',
  'console','document','window','localStorage','if','for','while','switch','catch','return',
  'typeof','function','await','async','new','Date','RegExp','Error','decodeURIComponent',

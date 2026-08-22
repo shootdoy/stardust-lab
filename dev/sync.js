@@ -15,6 +15,15 @@ const undf=fs.readFileSync(__dirname+'/undef.js','utf8');
 const rd=p=>{ try{ return fs.readFileSync(__dirname+'/'+p,'utf8') }catch(e){ return '' } };
 const ccrop=rd('cardcrop.py');       // 가로 카드 «그림만» 크롭 (v3.49.0)
 const fart =rd('fetch-art.sh');      // 공식 카드 원본 받기
+const sw   =(()=>{ try{ return fs.readFileSync(__dirname+'/../docs/sw.js','utf8') }
+                   catch(e){ return '' } })();   // 서비스워커 (v3.51.0)
+const astore=rd('artstore.py');      // 아트 저장소 공용 모듈 (v3.51.0)
+/* 아트를 다루는 도구 다섯 — 한 덩어리로 묶어 «옛 base64 방식이 되살아났는지» 를 본다.
+   v3.50.0 까지는 다섯이 각자 TAGIMG 블록을 정규식으로 다시 썼다. */
+const tools=['artgen.py','artcrop.py','cardcrop.py','recompress.py','cardshot.py']
+              .map(rd).join('\n/*≪≫*/\n');
+const tools4=['artgen.py','artcrop.py','cardcrop.py','cardshot.py']
+              .map(rd).join('\n/*≪≫*/\n');   // recompress 는 아이콘 때문에 base64 를 쓴다
 
 const checks=[
   // [설명, 대상, 있어야 하는가, 찾을 문자열]
@@ -358,7 +367,9 @@ const checks=[
   ['다른 칸에 든 태그는 테두리만',      html, true,  '.foegrid button.used{border-color'],
   ['이 칸 태그에 on 부여',            html, true,  "if(foes[foePickAt]===s.id){ b.className='on'"],
   ['다른 칸 태그에 used 부여',         html, true,  "else if(foes[other]===s.id){ b.className='used'"],
-  ['아트 키에 성급 포함',              html, true,  "TAGIMG[b.s+'-'+b.r+'-'+b.n]"],
+  ['아트 키에 성급 포함',              html, true,  "TAGSET.has(b.s+'-'+b.r+'-'+b.n)"],
+  ['아트는 파일로 뺐다',               html, true,  "url(art/'+encodeURIComponent(k)+'.webp?v='+VERSION"],
+  ['옛 base64 아트 블록 제거',         html, false, 'const TAGIMG={'],
   ['artCls 도 성급 포함',              html, true,  "AK[c.s+'-'+c.r+'-'+c.n]"],
   ['★4 이하는 세로 아트',              html, true,  "'432'.includes(c.r)"],
   ['세로 아트 비율 CSS',               html, true,  '.fl-art.p i{width:auto;height:100%;aspect-ratio:108/192}'],
@@ -564,8 +575,13 @@ const checks=[
   ['★6 창 (배지 회피)',              ccrop, true,  "'6': (59, 17, 238, 118)"],
   ['★5 창 (왼쪽 띠 회피)',           ccrop, true,  "'5': (99, 35, 267, 130)"],
   ['성급별로 나누라고 남김',          ccrop, true,  '한 창으로 묶지 말 것'],
-  ['artgen --force 금지를 남김',      ccrop, true,  'artgen.py --force'],
-  ['치환은 1회만 허용',               ccrop, true,  '치환 {cnt}회'],
+  /* v3.50.0 의 두 검사(«artgen --force 금지» · «치환은 1회만»)는 **폐기했다.**
+     둘 다 «base64 를 정규식으로 제자리 치환한다» 는 전제 위의 것이었는데, v3.51.0 에서
+     아트가 파일이 되어 그 치환 자체가 없어졌다. 키 중복도 구조적으로 불가능해졌다 —
+     `artstore.add_keys` 가 이미 있는 키를 건너뛰기 때문이다.
+     되살리지 말 것. 대신 아래 «도구가 옛 base64 블록을 안 만진다» 가 그 자리를 지킨다. */
+  ['크롭은 파일만 덮어쓴다',          ccrop, true,  'artstore.write(key, data)'],
+  ['성급마다 창이 다르다',            ccrop, true,  '한 창으로 묶지 말 것'],
   ['투명→흰색 함정을 남김',           ccrop, true,  '바로 열지 말 것'],
   /* ⚠ 파일명은 «코드-이름-면» 이다. 성급을 파일명에 넣지 않는 대신 코드로 앱을 조회한다 —
      작은 이미지에서 이름·번호를 눈으로 읽다 틀린 적이 두 번 있다 (만마드 056/055 등). */
@@ -577,6 +593,33 @@ const checks=[
   ['앞뒤 번호 — curl 이 base 를 쓴다', fart, true,  '$BASE_URL/$base$suf.png'],
   ['원본은 탄별 폴더',                fart,  true,  'printf \'%s/%s탄\''],
   ['원본을 커밋하지 말라고 남김',     fart,  true,  '커밋하지 말 것'],
+
+  /* ── 아트 외부 분리 · 서비스워커 (v3.51.0) ─────────────────────────────────
+     ⚠⚠ 가장 위험한 것은 «새 버전» 알림이 죽는 것이다. 앱은 자기 URL 을 no-store 로 받아
+        VERSION 을 비교하는데, 워커가 그걸 캐시로 답하면 버전이 늘 같아 보여 알림이
+        영구히 안 뜬다. GitHub Pages 는 커스텀 헤더를 못 걸어 그 감지가 유일한 수단이다. */
+  ['아트 목록 상수',                  html,  true,  'const TAGART=['],
+  ['아트 파일 URL 에 버전',           html,  true,  ".webp?v='+VERSION"],
+  ['워커 등록은 https 에서만',        html,  true,  "location.protocol==='https:'"],
+  ['워커 등록 URL 에 버전',           html,  true,  "register('sw.js?v='+VERSION)"],
+  ['아트 목록은 TAGART 하나만',       html,  true,  'urls:TAGART.map'],
+  ['워커가 no-store 를 안 가로챈다',  sw,    true,  "req.cache === 'no-store'"],
+  ['워커는 문서를 network-first',     sw,    true,  'network-first'],
+  ['워커 캐시 이름에 버전',           sw,    true,  "'stardust-' + V"],
+  ['워커에 아트 목록을 안 박았다',    sw,    false, '.webp",'],
+
+  /* ── 아트 도구를 파일 기반으로 (v3.51.0) ───────────────────────────────────
+     아트가 파일이 됐으니 도구도 파일을 써야 한다. 다섯이 각자 base64 를 만지던 것을
+     `artstore.py` 하나로 모았다 — 그 구조가 풀리는 것을 여기서 막는다. */
+  ['아트 저장소 공용 모듈',           astore, true,  'def add_keys('],
+  ['저장은 NFC 로 맞춘다',            astore, true,  'key = nfc(key)'],
+  ['목록 밖 키는 쓰기를 막는다',      astore, true,  'TAGART 목록에 없다'],
+  ['새 키는 목록 끝에만 붙인다',      astore, true,  '_block(cur + add)'],
+  ['도구 다섯이 공용 모듈을 쓴다',    tools,  true,  'import artstore'],
+  ['도구가 옛 base64 블록을 안 만진다', tools, false, "index('const TAGIMG={')"],
+  /* ⚠ `recompress.py` 는 **제외**한다 — TYPEICON 18개와 앱아이콘은 아직 HTML 안
+     base64 라서 b64encode 를 정당하게 쓴다. 넣으면 못 지나가는 검사가 된다. */
+  ['네 도구는 base64 를 안 쓴다',     tools4, false, 'base64.b64encode'],
 
   ['문서 버전이 코드와 같은가',       doc,  true,  null],
 ];
@@ -614,17 +657,23 @@ let bad0=0;
 }
 
 let bad=bad0;
-/* 용량 예산 — **v1.80.0 에서 ★4 이하 90장만 재압축했다 (108x192 → 84x149 q40). 911→782KB.**
-   ★6·★5·공통 56장과 아이콘은 **일부러 손대지 않았다** (잭 지정 2026-08-14) — 컬렉션 탭에서
-   늘 보이는 그림이라 체감이 크기 때문이다.
-   **미리보기(490 안정·576 경계·657 실패)는 복구를 포기했다.** ★4 이하를 64폭까지 낮춰도
-   658KB 라 산술적으로 불가능하다 — ★6·★5 아트 172KB 를 지키기로 한 이상 임계값은 의미가 없다.
-   그래서 한시 예산은 **900KB** 로 둔다 (부풀기 감시용이지 미리보기 기준이 아니다).
-   원래 예산 480KB 는 **아트 56장 시절 숫자라 지금은 성립하지 않는다** — 되돌릴 값이 아니라
-   다시 정해야 할 값이다. 재압축 도구는 `dev/recompress.py`. */
+/* 용량 예산 — **v3.51.0 에서 아트 146장을 `docs/art/` 로 뺐다. 851 → 409KB.**
+   base64 부풀림(1.33배)까지 사라져 전송량도 함께 줄었다.
+
+   예산을 **둘로 나눈다.** 한 덩어리로 재면 정작 위험한 것을 못 잡기 때문이다:
+     · `index.html` 480KB — **아트가 다시 HTML 로 들어오면 즉시 걸린다** (850KB 가 된다).
+       옛 900KB 한 줄로는 그 사고가 통째로 지나갔다. 코드·폰트 부풀기도 이쪽에서 잡힌다.
+     · 합계 900KB — HTML + 아트 + 워커. 3탄 25장(≈+60KB)까지 받아낼 여유다.
+   ★6·★5·공통 56장은 **일부러 크게 둔다** (잭 지정 2026-08-14) — 컬렉션 탭에서 늘 보이는
+   그림이라 체감이 크다. 재압축 도구는 `dev/recompress.py`. */
 const KB=fs.statSync(__dirname+'/../docs/index.html').size/1024;
-console.log(`용량  ${KB.toFixed(0)}KB / 한시 예산 900KB (미리보기 복구는 포기 · 부풀기 감시용)`);
-if(KB>900){ console.log('  ★ 예산 초과 — 아트 재압축 또는 감량 필요'); bad++; }
+const artKB=(()=>{ try{ const d=__dirname+'/../docs/art';
+    return fs.readdirSync(d).reduce((s,f)=>s+fs.statSync(d+'/'+f).size,0)/1024 }catch(e){ return 0 } })();
+const swKB=(()=>{ try{ return fs.statSync(__dirname+'/../docs/sw.js').size/1024 }catch(e){ return 0 } })();
+console.log(`용량  index.html ${KB.toFixed(0)}KB / 480 · 아트 ${artKB.toFixed(0)}KB · 워커 ${swKB.toFixed(1)}KB`
+  +` · 합계 ${(KB+artKB+swKB).toFixed(0)}KB / 900`);
+if(KB>480){ console.log('  ★ index.html 이 예산 초과 — 아트가 다시 HTML 에 박혔는지 먼저 볼 것'); bad++; }
+else if(KB+artKB+swKB>900){ console.log('  ★ 합계 예산 초과 — 아트 재압축 또는 감량 필요'); bad++; }
 else console.log('  OK');
 
 /* 아트 키 수·규격 — v1.76.0 사고(시험 삽입한 ★4 4장이 원복 뒤에도 남아 가로 144x81 인 채
@@ -641,24 +690,51 @@ const FOEON_N=5;
 /* 성급별 용량 — v1.80.0 재압축 결과를 고정한다. 위아래 양쪽을 본다:
    ★4 이하가 늘면 재압축이 풀린 것이고, **★6·★5 가 줄면 실수로 같이 압축한 것**이다
    (원본 크롭이 없어 한 번 줄이면 되돌릴 수 없다 — 이 검사가 그 사고를 막는다). */
-const LOW_KB_MAX=230, HI_KB_MIN=165;   // v2.3.0 그림만 312→232KB · v2.4.0 재조정 →210KB
+/* v3.51.0 에서 아트를 `docs/art/<키>.webp` 로 뺐다. 상·하한을 **실제 바이트**로 환산한다 —
+   옛 값(230 / 165)은 base64 기준이었고 그것은 실제의 1.333배다. 230/1.333≈173 · 165/1.333≈124. */
+const LOW_KB_MAX=175, HI_KB_MIN=120;
 {
-  const i=html.indexOf('const TAGIMG={'), j=html.indexOf('\n};',i);
-  const keys=(html.slice(i,j).match(/"[^"]+":"/g)||[]).map(x=>x.slice(1,-2));
-  const low=keys.filter(k=>/^\d-[1-4]-/.test(k));
+  const ad=__dirname+'/../docs/art';
+  let files=[];
+  try{ files=fs.readdirSync(ad).filter(f=>f.endsWith('.webp')) }catch(e){}
+  const keys=files.map(f=>f.replace(/\.webp$/,''));
+  const isLow=k=>/^\d-[1-4]-/.test(k);
+  const low=keys.filter(isLow);
   const fo=(html.match(/foeOn/g)||[]).length;
   console.log(`foeOn ${fo}회 (기대 ${FOEON_N}) — 상대 후보에만 걸어야 한다`);
   if(fo!==FOEON_N){ console.log('  ★ foeOn 이 다른 데로 번졌다. 내 수집 태그는 탄과 무관해야 한다'); bad++; }
   else console.log('  OK');
-  console.log(`아트  TAGIMG ${keys.length}키 (기대 ${TAGIMG_N}) · ★4 이하 ${low.length}장 (기대 ${LOW_N})`);
+  console.log(`아트  파일 ${keys.length}개 (기대 ${TAGIMG_N}) · ★4 이하 ${low.length}장 (기대 ${LOW_N})`);
   if(keys.length!==TAGIMG_N||low.length!==LOW_N){
     console.log('  ★ 문서에 적힌 장수와 다르다 — 시험 삽입이 남았거나 문서를 안 고쳤다'); bad++;
   }
   else console.log('  OK');
 
-  const ent=[...html.slice(i,j).matchAll(/"([^"]+)":"([^"]+)"/g)];
-  const kb=f=>ent.filter(m=>f(m[1])).reduce((s,m)=>s+m[1].length+m[2].length+6,0)/1024;
-  const lowKB=kb(k=>/^\d-[1-4]-/.test(k)), hiKB=kb(k=>!/^\d-[1-4]-/.test(k));
+  /* ⚠⚠ 아트를 파일로 뺀 뒤 생긴 **새 실패 방식** — 키 목록에 있는데 파일이 없으면
+     그 태그만 «그림 없이» 뜬다 (404). 화면이 안 죽으니 조용히 지나간다.
+     그래서 HTML 의 TAGART 와 디렉토리를 1:1 로 대조한다. */
+  const ti=html.indexOf('const TAGART=['), tj=html.indexOf('\n];',ti);
+  const listed=(html.slice(ti,tj).match(/"[^"]+"/g)||[]).map(x=>x.slice(1,-1));
+  const onDisk=new Set(keys), inList=new Set(listed);
+  const missing=listed.filter(k=>!onDisk.has(k));
+  const orphan=keys.filter(k=>!inList.has(k));
+  console.log(`      목록 ${listed.length}키 ↔ 파일 ${keys.length}개 · 파일 없음 ${missing.length} · 목록 없음 ${orphan.length}`);
+  if(missing.length||orphan.length){
+    console.log('  ★ 목록과 파일이 어긋난다 — 그 태그는 그림 없이 뜬다(404). '
+      +(missing[0]?'파일 없음 예: '+missing[0]:'')+(orphan[0]?' / 목록 없음 예: '+orphan[0]:''));
+    bad++;
+  } else console.log('  OK');
+
+  /* ⚠ 파일 이름은 NFC 여야 한다. macOS 는 NFD 로 저장하는데 CSS 는 NFC 를
+     encodeURIComponent 로 감싸 요청하므로, NFD 로 남으면 그 태그만 404 가 난다. */
+  const nfd=files.filter(f=>f.normalize('NFC')!==f);
+  console.log(`      파일 이름 NFC 검사 — 어긋남 ${nfd.length}개`);
+  if(nfd.length){ console.log('  ★ NFD 로 저장된 파일이 있다: '+nfd[0]); bad++; }
+  else console.log('  OK');
+
+  const sz=k=>{ try{ return fs.statSync(ad+'/'+k+'.webp').size }catch(e){ return 0 } };
+  const lowKB=low.reduce((s,k)=>s+sz(k),0)/1024;
+  const hiKB=keys.filter(k=>!isLow(k)).reduce((s,k)=>s+sz(k),0)/1024;
   console.log(`      ★4 이하 ${lowKB.toFixed(0)}KB (상한 ${LOW_KB_MAX}) · ★6·★5·공통 ${hiKB.toFixed(0)}KB (하한 ${HI_KB_MIN})`);
   if(lowKB>LOW_KB_MAX){ console.log('  ★ ★4 이하 아트가 부풀었다 — 재압축이 풀렸는지 볼 것'); bad++; }
   else if(hiKB<HI_KB_MIN){ console.log('  ★ ★6·★5 아트가 줄었다 — 실수로 같이 압축했다. 원본이 없으니 백업에서 되돌릴 것'); bad++; }
