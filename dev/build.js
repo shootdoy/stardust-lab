@@ -23,6 +23,7 @@
  */
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 const ROOT = path.join(__dirname, '..');
 const SRC  = path.join(ROOT, 'src');
@@ -50,6 +51,15 @@ function read(f) {
   const p = path.join(SRC, f);
   if (!fs.existsSync(p)) throw new Error(`소스가 없다: src/${f}`);
   return fs.readFileSync(p, 'utf8');
+}
+
+/* 미디어 개정판 — `docs/art/` + `docs/asset/` 의 **내용**에서 나온 12자 해시.
+   ⚠ mtime 을 쓰지 말 것. 파일을 만질 때마다 바뀌어 «안 바뀐 아트를 다시 받는» 문제가 되돌아온다.
+   ⚠ 이름도 함께 센다 — 파일 이름만 바꾼 경우(엉뚱한 그림이 뜬다)를 놓치지 않으려는 것이다. */
+function mediaRev() {
+  const h = crypto.createHash('sha256');
+  for (const p of inputs().media) { h.update(path.basename(p)); h.update(fs.readFileSync(p)); }
+  return h.digest('hex').slice(0, 12);
 }
 
 /* 조립 — 각 소스가 개행으로 끝나므로 그대로 이어 붙이면 원래 줄 배치가 나온다. */
@@ -83,7 +93,18 @@ function assemble() {
     return `data:${mime};base64,` + fs.readFileSync(p).toString('base64');
   });
 
-  /* ② `@V@` → 버전. **정적** CSS·HTML 이 버전 붙은 자산 URL 을 쓸 수 있게 하는 유일한 수단이다.
+  /* ② `@MEDIAV@` → **미디어 개정판**. `docs/art/` + `docs/asset/` 의 **내용**에서 나온 해시다.
+     ⚠⚠ 아트·자산 URL 을 앱 버전(`@V@`)에 묶으면 **배포마다 373KB 를 다시 받는다** —
+       아트가 그대로인데도 URL 이 달라져 캐시가 안 맞기 때문이다 (v3.52.0 까지 그랬다).
+       내용 해시에 묶으면 **아트가 바뀔 때만** 다시 받는다 (2026-08-22 잭 지적).
+     ⚠ 그래도 «아트를 바꾸면 버전을 올린다» 는 규칙은 남는다 — 이유가 다르다.
+       새 URL 은 **새 HTML** 에만 들어 있어서, 사용자가 새 HTML 을 받아야 새 그림을 본다.
+       다만 이제 URL 무효화 자체는 빌드가 자동으로 하므로 «잊어서 영구히 옛 그림» 은 없다.
+     ⚠ 한 덩어리로 센다 — 아트 한 장이 바뀌면 자산까지 함께 무효화된다. 둘 다 드물게
+       바뀌므로 이 단순함을 택했다. 아프면 그때 둘로 가를 것. */
+  out = out.split('@MEDIAV@').join(mediaRev());
+
+  /* ③ `@V@` → 버전. **정적** CSS·HTML 이 버전 붙은 자산 URL 을 쓸 수 있게 하는 유일한 수단이다.
      아트는 JS 가 CSS 를 심을 때 `?v='+VERSION` 을 붙이지만, `@font-face` 와 `<img>` 는
      정적이라 그럴 수 없다. 여기서 손으로 버전을 적으면 **다섯 번째 버전 위치**가 생겨
      언젠가 갈라진다 — 그래서 `src/data.js` 의 VERSION 하나만 읽어 채운다. */
@@ -92,16 +113,28 @@ function assemble() {
   return out.split('@V@').join(m[1]);
 }
 
-/* 빌드 입력 중 가장 최근에 고쳐진 시각.
-   ⚠ **이 스크립트 자신도 입력이다.** 빼 두면 빌드 규칙을 고칠 때마다
-     «생성물이 소스보다 새로운데 내용이 다르다» 로 오탐한다 (v3.52.0 작업 중 실제로 걸렸다). */
+/* 빌드 입력 **전부**. 출력에 영향을 주는 것은 하나도 빠뜨리면 안 된다.
+   ⚠⚠ 이 목록을 빠뜨려 **세 번** 같은 사고가 났다 (v3.52.0 작업 중):
+     ① `build.js` 자신 — 빌드 규칙을 고칠 때마다 «손으로 고쳤는가» 로 오탐
+     ② `src/inline/` — 구워 넣는 파일
+     ③ `docs/art/` · `docs/asset/` — 내용 해시(MEDIAV)의 재료라 출력이 달라진다
+   그래서 목록을 **한 곳**으로 모았다. 새 입력을 더할 때는 여기만 고칠 것 —
+   `mediaRev()` 와 `newestSrc()` 가 함께 이것을 본다. */
+function inputs() {
+  const dir = d => { try { return fs.readdirSync(d).sort().map(f => path.join(d, f)); }
+                     catch (e) { return []; } };
+  return {
+    src:   [SHELL, CSS, ...ORDER].map(f => path.join(SRC, f)),
+    inline: dir(path.join(SRC, 'inline')),
+    media: [...dir(path.join(ROOT, 'docs', 'art')), ...dir(path.join(ROOT, 'docs', 'asset'))],
+    self:  [__filename],
+  };
+}
+
+/* 빌드 입력 중 가장 최근에 고쳐진 시각. */
 function newestSrc() {
-  const inline = (() => {                       // 구워 넣는 파일도 입력이다
-    try { return fs.readdirSync(path.join(SRC, 'inline'))
-                   .map(f => path.join(SRC, 'inline', f)); }
-    catch (e) { return []; }
-  })();
-  return [...[SHELL, CSS, ...ORDER].map(f => path.join(SRC, f)), ...inline, __filename]
+  const i = inputs();
+  return [...i.src, ...i.inline, ...i.media, ...i.self]
     .map(p => fs.statSync(p).mtimeMs)
     .reduce((a, b) => Math.max(a, b), 0);
 }

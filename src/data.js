@@ -375,13 +375,17 @@ const TAGART=[
    ⚠ 아트와 같은 위험이 있다 — 목록과 파일이 어긋나도 화면이 안 죽는다.
      `dev/sync.js` 가 1:1 로 대조하고, 마크업이 실제로 참조하는지까지 본다. */
 const ASSETS=['blackhansans.woff2','logo.webp','tagcard.webp'];
+/* 미디어 개정판 — 빌드가 `docs/art/`+`docs/asset/` **내용 해시**로 채운다.
+   ⚠⚠ 아트 URL 을 VERSION 에 묶지 말 것 — 배포마다 373KB 를 다시 받는다 (v3.52.0 까지 그랬다).
+     아트는 거의 안 바뀌므로 내용에 묶어야 «바뀔 때만» 받는다. */
+const MEDIAV='@MEDIAV@';
 const TAGSET=new Set(TAGART);
 /* 반환값은 «아트가 있는가» 판정에만 쓴다. url() 에 넣지 말 것 —
    실제 그림은 artCls(c) 가 주는 클래스의 var(--art) 로 들어간다. */
 const tagArt=b=>TAGSET.has(b.s+'-'+b.r+'-'+b.n)?b.s+'-'+b.r+'-'+b.n:null;
 
 const RANK_N=10;          // 순위에 보여줄 개수
-const VERSION='3.52.0';
+const VERSION='3.53.0';
 const BUILT='2026-08-22';
 
 /* ══ 자산을 CSS 로 한 번만 심는다 (DOM 에 base64 중복 방지) ══ */
@@ -392,7 +396,7 @@ const AK={}, TK={}, GK={}, SK={};
     map[k]=pre+i; out.push('.'+pre+i+'{--'+v+':url(data:image/webp;base64,'+src[k]+')}')});
   /* 아트는 파일이라 base64 가 아니다. ?v= 로 캐시를 무효화한다. */
   TAGART.forEach((k,i)=>{ AK[k]='a'+i;
-    out.push('.a'+i+'{--art:url(art/'+encodeURIComponent(k)+'.webp?v='+VERSION+')}') });
+    out.push('.a'+i+'{--art:url(art/'+encodeURIComponent(k)+'.webp?v='+MEDIAV+')}') });
   put(TK,TYPEICON,'t','ic');
   put(GK,GIMICON,'g','ic'); put(SK,SUPIMG,'s','art');
   const st=document.createElement('style'); st.textContent=out.join('\n');
