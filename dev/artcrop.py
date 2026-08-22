@@ -24,7 +24,7 @@ Pokémon 글자까지). 그런데 ★5·★6 아트는 **그림만** 잘라 넣�
 import io, os, re, math, base64, argparse
 from PIL import Image
  
-HTML = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'release', 'index.html')
+HTML = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'docs', 'index.html')
 LOWRE = re.compile(r'^\d-[1-4]-')
 OUT = (84, 149)          # 재압축(v1.80.0) 규격 그대로
 TOP, BOT = 0.105, 0.630   # 카드에서 그림이 차지하는 세로 구간
